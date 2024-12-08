@@ -1,4 +1,7 @@
 package com.example.gymtracker
 
-class ExerciseClass {
+class ExerciseClass(
+    name: String
+) {
+
 }
