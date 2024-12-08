@@ -1,7 +1,7 @@
 package com.example.gymtracker
 
 class ExerciseClass(
-    name: String
-) {
+    val name: String,
+    val category: String) {
 
 }
