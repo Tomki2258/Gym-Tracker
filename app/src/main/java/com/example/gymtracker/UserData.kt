@@ -1,4 +1,5 @@
 package com.example.gymtracker
 
-class UserData {
+class UserData() {
+    val userNick = R.string.user_name
 }

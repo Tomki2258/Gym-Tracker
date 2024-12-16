@@ -1,10 +1,16 @@
 package com.example.gymtracker
 
+import ExerciseClass
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,15 +19,19 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.gymtracker.ui.theme.GymTrackerTheme
+
+val userData = UserData()
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -29,8 +39,9 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             GymTrackerTheme {
-                Scaffold(modifier = Modifier.fillMaxSize().
-                padding(4.dp,16.dp,4.dp,0.dp)) { innerPadding ->
+                Scaffold(modifier = Modifier
+                    .fillMaxSize()
+                    .padding(4.dp, 16.dp, 4.dp, 0.dp)) { innerPadding ->
                     MainView(
                         modifier = Modifier.padding(innerPadding)
                     )
@@ -41,15 +52,31 @@ class MainActivity : ComponentActivity() {
 }
 fun LoadExercises() : List<ExerciseClass> {
     val exerciseList = listOf(
-        ExerciseClass("Shoulder press","Shoulders"),
-        ExerciseClass("Squats","Legs"),
-        ExerciseClass("Bench press","Chest")
+        ExerciseClass("Chest fly","Chest"),
+        ExerciseClass("Leg curl","Legs"),
+        ExerciseClass("Leg press","Legs"),
+        ExerciseClass("Dumbbell biceps","Hands"),
+        ExerciseClass("Bench press","Chest"),
+        ExerciseClass("seated_barbell_press","Shoulders")
     )
     return exerciseList
+}
+fun LoadCategories(exercises: List<ExerciseClass>) : List<String> {
+    val categories = mutableListOf<String>()
+    for (exercise in exercises) {
+        if(!categories.contains(exercise.category)) {
+            categories.add(exercise.category)
+        }
+    }
+
+    return categories
 }
 @Composable
 fun MainView(modifier: Modifier = Modifier) {
     val exerciseList = LoadExercises()
+    val categories = LoadCategories(exerciseList)
+    val context  = LocalContext.current
+
     Column(modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -58,31 +85,53 @@ fun MainView(modifier: Modifier = Modifier) {
             Button(onClick = {}) {
                 Text(text = "Account")
             }
+            Text(text = context.getString(userData.userNick))
             Button(onClick = {}) {
                 Text(text = "Settings")
             }
         }
+         //DropdownMenu() { }
+        /*
+            Drop down menu z możliwością przefiltrowania kategorii ćwiczeń w aplikacji
+            tak aby wszystkie na raz nie były pokazane na ekranie itp itd
+        */
         Column(modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)) {
+            .padding(16.dp)
+            .horizontalScroll(rememberScrollState())) {
             ExerciseList(exerciseList)
         }
     }
 }
 
+
 @Composable
 fun ExerciseCard(exercise: ExerciseClass) {
-    Card(modifier = Modifier.padding(8.dp)) {
-        Column(modifier = Modifier.padding(16.dp)
+    val context = LocalContext.current
+    val photoId = exercise.getPhotoResourceId(context)
+    Card(modifier = Modifier.padding(8.dp).fillMaxWidth()) {
+        Column(modifier = Modifier
+            .padding(16.dp)
             .fillMaxWidth()) {
-            Text(text = exercise.name)
-            Text(text = "Category: ${exercise.category}")
-            Button(
-                onClick = {
-                    LaunchExerciseIntent(exercise)
+            Row {
+                Column {
+                    Text(text = exercise.name)
+                    Text(text = "Category: ${exercise.category}")
+                    Button(onClick = {
+                        LaunchExerciseIntent(exercise,context)
+                    }) {
+                        Text(text = "Choose")
+                    }
                 }
-            ) {
-                Text(text = "Choose")
+                if (photoId != 0) {
+                    Image(
+                        painter = painterResource(id = photoId),
+                        contentDescription = "${exercise.name} image",
+                        //contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Text(text = "Image not found")
+                }
             }
         }
     }
@@ -99,6 +148,10 @@ fun ExerciseList(exercises: List<ExerciseClass>) {
     }
 }
 
-fun LaunchExerciseIntent(exercise: ExerciseClass){
-    Log.d(exercise.category,exercise.name)
+
+fun LaunchExerciseIntent(exercise: ExerciseClass, context: Context) {
+    val intent = Intent(context, ExerciseView::class.java).apply {
+        putExtra("EXERCISE", exercise)
+    }
+    context.startActivity(intent)
 }
