@@ -4,8 +4,6 @@ import ExerciseClass
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -17,6 +15,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -50,6 +49,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+
 fun LoadExercises() : List<ExerciseClass> {
     val exerciseList = listOf(
         ExerciseClass("Chest fly","Chest"),
@@ -57,7 +57,7 @@ fun LoadExercises() : List<ExerciseClass> {
         ExerciseClass("Leg press","Legs"),
         ExerciseClass("Dumbbell biceps","Hands"),
         ExerciseClass("Bench press","Chest"),
-        ExerciseClass("seated_barbell_press","Shoulders")
+        ExerciseClass("Seated barbell press","Shoulders")
     )
     return exerciseList
 }
@@ -109,11 +109,14 @@ fun MainView(modifier: Modifier = Modifier) {
 fun ExerciseCard(exercise: ExerciseClass) {
     val context = LocalContext.current
     val photoId = exercise.getPhotoResourceId(context)
-    Card(modifier = Modifier.padding(8.dp).fillMaxWidth()) {
+    Card(
+        modifier = Modifier.padding(8.dp)
+            .fillMaxWidth())
+    {
         Column(modifier = Modifier
             .padding(16.dp)
-            .fillMaxWidth()) {
-            Row {
+            .width(300.dp)) {
+            Row() {
                 Column {
                     Text(text = exercise.name)
                     Text(text = "Category: ${exercise.category}")
