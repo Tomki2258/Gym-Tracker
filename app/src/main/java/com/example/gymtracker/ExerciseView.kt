@@ -1,10 +1,7 @@
 package com.example.gymtracker
 
-
 import ExerciseClass
-import ToastManager
 import android.os.Bundle
-import android.util.Log
 import android.content.Context
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -14,9 +11,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Text
@@ -24,10 +23,12 @@ import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableDoubleState
 import androidx.compose.runtime.MutableIntState
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -37,9 +38,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.example.gymtracker.ui.theme.GymTrackerTheme
+import kotlinx.coroutines.launch
 
-
-var exercise = ExerciseClass("Default Name", "Default Category")
+var exercise = ExerciseClass("Default Name", CategoriesEnum.NONE)
 
 class ExerciseView : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -53,49 +54,72 @@ class ExerciseView : ComponentActivity() {
         }
     }
 }
+
 @Preview(showBackground = true)
 @Composable
 fun ExerciseIntent(
     modifier: Modifier = Modifier,
-    exerciseClass: ExerciseClass = ExerciseClass("Default Name", "Default Category")
+    exerciseClass: ExerciseClass = ExerciseClass("Default Name", CategoriesEnum.NONE)
 ) {
     val showDialog = remember { mutableStateOf(false) }
+    val measurementsList = remember { mutableStateOf(exercise.measurementsList.toMutableList()) }
+    Column(
 
-    Card(
-        modifier = Modifier
-            .padding(8.dp)
-            .fillMaxWidth()
     ) {
-        Column() {
-            Image(
-                painter = painterResource(id = exerciseClass.getPhotoResourceId(LocalContext.current)),
-                contentDescription = "Exercise Image"
-            )
-            Text(text = exerciseClass.name)
-            Text(text = exerciseClass.category)
-            Button(onClick = { showDialog.value = true }) {
-                Text(text = "Add measurement")
+        Card(
+            modifier = Modifier
+                .padding(8.dp)
+                .fillMaxWidth()
+        ) {
+            Column {
+                Image(
+                    painter = painterResource(id = exerciseClass.getPhotoResourceId(LocalContext.current)),
+                    contentDescription = "Exercise Image"
+                )
+                Text(text = exerciseClass.name)
+                Text(text = exerciseClass.category.toString())
+                Button(onClick = { showDialog.value = true }) {
+                    Text(text = "Add measurement")
+                }
             }
         }
-        // lista pomiarów
+        Card(
+            modifier = Modifier
+                .padding(8.dp)
+                .fillMaxWidth()
+                .height(250.dp)
+        ) {
+            LazyColumn {
+                items(measurementsList.value) { measurement ->
+                    Row {
+                        Text(text = "Reps: ${measurement.reps}")
+                        Text(text = "Weight: ${measurement.weight}")
+                    }
+                }
+            }
+        }
     }
 
     if (showDialog.value) {
-        AddMeasurementDialog(onDismissRequest = { showDialog.value = false })
+        AddMeasurementDialog(onDismissRequest = { showDialog.value = false }, measurementsList)
     }
 }
-fun AddMesurment(context: Context, reps: MutableIntState, weigh: MutableDoubleState): Int {
-    exercise.measurementsList.add(MeasurementClass(reps.value, weigh.value))
-    //Log.d("Measurement", "Reps: ${exercise.measurementsList[0].reps}, Weight: ${weigh.value}")
+
+fun AddMesurment(context: Context, reps: MutableIntState, weigh: MutableDoubleState, measurementsList: MutableState<MutableList<MeasurementClass>>): Int {
+    val newMeasurement = MeasurementClass(reps.value, weigh.value)
+    exercise.measurementsList.add(newMeasurement)
+    measurementsList.value = exercise.measurementsList.toMutableList()
     ToastManager(context, "Measurement added")
     return 1
 }
 
 @Composable
-fun AddMeasurementDialog(onDismissRequest: () -> Unit) {
+fun AddMeasurementDialog(onDismissRequest: () -> Unit, measurementsList: MutableState<MutableList<MeasurementClass>>) {
     val reps = remember { mutableIntStateOf(0) }
     val weight = remember { mutableDoubleStateOf(0.0) }
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+
     Dialog(onDismissRequest = { onDismissRequest() }) {
         Card {
             Column(
@@ -121,8 +145,10 @@ fun AddMeasurementDialog(onDismissRequest: () -> Unit) {
                     )
                 }
                 Button(onClick = {
-                    if(AddMesurment(context, reps, weight) == 1) {
-                        onDismissRequest()
+                    scope.launch {
+                        if (AddMesurment(context, reps, weight, measurementsList) == 1) {
+                            onDismissRequest()
+                        }
                     }
                 }) {
                     Text(text = "Add measurement")

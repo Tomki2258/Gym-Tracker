@@ -52,23 +52,24 @@ class MainActivity : ComponentActivity() {
 
 fun LoadExercises() : List<ExerciseClass> {
     val exerciseList = listOf(
-        ExerciseClass("Chest fly","Chest"),
-        ExerciseClass("Leg curl","Legs"),
-        ExerciseClass("Leg press","Legs"),
-        ExerciseClass("Dumbbell biceps","Hands"),
-        ExerciseClass("Bench press","Chest"),
-        ExerciseClass("Seated barbell press","Shoulders")
+        ExerciseClass("Chest fly",CategoriesEnum.CHEST),
+        ExerciseClass("Leg curl",CategoriesEnum.NONE),
+        ExerciseClass("Leg press",CategoriesEnum.NONE),
+        ExerciseClass("Dumbbell biceps",CategoriesEnum.NONE),
+        ExerciseClass("Bench press",CategoriesEnum.CHEST),
+        ExerciseClass("Seated barbell press",CategoriesEnum.SHOULDERS)
     )
     return exerciseList
 }
 fun LoadCategories(exercises: List<ExerciseClass>) : List<String> {
     val categories = mutableListOf<String>()
+    /*
     for (exercise in exercises) {
         if(!categories.contains(exercise.category)) {
-            categories.add(exercise.category)
+            categories.add(exercise.category.toString())
         }
     }
-
+    */
     return categories
 }
 @Composable
