@@ -7,17 +7,21 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -63,43 +67,58 @@ fun ExerciseIntent(
 ) {
     val showDialog = remember { mutableStateOf(false) }
     val measurementsList = remember { mutableStateOf(exercise.measurementsList.toMutableList()) }
-    Column(
-
-    ) {
-        Card(
-            modifier = Modifier
-                .padding(8.dp)
-                .fillMaxWidth()
-        ) {
-            Column {
-                Image(
-                    painter = painterResource(id = exerciseClass.getPhotoResourceId(LocalContext.current)),
-                    contentDescription = "Exercise Image"
-                )
-                Text(text = exerciseClass.name)
-                Text(text = exerciseClass.category.toString())
-                Button(onClick = { showDialog.value = true }) {
-                    Text(text = "Add measurement")
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column {
+            Card(
+                modifier = Modifier
+                    .padding(8.dp)
+                    .fillMaxWidth()
+            ) {
+                Column {
+                    Image(
+                        painter = painterResource(id = exerciseClass.getPhotoResourceId(LocalContext.current)),
+                        contentDescription = "Exercise Image"
+                    )
+                    Text(text = exerciseClass.name)
+                    Text(text = exerciseClass.category.toString())
                 }
             }
-        }
-        Card(
-            modifier = Modifier
-                .padding(8.dp)
-                .fillMaxWidth()
-                .height(250.dp)
-        ) {
-            LazyColumn {
-                items(measurementsList.value) { measurement ->
-                    Row {
-                        Text(text = "Reps: ${measurement.reps}")
-                        Text(text = "Weight: ${measurement.weight}")
+            Card(
+                modifier = Modifier
+                    .padding(8.dp)
+                    .fillMaxWidth()
+                    .height(250.dp)
+            ) {
+                if (measurementsList.value.isEmpty()) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text(text = "No measurements yet")
+                    }
+                } else {
+                    LazyColumn {
+                        items(measurementsList.value) { measurement ->
+                            Row {
+                                Text(text = "Reps: ${measurement.reps}")
+                                Text(text = "Weight: ${measurement.weight}")
+                            }
+                        }
                     }
                 }
             }
         }
+        FloatingActionButton(
+            onClick = { showDialog.value = true },
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(16.dp)
+                .requiredSize(56.dp) // Use requiredSize or size with specific dimensions
+        ) {
+            Icon(
+                painter = painterResource(id = R.drawable.add),
+                contentDescription = "Add measurement",
+                modifier = Modifier.fillMaxSize(0.6f)
+            )
+        }
     }
-
     if (showDialog.value) {
         AddMeasurementDialog(onDismissRequest = { showDialog.value = false }, measurementsList)
     }

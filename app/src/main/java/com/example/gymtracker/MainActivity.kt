@@ -4,31 +4,30 @@ import ExerciseClass
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.lifecycle.ViewModel
 import com.example.gymtracker.ui.theme.GymTrackerTheme
+import kotlinx.coroutines.launch
 
 val userData = UserData()
 
@@ -91,7 +90,7 @@ fun MainView(modifier: Modifier = Modifier) {
                 Text(text = "Settings")
             }
         }
-         //DropdownMenu() { }
+        //DropdownMenu() { }
         /*
             Drop down menu z możliwością przefiltrowania kategorii ćwiczeń w aplikacji
             tak aby wszystkie na raz nie były pokazane na ekranie itp itd
@@ -107,44 +106,10 @@ fun MainView(modifier: Modifier = Modifier) {
 
 
 @Composable
-fun ExerciseCard(exercise: ExerciseClass) {
-    val context = LocalContext.current
-    val photoId = exercise.getPhotoResourceId(context)
-    Card(
-        modifier = Modifier.padding(8.dp)
-            .fillMaxWidth())
-    {
-        Column(modifier = Modifier
-            .padding(16.dp)
-            .width(300.dp)) {
-            Row() {
-                Column {
-                    Text(text = exercise.name)
-                    Text(text = "Category: ${exercise.category}")
-                    Button(onClick = {
-                        LaunchExerciseIntent(exercise,context)
-                    }) {
-                        Text(text = "Choose")
-                    }
-                }
-                if (photoId != 0) {
-                    Image(
-                        painter = painterResource(id = photoId),
-                        contentDescription = "${exercise.name} image",
-                        //contentScale = ContentScale.Crop
-                    )
-                } else {
-                    Text(text = "Image not found")
-                }
-            }
-        }
-    }
-}
-
-@Composable
 fun ExerciseList(exercises: List<ExerciseClass>) {
     LazyColumn(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxSize(),
+        //verticalArrangement = Arrangement.Center // Center the items vertically
     ) {
         items(exercises) { exercise ->
             ExerciseCard(exercise = exercise)
@@ -152,7 +117,46 @@ fun ExerciseList(exercises: List<ExerciseClass>) {
     }
 }
 
-
+@Composable
+fun ExerciseCard(exercise: ExerciseClass) {
+    val context = LocalContext.current
+    val photoId = exercise.getPhotoResourceId(context)
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp),
+        contentAlignment = Alignment.Center // Center the card horizontally
+    ) {
+        Card(
+            modifier = Modifier
+                .width(350.dp)
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Row {
+                    Column {
+                        Text(text = exercise.name)
+                        Text(text = "Category: ${exercise.category}")
+                        Button(onClick = {
+                            LaunchExerciseIntent(exercise, context)
+                        }) {
+                            Text(text = "Choose")
+                        }
+                    }
+                    if (photoId != 0) {
+                        Image(
+                            painter = painterResource(id = photoId),
+                            contentDescription = "${exercise.name} image"
+                        )
+                    } else {
+                        Text(text = "Image not found")
+                    }
+                }
+            }
+        }
+    }
+}
 fun LaunchExerciseIntent(exercise: ExerciseClass, context: Context) {
     val intent = Intent(context, ExerciseView::class.java).apply {
         putExtra("EXERCISE", exercise)
