@@ -5,7 +5,7 @@ import com.example.gymtracker.MeasurementClass
 import java.io.Serializable
 class ExerciseClass(
     val name: String,
-    val category: CategoriesEnum,
+    val category: String,
     val photoString: String = name.replace(" ", "_").lowercase(),
     val measurementsList: MutableList<MeasurementClass> = mutableListOf<MeasurementClass>()
 ) : Serializable

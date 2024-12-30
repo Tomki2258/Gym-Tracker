@@ -44,7 +44,7 @@ import androidx.compose.ui.window.Dialog
 import com.example.gymtracker.ui.theme.GymTrackerTheme
 import kotlinx.coroutines.launch
 
-var exercise = ExerciseClass("Default Name", CategoriesEnum.NONE)
+var exercise = ExerciseClass("Default Name", "Default")
 
 class ExerciseView : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -63,7 +63,7 @@ class ExerciseView : ComponentActivity() {
 @Composable
 fun ExerciseIntent(
     modifier: Modifier = Modifier,
-    exerciseClass: ExerciseClass = ExerciseClass("Default Name", CategoriesEnum.NONE)
+    exerciseClass: ExerciseClass = ExerciseClass("Default Name", "Default")
 ) {
     val showDialog = remember { mutableStateOf(false) }
     val measurementsList = remember { mutableStateOf(exercise.measurementsList.toMutableList()) }

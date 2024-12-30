@@ -4,6 +4,7 @@ import ExerciseClass
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -15,12 +16,14 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material.icons.Icons
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -37,9 +40,11 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             GymTrackerTheme {
-                Scaffold(modifier = Modifier
-                    .fillMaxSize()
-                    .padding(4.dp, 16.dp, 4.dp, 0.dp)) { innerPadding ->
+                Scaffold(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(4.dp, 16.dp, 4.dp, 0.dp)
+                ) { innerPadding ->
                     MainView(
                         modifier = Modifier.padding(innerPadding)
                     )
@@ -49,70 +54,115 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-fun LoadExercises() : List<ExerciseClass> {
+fun LoadExercises(): List<ExerciseClass> {
     val exerciseList = listOf(
-        ExerciseClass("Chest fly",CategoriesEnum.CHEST),
-        ExerciseClass("Leg curl",CategoriesEnum.NONE),
-        ExerciseClass("Leg press",CategoriesEnum.NONE),
-        ExerciseClass("Dumbbell biceps",CategoriesEnum.NONE),
-        ExerciseClass("Bench press",CategoriesEnum.CHEST),
-        ExerciseClass("Seated barbell press",CategoriesEnum.SHOULDERS)
+        ExerciseClass("Chest fly", "Chest"),
+        ExerciseClass("Leg curl", "Legs"),
+        ExerciseClass("Leg press", "Legs"),
+        ExerciseClass("Dumbbell biceps", "Arms"),
+        ExerciseClass("Bench press", "Chest"),
+        ExerciseClass("Seated barbell press", "Shoulders"),
     )
     return exerciseList
 }
-fun LoadCategories(exercises: List<ExerciseClass>) : List<String> {
+
+fun LoadCategories(exercises: List<ExerciseClass>): List<String> {
     val categories = mutableListOf<String>()
-    /*
+    categories.add("All")
     for (exercise in exercises) {
-        if(!categories.contains(exercise.category)) {
+        if (!categories.contains(exercise.category)) {
             categories.add(exercise.category.toString())
         }
     }
-    */
+
     return categories
 }
+
 @Composable
 fun MainView(modifier: Modifier = Modifier) {
     val exerciseList = LoadExercises()
     val categories = LoadCategories(exerciseList)
-    val context  = LocalContext.current
+    var currentCategory by remember { mutableStateOf(categories.first()) }
+    val context = LocalContext.current
 
     Column(modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.SpaceBetween,
+
         ) {
+            /*
             Button(onClick = {}) {
                 Text(text = "Account")
             }
+            */
+            IconButton(onClick = { /* Handle click */ }) {
+                Icon(
+                    painter = painterResource(R.drawable.icons8_male_user_100),
+                    contentDescription = "User Icon"
+                )
+            }
             Text(text = context.getString(userData.userNick))
-            Button(onClick = {}) {
-                Text(text = "Settings")
+            IconButton(onClick = { /* Handle click */ }) {
+                Icon(
+                    painter = painterResource(R.drawable.icons8_settings_500),
+                    contentDescription = "User Icon"
+                )
             }
         }
-        //DropdownMenu() { }
-        /*
-            Drop down menu z możliwością przefiltrowania kategorii ćwiczeń w aplikacji
-            tak aby wszystkie na raz nie były pokazane na ekranie itp itd
-        */
-        Column(modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-            .horizontalScroll(rememberScrollState())) {
-            ExerciseList(exerciseList)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Button(onClick = {
+                var catIndex = categories.indexOf(currentCategory)
+                catIndex -= 1
+                if (catIndex < 0) {
+                    catIndex = categories.size - 1
+                }
+                currentCategory = categories[catIndex]
+                Log.d(currentCategory, currentCategory)
+            }) {
+                Text(text = "<-")
+            }
+            var catIndex = categories.indexOf(currentCategory)
+            Text(text = "${currentCategory}\n${catIndex + 1} / ${categories.size}",
+                textAlign = TextAlign.Center)
+            Button(onClick = {
+                catIndex += 1
+                if (catIndex > categories.size - 1) {
+                    catIndex = 0
+                }
+                currentCategory = categories[catIndex]
+                Log.d(currentCategory, currentCategory)
+            }) {
+                Text(text = "->")
+            }
+        }
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+                .horizontalScroll(rememberScrollState())
+        ) {
+            ExerciseList(exerciseList, currentCategory)
         }
     }
 }
 
-
 @Composable
-fun ExerciseList(exercises: List<ExerciseClass>) {
+fun ExerciseList(exercises: List<ExerciseClass>, currentCategory: String) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        //verticalArrangement = Arrangement.Center // Center the items vertically
     ) {
         items(exercises) { exercise ->
-            ExerciseCard(exercise = exercise)
+            if(currentCategory == "All"){
+                ExerciseCard(exercise = exercise)
+
+            }
+            if (exercise.category == currentCategory) {
+                ExerciseCard(exercise = exercise)
+            }
         }
     }
 }
@@ -125,7 +175,7 @@ fun ExerciseCard(exercise: ExerciseClass) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp),
-        contentAlignment = Alignment.Center // Center the card horizontally
+        contentAlignment = Alignment.Center
     ) {
         Card(
             modifier = Modifier
@@ -157,6 +207,7 @@ fun ExerciseCard(exercise: ExerciseClass) {
         }
     }
 }
+
 fun LaunchExerciseIntent(exercise: ExerciseClass, context: Context) {
     val intent = Intent(context, ExerciseView::class.java).apply {
         putExtra("EXERCISE", exercise)
