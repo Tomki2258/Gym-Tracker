@@ -1,3 +1,4 @@
+// MainActivity.kt
 package com.example.gymtracker
 
 import ExerciseClass
@@ -32,23 +33,20 @@ import androidx.lifecycle.ViewModel
 import com.example.gymtracker.ui.theme.GymTrackerTheme
 import kotlinx.coroutines.launch
 
-val userData = UserData()
-
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        UserManager.initialize(this)
         enableEdgeToEdge()
         setContent {
-            GymTrackerTheme {
-                Scaffold(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(4.dp, 16.dp, 4.dp, 0.dp)
-                ) { innerPadding ->
-                    MainView(
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+            Scaffold(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(4.dp, 16.dp, 4.dp, 0.dp)
+            ) { innerPadding ->
+                MainView(
+                    modifier = Modifier.padding(innerPadding)
+                )
             }
         }
     }
@@ -78,6 +76,7 @@ fun LoadCategories(exercises: List<ExerciseClass>): List<String> {
     return categories
 }
 
+@Preview(showBackground = true)
 @Composable
 fun MainView(modifier: Modifier = Modifier) {
     val exerciseList = LoadExercises()
@@ -89,20 +88,16 @@ fun MainView(modifier: Modifier = Modifier) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
-
         ) {
-            /*
-            Button(onClick = {}) {
-                Text(text = "Account")
-            }
-            */
-            IconButton(onClick = { /* Handle click */ }) {
+            IconButton(onClick = {
+                LaunchUserIntent(context)
+            }) {
                 Icon(
                     painter = painterResource(R.drawable.icons8_male_user_100),
                     contentDescription = "User Icon"
                 )
             }
-            Text(text = context.getString(userData.userNick))
+            Text(text = UserManager.userData.userNick)
             IconButton(onClick = { /* Handle click */ }) {
                 Icon(
                     painter = painterResource(R.drawable.icons8_settings_500),
@@ -142,8 +137,8 @@ fun MainView(modifier: Modifier = Modifier) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp)
-                .horizontalScroll(rememberScrollState())
+                .horizontalScroll(rememberScrollState()),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             ExerciseList(exerciseList, currentCategory)
         }
@@ -152,16 +147,16 @@ fun MainView(modifier: Modifier = Modifier) {
 
 @Composable
 fun ExerciseList(exercises: List<ExerciseClass>, currentCategory: String) {
-    LazyColumn(
+    Box(
         modifier = Modifier.fillMaxSize(),
     ) {
-        items(exercises) { exercise ->
-            if(currentCategory == "All"){
-                ExerciseCard(exercise = exercise)
-
-            }
-            if (exercise.category == currentCategory) {
-                ExerciseCard(exercise = exercise)
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+        ) {
+            items(exercises) { exercise ->
+                if (currentCategory == "All" || exercise.category == currentCategory) {
+                    ExerciseCard(exercise = exercise)
+                }
             }
         }
     }
@@ -212,5 +207,10 @@ fun LaunchExerciseIntent(exercise: ExerciseClass, context: Context) {
     val intent = Intent(context, ExerciseView::class.java).apply {
         putExtra("EXERCISE", exercise)
     }
+    context.startActivity(intent)
+}
+
+fun LaunchUserIntent(context: Context) {
+    val intent = Intent(context, UserActivity::class.java)
     context.startActivity(intent)
 }

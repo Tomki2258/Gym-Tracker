@@ -1,5 +1,6 @@
+// UserData.kt
 package com.example.gymtracker
 
-class UserData() {
-    val userNick = R.string.user_name
-}
+data class UserData(
+    val userNick: String = "Default User"
+)

@@ -1,3 +1,4 @@
+// ExerciseView.kt
 package com.example.gymtracker
 
 import ExerciseClass
@@ -51,13 +52,14 @@ class ExerciseView : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            GymTrackerTheme {
-                exercise = intent.getSerializableExtra("EXERCISE") as ExerciseClass
-                ExerciseIntent(modifier = Modifier.fillMaxSize(), exerciseClass = exercise)
-            }
+            //GymTrackerTheme {
+            exercise = intent.getSerializableExtra("EXERCISE") as ExerciseClass
+            ExerciseIntent(modifier = Modifier.fillMaxSize(), exerciseClass = exercise)
+            //}
         }
     }
 }
+
 
 @Preview(showBackground = true)
 @Composable
@@ -110,7 +112,7 @@ fun ExerciseIntent(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(16.dp)
-                .requiredSize(56.dp) // Use requiredSize or size with specific dimensions
+                .requiredSize(56.dp)
         ) {
             Icon(
                 painter = painterResource(id = R.drawable.add),
@@ -124,16 +126,28 @@ fun ExerciseIntent(
     }
 }
 
-fun AddMesurment(context: Context, reps: MutableIntState, weigh: MutableDoubleState, measurementsList: MutableState<MutableList<MeasurementClass>>): Int {
+fun AddMesurment(
+    context: Context,
+    reps: MutableIntState,
+    weigh: MutableDoubleState,
+    measurementsList: MutableState<MutableList<MeasurementClass>>
+) {
+    if (reps.value == 0 || weigh.value == 0.0) {
+        ToastManager(context, "Reps or weight cannot be 0")
+        return
+    }
+
     val newMeasurement = MeasurementClass(reps.value, weigh.value)
     exercise.measurementsList.add(newMeasurement)
     measurementsList.value = exercise.measurementsList.toMutableList()
     ToastManager(context, "Measurement added")
-    return 1
 }
 
 @Composable
-fun AddMeasurementDialog(onDismissRequest: () -> Unit, measurementsList: MutableState<MutableList<MeasurementClass>>) {
+fun AddMeasurementDialog(
+    onDismissRequest: () -> Unit,
+    measurementsList: MutableState<MutableList<MeasurementClass>>
+) {
     val reps = remember { mutableIntStateOf(0) }
     val weight = remember { mutableDoubleStateOf(0.0) }
     val context = LocalContext.current
@@ -165,9 +179,8 @@ fun AddMeasurementDialog(onDismissRequest: () -> Unit, measurementsList: Mutable
                 }
                 Button(onClick = {
                     scope.launch {
-                        if (AddMesurment(context, reps, weight, measurementsList) == 1) {
-                            onDismissRequest()
-                        }
+                        AddMesurment(context, reps, weight, measurementsList)
+                        onDismissRequest()
                     }
                 }) {
                     Text(text = "Add measurement")
