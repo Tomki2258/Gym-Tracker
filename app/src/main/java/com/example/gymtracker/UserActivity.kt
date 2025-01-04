@@ -2,6 +2,7 @@
 package com.example.gymtracker
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -15,11 +16,14 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TimeInput
+import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableDoubleStateOf
@@ -37,6 +41,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.example.gymtracker.ui.theme.GymTrackerTheme
 import kotlinx.coroutines.launch
+import java.util.Calendar
 
 class UserActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -57,17 +62,56 @@ fun DefaultPreview(modifier: Modifier = Modifier) {
     Greeting(name = UserManager.userData.userNick, modifier = modifier)
 }
 
+fun SetSumplementsHour(hour: Int, minute: Int) {
+    //TODO
+    Log.d("Hour", hour.toString())
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun HourPicker(
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val currentTime = Calendar.getInstance()
+
+    val timePickerState = rememberTimePickerState(
+        initialHour = currentTime.get(Calendar.HOUR_OF_DAY),
+        initialMinute = currentTime.get(Calendar.MINUTE),
+        is24Hour = true,
+    )
+    Dialog(onDismissRequest = { onDismiss() }) {
+        Card(
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.padding(8.dp)
+            ) {
+                TimeInput(
+                    state = timePickerState,
+                )
+                Button(onClick = {
+                    onConfirm
+                    SetSumplementsHour(timePickerState.hour, timePickerState.minute)
+                }) {
+                    Text("Confirm")
+                }
+            }
+        }
+    }
+
+}
+
 @Composable
 fun Greeting(name: String, modifier: Modifier = Modifier) {
     val context = LocalContext.current
-    val showDialog = remember { mutableStateOf(false) }
-
+    val showNickameDialog = remember { mutableStateOf(false) }
+    val showHourDialog = remember { mutableStateOf(false) }
     Column(
         modifier = modifier.padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         IconButton(onClick = {
-            //LaunchUserIntent(context)
         }, modifier = Modifier.size(100.dp)) {
             Icon(
                 painter = painterResource(R.drawable.icons8_male_user_100),
@@ -79,18 +123,25 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
             text = "Hello $name!",
             modifier = modifier
         )
-        Button(onClick = { showDialog.value = true} ) {
+        Button(onClick = { showNickameDialog.value = true }) {
             Text(text = "Change Nickname")
         }
         Button(onClick = { TODO() }) {
             Text(text = "Training plan")
         }
-        Button(onClick = { TODO() }) {
+        Button(onClick = { showHourDialog.value = true }) {
             Text(text = "Supplements")
         }
     }
-    if (showDialog.value) {
-        ChangeNickDialog { showDialog.value = false }
+
+    if (showNickameDialog.value) {
+        ChangeNickDialog { showNickameDialog.value = false }
+    }
+    if (showHourDialog.value) {
+        HourPicker(
+            onConfirm = { showHourDialog.value = false },
+            onDismiss = { showHourDialog.value = false }
+        )
     }
 }
 
@@ -105,12 +156,18 @@ fun ChangeNickDialog(onDismissRequest: () -> Unit) {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.padding(16.dp)
             ) {
-                Text(text = "Change Nickname", fontSize = 20.sp, modifier = Modifier.padding(bottom = 8.dp))
+                Text(
+                    text = "Change Nickname",
+                    fontSize = 20.sp,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
                 TextField(
                     value = newNick.value,
                     onValueChange = { newNick.value = it },
                     label = { Text("New Nickname") },
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp)
                 )
                 Row(
                     horizontalArrangement = Arrangement.SpaceEvenly,
