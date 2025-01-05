@@ -52,8 +52,9 @@ class ExerciseView : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             //GymTrackerTheme {
-            exercise = intent.getSerializableExtra("EXERCISE") as ExerciseClass
-            ExerciseIntent(modifier = Modifier.fillMaxSize(), exerciseClass = exercise)
+            //exercise = intent.getSerializableExtra("EXERCISE") as ExerciseClass
+            val index = intent.getIntExtra("EXERCISE_INDEX", 0)
+            ExerciseIntent(modifier = Modifier.fillMaxSize(), exerciseClass = ExerciseManager.exercises[index])
             //}
         }
     }
@@ -81,7 +82,7 @@ fun ExerciseIntent(
                         contentDescription = "Exercise Image"
                     )
                     Text(text = exerciseClass.name)
-                    Text(text = exerciseClass.category.toString())
+                    Text(text = exerciseClass.category)
                 }
             }
             Card(
@@ -95,7 +96,9 @@ fun ExerciseIntent(
                         Text(text = "No measurements yet")
                     }
                 } else {
-                    LazyColumn {
+                    LazyColumn (
+                        modifier = Modifier.padding(8.dp)
+                    ){
                         items(measurementsList.value) { measurement ->
                             Row {
                                 Text(text = "Reps: ${measurement.reps}")
@@ -171,8 +174,8 @@ fun AddMeasurementDialog(
                         fontSize = 20.sp
                     )
                     TextField(
-                        value = weight.value.toString(),
-                        onValueChange = { weight.value = it.toDouble() },
+                        value = weight.doubleValue.toString(),
+                        onValueChange = { weight.doubleValue = it.toDouble() },
                         label = { Text("Weight") }
                     )
                 }

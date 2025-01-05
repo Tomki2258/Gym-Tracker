@@ -155,7 +155,7 @@ fun ExerciseList(exercises: List<ExerciseClass>, currentCategory: String) {
         ) {
             items(exercises) { exercise ->
                 if (currentCategory == "All" || exercise.category == currentCategory) {
-                    ExerciseCard(exercise)
+                    ExerciseCard(exercise, exercises.indexOf(exercise))
                 }
             }
         }
@@ -163,7 +163,7 @@ fun ExerciseList(exercises: List<ExerciseClass>, currentCategory: String) {
 }
 
 @Composable
-fun ExerciseCard(exercise: ExerciseClass) {
+fun ExerciseCard(exercise: ExerciseClass,index: Int) {
     val context = LocalContext.current
     val photoId = exercise.getPhotoResourceId(context)
     Box(
@@ -184,7 +184,7 @@ fun ExerciseCard(exercise: ExerciseClass) {
                         Text(text = exercise.name)
                         Text(text = "Category: ${exercise.category}")
                         Button(onClick = {
-                            LaunchExerciseIntent(exercise, context)
+                            LaunchExerciseIntent(index, context)
                         }) {
                             Text(text = "Choose")
                         }
@@ -203,9 +203,9 @@ fun ExerciseCard(exercise: ExerciseClass) {
     }
 }
 
-fun LaunchExerciseIntent(exercise: ExerciseClass, context: Context) {
+fun LaunchExerciseIntent(exerciseIndex: Int, context: Context) {
     val intent = Intent(context, ExerciseView::class.java).apply {
-        putExtra("EXERCISE", exercise)
+        putExtra("EXERCISE_INDEX", exerciseIndex)
     }
     context.startActivity(intent)
 }
