@@ -1,6 +1,8 @@
 // UserActivity.kt
 package com.example.gymtracker
 
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -126,7 +128,7 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
         Button(onClick = { showNickameDialog.value = true }) {
             Text(text = "Change Nickname")
         }
-        Button(onClick = { TODO() }) {
+        Button(onClick = { LaunchTrainingPlanIntent(context) }) {
             Text(text = "Training plan")
         }
         Button(onClick = { showHourDialog.value = true }) {
@@ -186,4 +188,8 @@ fun ChangeNickDialog(onDismissRequest: () -> Unit) {
             }
         }
     }
+}
+fun LaunchTrainingPlanIntent(context: Context) {
+    val intent = Intent(context, TrainingPlannerActivity::class.java)
+    context.startActivity(intent)
 }
