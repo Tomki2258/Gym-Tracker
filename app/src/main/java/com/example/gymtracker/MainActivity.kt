@@ -1,7 +1,6 @@
 // MainActivity.kt
 package com.example.gymtracker
 
-import ExerciseClass
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -36,6 +35,7 @@ import kotlinx.coroutines.launch
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        ExerciseManager.initialize(this)
         UserManager.initialize(this)
         enableEdgeToEdge()
         setContent {
@@ -52,17 +52,17 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-fun LoadExercises(): List<ExerciseClass> {
-    val exerciseList = listOf(
-        ExerciseClass("Chest fly", "Chest"),
-        ExerciseClass("Leg curl", "Legs"),
-        ExerciseClass("Leg press", "Legs"),
-        ExerciseClass("Dumbbell biceps", "Arms"),
-        ExerciseClass("Bench press", "Chest"),
-        ExerciseClass("Seated barbell press", "Shoulders"),
-    )
-    return exerciseList
-}
+//fun LoadExercises(): List<ExerciseClass> {
+//    val exerciseList = listOf(
+//        ExerciseClass("Chest fly", "Chest"),
+//        ExerciseClass("Leg curl", "Legs"),
+//        ExerciseClass("Leg press", "Legs"),
+//        ExerciseClass("Dumbbell biceps", "Arms"),
+//        ExerciseClass("Bench press", "Chest"),
+//        ExerciseClass("Seated barbell press", "Shoulders"),
+//    )
+//    return exerciseList
+//}
 
 fun LoadCategories(exercises: List<ExerciseClass>): List<String> {
     val categories = mutableListOf<String>()
@@ -79,8 +79,8 @@ fun LoadCategories(exercises: List<ExerciseClass>): List<String> {
 @Preview(showBackground = true)
 @Composable
 fun MainView(modifier: Modifier = Modifier) {
-    val exerciseList = LoadExercises()
-    val categories = LoadCategories(exerciseList)
+    //val exerciseList = LoadExercises()
+    val categories = LoadCategories(ExerciseManager.exercises)
     var currentCategory by remember { mutableStateOf(categories.first()) }
     val context = LocalContext.current
 
@@ -140,7 +140,7 @@ fun MainView(modifier: Modifier = Modifier) {
                 .horizontalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            ExerciseList(exerciseList, currentCategory)
+            ExerciseList(ExerciseManager.exercises, currentCategory)
         }
     }
 }
@@ -155,7 +155,7 @@ fun ExerciseList(exercises: List<ExerciseClass>, currentCategory: String) {
         ) {
             items(exercises) { exercise ->
                 if (currentCategory == "All" || exercise.category == currentCategory) {
-                    ExerciseCard(exercise = exercise)
+                    ExerciseCard(exercise)
                 }
             }
         }

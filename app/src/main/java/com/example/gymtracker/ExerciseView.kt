@@ -1,7 +1,6 @@
 // ExerciseView.kt
 package com.example.gymtracker
 
-import ExerciseClass
 import android.os.Bundle
 import android.content.Context
 import androidx.activity.ComponentActivity

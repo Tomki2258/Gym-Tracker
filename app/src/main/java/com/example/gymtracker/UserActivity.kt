@@ -46,7 +46,7 @@ import java.util.Calendar
 class UserActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        UserManager.initialize(this)
+        //UserManager.initialize(this)
         enableEdgeToEdge()
         setContent {
             Scaffold(modifier = Modifier.fillMaxSize()) { paddingValues ->
