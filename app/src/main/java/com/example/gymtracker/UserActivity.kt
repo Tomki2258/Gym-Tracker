@@ -27,9 +27,6 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TimeInput
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableDoubleStateOf
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -110,7 +107,10 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
     val showNickameDialog = remember { mutableStateOf(false) }
     val showHourDialog = remember { mutableStateOf(false) }
     Column(
-        modifier = modifier.padding(16.dp),
+        modifier = modifier
+            .padding(16.dp)
+            .fillMaxSize()
+        ,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         IconButton(onClick = {
@@ -125,14 +125,25 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
             text = "Hello $name!",
             modifier = modifier
         )
-        Button(onClick = { showNickameDialog.value = true }) {
-            Text(text = "Change Nickname")
-        }
-        Button(onClick = { LaunchTrainingPlanIntent(context) }) {
-            Text(text = "Training plan")
-        }
-        Button(onClick = { showHourDialog.value = true }) {
-            Text(text = "Supplements")
+        Column(
+            modifier = Modifier.fillMaxWidth(0.5f)
+                .padding(0.dp, 24.dp, 0.dp, 0.dp),
+        ) {
+            Button(
+                modifier = Modifier.fillMaxWidth(),
+                onClick = { showNickameDialog.value = true }) {
+                Text(text = "Change Nickname")
+            }
+            Button(
+                modifier = Modifier.fillMaxWidth(),
+                onClick = { LaunchTrainingPlanIntent(context) }) {
+                Text(text = "Training plan")
+            }
+            Button(
+                modifier = Modifier.fillMaxWidth(),
+                onClick = { showHourDialog.value = true }) {
+                Text(text = "Supplements")
+            }
         }
     }
 

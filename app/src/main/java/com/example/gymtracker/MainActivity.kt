@@ -11,6 +11,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -21,6 +22,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
@@ -42,7 +45,7 @@ class MainActivity : ComponentActivity() {
             Scaffold(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(4.dp, 16.dp, 4.dp, 0.dp)
+                    //.padding(4.dp, 16.dp, 4.dp, 0.dp)
             ) { innerPadding ->
                 MainView(
                     modifier = Modifier.padding(innerPadding)
@@ -86,7 +89,9 @@ fun MainView(modifier: Modifier = Modifier) {
 
     Column(modifier = Modifier.fillMaxWidth()) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth()
+                .background(Color.LightGray)
+                .padding(0.dp, 16.dp, 0.dp, 0.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             IconButton(onClick = {
@@ -97,7 +102,9 @@ fun MainView(modifier: Modifier = Modifier) {
                     contentDescription = "User Icon"
                 )
             }
-            Text(text = UserManager.userData.userNick)
+            Text(
+                modifier = Modifier.padding(0.dp, 16.dp, 0.dp, 0.dp),
+                text = UserManager.userData.userNick)
             IconButton(onClick = { /* Handle click */ }) {
                 Icon(
                     painter = painterResource(R.drawable.icons8_settings_500),
@@ -106,10 +113,12 @@ fun MainView(modifier: Modifier = Modifier) {
             }
         }
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth()
+                .background(Color.LightGray)
+                .padding(0.dp, 0.dp, 0.dp, 8.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Button(onClick = {
+            IconButton(onClick = {
                 var catIndex = categories.indexOf(currentCategory)
                 catIndex -= 1
                 if (catIndex < 0) {
@@ -118,12 +127,18 @@ fun MainView(modifier: Modifier = Modifier) {
                 currentCategory = categories[catIndex]
                 Log.d(currentCategory, currentCategory)
             }) {
-                Text(text = "<-")
+                Icon(
+                    modifier = Modifier.size(25.dp)
+                        .scale(scaleX = -1f, scaleY = 1f),
+                    painter = painterResource(R.drawable.right_arrow),
+                    contentDescription = "Filter Icon"
+                )
+                //Text(text = "<-")
             }
             var catIndex = categories.indexOf(currentCategory)
             Text(text = "${currentCategory}\n${catIndex + 1} / ${categories.size}",
                 textAlign = TextAlign.Center)
-            Button(onClick = {
+            IconButton(onClick = {
                 catIndex += 1
                 if (catIndex > categories.size - 1) {
                     catIndex = 0
@@ -131,13 +146,19 @@ fun MainView(modifier: Modifier = Modifier) {
                 currentCategory = categories[catIndex]
                 Log.d(currentCategory, currentCategory)
             }) {
-                Text(text = "->")
+                Icon(
+                    modifier = Modifier.size(25.dp),
+                    painter = painterResource(R.drawable.right_arrow),
+                    contentDescription = "Filter Icon"
+                )
+                //Text(text = "->")
             }
         }
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .horizontalScroll(rememberScrollState()),
+                .horizontalScroll(rememberScrollState())
+                .padding(0.dp, 0.dp, 0.dp, 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             ExerciseList(ExerciseManager.exercises, currentCategory)

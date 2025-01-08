@@ -9,15 +9,21 @@ class ExerciseClass(
     val name: String,
     val category: String,
     val photoString: String = name.replace(" ", "_").lowercase(),
-    val measurementsList: MutableList<MeasurementClass> = mutableListOf<MeasurementClass>()
+    val measurementsList: MutableList<MeasurementClass> = mutableListOf<MeasurementClass>(),
+    var bestMeasurement: MeasurementClass? = null
 ) : Serializable {
     fun getPhotoResourceId(context: Context): Int {
         return context.resources.getIdentifier(photoString, "drawable", context.packageName)
     }
-
-    fun printList() {
-        for (measurement in measurementsList) {
-            Log.d("Reps: ${measurement.reps}", "Weight: ${measurement.weight}")
+    fun SetBestMeasurement() {
+        if (measurementsList.isNotEmpty()) {
+            bestMeasurement = measurementsList.maxByOrNull { it.weight }
         }
     }
+    fun printList() {
+        for (measurement in measurementsList) {
+            Log.d("Reps: ${measurement.reps}", "Date: ${measurement.date}")
+        }
+    }
+
 }

@@ -3,6 +3,7 @@ package com.example.gymtracker
 
 import android.os.Bundle
 import android.content.Context
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -55,6 +56,7 @@ class ExerciseView : ComponentActivity() {
             //exercise = intent.getSerializableExtra("EXERCISE") as ExerciseClass
             val index = intent.getIntExtra("EXERCISE_INDEX", 0)
             ExerciseIntent(modifier = Modifier.fillMaxSize(), exerciseClass = ExerciseManager.exercises[index])
+            //exercise.printList()
             //}
         }
     }
@@ -108,6 +110,23 @@ fun ExerciseIntent(
                     }
                 }
             }
+            Text(text = "Progress")
+            Card(){
+                PrintProgress()
+            }
+        }
+        FloatingActionButton(
+            onClick = { showDialog.value = true },
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .padding(16.dp)
+                .requiredSize(56.dp)
+        ) {
+            Icon(
+                painter = painterResource(id = R.drawable.information),
+                contentDescription = "Exercise Info",
+                modifier = Modifier.fillMaxSize(0.6f)
+            )
         }
         FloatingActionButton(
             onClick = { showDialog.value = true },
@@ -139,9 +158,10 @@ fun AddMesurment(
         return
     }
 
-    val newMeasurement = MeasurementClass(reps.value, weigh.value)
+    val newMeasurement = MeasurementClass(reps.value, weigh.value, exercise.category)
     exercise.measurementsList.add(newMeasurement)
     measurementsList.value = exercise.measurementsList.toMutableList()
+    exercise.SetBestMeasurement()
     ToastManager(context, "Measurement added")
 }
 
@@ -190,4 +210,28 @@ fun AddMeasurementDialog(
             }
         }
     }
+}
+@Composable
+fun WeekChart(){
+
+}
+@Composable
+fun PrintProgress() {
+    val progressWeightMap = mutableMapOf<Int, Double>()
+
+    for (measurement in exercise.measurementsList) {
+        val weekOfYear = measurement.getWeekOfYear()
+        progressWeightMap[weekOfYear] = progressWeightMap.getOrDefault(weekOfYear, 0.0) + measurement.weight
+    }
+
+    val progressWeightList = progressWeightMap.toList()
+
+    for (pair in progressWeightList) {
+        //println("Week: ${pair.first}, Total Weight: ${pair.second}")
+    }
+    //Log.d("Progress", exercise.bestMeasurement?.weight.toString())
+}
+@Composable
+fun ShowExerciseInfo(){
+
 }
