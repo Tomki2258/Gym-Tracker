@@ -4,10 +4,12 @@ package com.example.gymtracker
 import android.content.Context
 import android.util.Log
 import java.io.Serializable
+import java.nio.file.Path
 
 class ExerciseClass(
     val name: String,
     val category: String,
+    val descFilePath: String,
     val photoString: String = name.replace(" ", "_").lowercase(),
     val measurementsList: MutableList<MeasurementClass> = mutableListOf<MeasurementClass>(),
     var bestMeasurement: MeasurementClass? = null

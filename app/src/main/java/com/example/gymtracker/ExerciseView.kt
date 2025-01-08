@@ -3,6 +3,7 @@ package com.example.gymtracker
 
 import android.os.Bundle
 import android.content.Context
+import android.content.res.AssetManager
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -44,8 +46,12 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.example.gymtracker.ui.theme.GymTrackerTheme
 import kotlinx.coroutines.launch
+import java.io.BufferedReader
+import java.io.File
+import java.io.InputStream
+import kotlin.io.path.Path
 
-var exercise = ExerciseClass("Default Name", "Default")
+var exercise = ExerciseClass("Default Name", "Default","no_desc.txt")
 
 class ExerciseView : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -67,9 +73,10 @@ class ExerciseView : ComponentActivity() {
 @Composable
 fun ExerciseIntent(
     modifier: Modifier = Modifier,
-    exerciseClass: ExerciseClass = ExerciseClass("Default Name", "Default")
+    exerciseClass: ExerciseClass = ExerciseClass("Default Name", "Default", "no_desc.txt")
 ) {
     val showDialog = remember { mutableStateOf(false) }
+    val showDescDialog = remember { mutableStateOf(false) }
     val measurementsList = remember { mutableStateOf(exercise.measurementsList.toMutableList()) }
     Box(modifier = Modifier.fillMaxSize()) {
         Column {
@@ -116,7 +123,7 @@ fun ExerciseIntent(
             }
         }
         FloatingActionButton(
-            onClick = { showDialog.value = true },
+            onClick = { showDescDialog.value = true },
             modifier = Modifier
                 .align(Alignment.BottomStart)
                 .padding(16.dp)
@@ -144,6 +151,9 @@ fun ExerciseIntent(
     }
     if (showDialog.value) {
         AddMeasurementDialog(onDismissRequest = { showDialog.value = false }, measurementsList)
+    }
+    if(showDescDialog.value){
+        ShowExerciseInfo(onDismissRequest = {showDescDialog.value = false})
     }
 }
 
@@ -232,6 +242,17 @@ fun PrintProgress() {
     //Log.d("Progress", exercise.bestMeasurement?.weight.toString())
 }
 @Composable
-fun ShowExerciseInfo(){
+fun ShowExerciseInfo(onDismissRequest: () -> Unit) {
+    val exerciseDesc = LocalContext.current.assets.open(exercise.descFilePath).bufferedReader().use(BufferedReader::readText)
 
+    Dialog(onDismissRequest = { onDismissRequest() }) {
+        Card (
+            modifier = Modifier.size(300.dp)
+        ){
+            Text(
+                modifier = Modifier.padding(16.dp),
+                text = exerciseDesc
+            )
+        }
+    }
 }

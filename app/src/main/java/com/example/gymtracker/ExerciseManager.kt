@@ -5,6 +5,7 @@ import android.content.Context
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import kotlin.io.path.Path
 
 object ExerciseManager {
     private const val PREFS_NAME = "exercise_prefs"
@@ -18,12 +19,12 @@ object ExerciseManager {
     }
     fun LoadExercises(): List<ExerciseClass> {
         val exerciseList = listOf(
-            ExerciseClass("Chest fly", "Chest"),
-            ExerciseClass("Leg curl", "Legs"),
-            ExerciseClass("Leg press", "Legs"),
-            ExerciseClass("Dumbbell biceps", "Arms"),
-            ExerciseClass("Bench press", "Chest"),
-            ExerciseClass("Seated barbell press", "Shoulders"),
+            ExerciseClass("Chest fly", "Chest", "leg_press.txt"),
+            ExerciseClass("Leg curl", "Legs", "leg_press.txt"),
+            ExerciseClass("Leg press", "Legs","leg_press.txt"),
+            ExerciseClass("Dumbbell biceps", "Arms","leg_press.txt"),
+            ExerciseClass("Bench press", "Chest", "leg_press.txt"),
+            ExerciseClass("Seated barbell press", "Shoulders", "leg_press.txt"),
         )
         return exerciseList
     }
