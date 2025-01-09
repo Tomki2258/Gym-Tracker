@@ -63,8 +63,9 @@ class ExerciseView : ComponentActivity() {
             //GymTrackerTheme {
             //exercise = intent.getSerializableExtra("EXERCISE") as ExerciseClass
             val index = intent.getIntExtra("EXERCISE_INDEX", 0)
-            ExerciseIntent(modifier = Modifier.fillMaxSize(), exerciseClass = ExerciseManager.exercises[index])
-            //exercise.printList()
+            val exerciseClass = ExerciseManager.exercises[index]
+            exercise = exerciseClass // Update the global exercise variable
+            ExerciseIntent(modifier = Modifier.fillMaxSize(), exerciseClass = exerciseClass)
             //}
         }
     }
@@ -89,7 +90,9 @@ fun ExerciseIntent(
                     .fillMaxWidth()
             ) {
                 Column (
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth()
+                        .padding(8.dp)
+                    ,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ){
                     Image(
@@ -254,7 +257,7 @@ fun PrintProgress() {
 @Composable
 fun ShowExerciseInfo(onDismissRequest: () -> Unit) {
     val exerciseDesc = LocalContext.current.assets.open(exercise.descFilePath).bufferedReader().use(BufferedReader::readText)
-
+    Log.d("Exercise Desc", exercise.descFilePath)
     Dialog(onDismissRequest = { onDismissRequest() }) {
         Card (
             modifier = Modifier.size(300.dp)

@@ -22,8 +22,8 @@ object ExerciseManager {
             ExerciseClass("Chest fly", "Chest", "leg_press.txt"),
             ExerciseClass("Leg curl", "Legs", "leg_press.txt"),
             ExerciseClass("Leg press", "Legs","leg_press.txt"),
-            ExerciseClass("Dumbbell biceps", "Arms","leg_press.txt"),
-            ExerciseClass("Bench press", "Chest", "leg_press.txt"),
+            ExerciseClass("Dumbbell biceps", "Arms","bench_press.txt"),
+            ExerciseClass("Bench press", "Chest", "bench_press.txt"),
             ExerciseClass("Seated barbell press", "Shoulders", "leg_press.txt"),
         )
         return exerciseList

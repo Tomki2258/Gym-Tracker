@@ -1,10 +1,12 @@
 package com.example.gymtracker
 
+import DayTrainingPlan
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,9 +14,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -23,16 +25,15 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import com.example.gymtracker.ui.theme.GymTrackerTheme
 
 class TrainingPlannerActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -49,11 +50,22 @@ class TrainingPlannerActivity : ComponentActivity() {
     }
 }
 
+var showAddDialog = mutableStateOf(false)
+var currentDay : MutableState<DayTrainingPlan> = mutableStateOf(DayTrainingPlan("Monday"))
 @Composable
 fun MainView(name: String, modifier: Modifier = Modifier) {
-    val daysOfWeek = listOf("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
-    val currentDay = remember { mutableStateOf(daysOfWeek[0]) }
-    val showAddDialog = remember { mutableStateOf(false) }
+    val daysOfWeek =
+        listOf(
+            DayTrainingPlan("Monday"),
+            DayTrainingPlan("Tuesday"),
+            DayTrainingPlan("Wednesday"),
+            DayTrainingPlan("Thursday"),
+            DayTrainingPlan("Friday"),
+            DayTrainingPlan("Saturday"),
+            DayTrainingPlan("Sunday")
+        )
+    currentDay = remember { mutableStateOf(daysOfWeek[0]) }
+    showAddDialog = remember { mutableStateOf(false) }
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -66,13 +78,12 @@ fun MainView(name: String, modifier: Modifier = Modifier) {
         ) {
             Button(
                 onClick = {
-                    var index = daysOfWeek.indexOf(currentDay.value)
-                    index -= 1
-                    if (index < 0) {
-                        index = daysOfWeek.size - 1
+                    val index = daysOfWeek.indexOf(currentDay.value)
+                    if (index == 0) {
+                        currentDay.value = daysOfWeek[daysOfWeek.size - 1]
+                    } else {
+                        currentDay.value = daysOfWeek[index - 1]
                     }
-                    currentDay.value = daysOfWeek[index]
-                    Log.d("MainView", "currentDay: ${currentDay.value}")
                 }
             ) {
                 Text(text = "<-")
@@ -85,12 +96,13 @@ fun MainView(name: String, modifier: Modifier = Modifier) {
 
             Button(
                 onClick = {
-                    var index = daysOfWeek.indexOf(currentDay.value)
-                    index += 1
-                    if (index >= daysOfWeek.size) {
-                        index = 0
+                    val indexedValue = daysOfWeek.indexOf(currentDay.value)
+                    if (indexedValue == daysOfWeek.size - 1) {
+                        currentDay.value = daysOfWeek[0]
+                    } else {
+                        currentDay.value = daysOfWeek[indexedValue + 1]
                     }
-                    currentDay.value = daysOfWeek[index]
+
                 }
             ) {
                 Text(text = "->")
@@ -98,16 +110,13 @@ fun MainView(name: String, modifier: Modifier = Modifier) {
         }
 
         Text(
-            text = currentDay.value,
+            text = currentDay.value.day,
             modifier = Modifier.padding(8.dp)
         )
 
-        LazyColumn {
-            items(daysOfWeek) { day ->
-                DayCard()
-            }
-        }
-        if(showAddDialog.value){
+        DayCard()
+
+        if (showAddDialog.value) {
             AddExericeToDay(onDismissRequest = { showAddDialog.value = false })
         }
     }
@@ -129,7 +138,7 @@ fun DayCard() {
         Column {
             Text(text = "Exercise")
             IconButton(
-                onClick = { /*TODO*/ }
+                onClick = { showAddDialog.value = true }
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.add),
@@ -141,7 +150,7 @@ fun DayCard() {
 }
 
 @Composable
-fun AddExericeToDay(onDismissRequest: () -> Unit){
+fun AddExericeToDay(onDismissRequest: () -> Unit) {
     Dialog(onDismissRequest = { onDismissRequest() }) {
         Card(
             modifier = Modifier
@@ -150,13 +159,30 @@ fun AddExericeToDay(onDismissRequest: () -> Unit){
                 .padding(16.dp),
             shape = RoundedCornerShape(16.dp),
         ) {
-            Text(
-                text = "This is a minimal dialog",
-                modifier = Modifier
-                    .fillMaxSize()
-                    .wrapContentSize(Alignment.Center),
-                textAlign = TextAlign.Center,
-            )
+            LazyColumn(
+                modifier = Modifier.horizontalScroll(rememberScrollState())
+            ) {
+                items(ExerciseManager.exercises) { exercise ->
+                    Row {
+                        Text(text = exercise.name)
+                        IconButton(
+                            onClick = {
+                                Log.d(
+                                    "AddExericeToDay",
+                                    "Add ${exercise.name} to ${showAddDialog.value}"
+                                )
+
+                                showAddDialog.value = false
+                            }
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.add),
+                                contentDescription = "Add exercise"
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 }
