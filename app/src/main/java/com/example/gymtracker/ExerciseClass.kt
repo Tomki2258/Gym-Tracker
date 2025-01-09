@@ -17,6 +17,7 @@ class ExerciseClass(
     fun getPhotoResourceId(context: Context): Int {
         return context.resources.getIdentifier(photoString, "drawable", context.packageName)
     }
+
     fun SetBestMeasurement() {
         if (measurementsList.isNotEmpty()) {
             bestMeasurement = measurementsList.maxByOrNull { it.weight }

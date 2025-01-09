@@ -30,6 +30,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -51,7 +52,8 @@ class TrainingPlannerActivity : ComponentActivity() {
 }
 
 var showAddDialog = mutableStateOf(false)
-var currentDay : MutableState<DayTrainingPlan> = mutableStateOf(DayTrainingPlan("Monday"))
+var currentDayIndex = 0;
+
 @Composable
 fun MainView(name: String, modifier: Modifier = Modifier) {
     val daysOfWeek =
@@ -64,7 +66,8 @@ fun MainView(name: String, modifier: Modifier = Modifier) {
             DayTrainingPlan("Saturday"),
             DayTrainingPlan("Sunday")
         )
-    currentDay = remember { mutableStateOf(daysOfWeek[0]) }
+    val currentDay = remember { mutableStateOf(daysOfWeek[currentDayIndex]) }
+    daysOfWeek[0].exercises.add(ExerciseManager.exercises[0])
     showAddDialog = remember { mutableStateOf(false) }
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -78,12 +81,11 @@ fun MainView(name: String, modifier: Modifier = Modifier) {
         ) {
             Button(
                 onClick = {
-                    val index = daysOfWeek.indexOf(currentDay.value)
-                    if (index == 0) {
-                        currentDay.value = daysOfWeek[daysOfWeek.size - 1]
-                    } else {
-                        currentDay.value = daysOfWeek[index - 1]
+                    currentDayIndex--
+                    if (currentDayIndex < 0) {
+                        currentDayIndex = daysOfWeek.size - 1
                     }
+                    currentDay.value = daysOfWeek[currentDayIndex]
                 }
             ) {
                 Text(text = "<-")
@@ -96,13 +98,11 @@ fun MainView(name: String, modifier: Modifier = Modifier) {
 
             Button(
                 onClick = {
-                    val indexedValue = daysOfWeek.indexOf(currentDay.value)
-                    if (indexedValue == daysOfWeek.size - 1) {
-                        currentDay.value = daysOfWeek[0]
-                    } else {
-                        currentDay.value = daysOfWeek[indexedValue + 1]
+                    currentDayIndex++
+                    if (currentDayIndex > daysOfWeek.size - 1) {
+                        currentDayIndex = 0
                     }
-
+                    currentDay.value = daysOfWeek[currentDayIndex]
                 }
             ) {
                 Text(text = "->")
@@ -114,10 +114,56 @@ fun MainView(name: String, modifier: Modifier = Modifier) {
             modifier = Modifier.padding(8.dp)
         )
 
-        DayCard()
-
+        //DayCard()
+        LazyColumn {
+            items(daysOfWeek[currentDayIndex].exercises) { exercise ->
+                ExericeCard(exercise)
+            }
+        }
+        AddExercisePanel()
         if (showAddDialog.value) {
             AddExericeToDay(onDismissRequest = { showAddDialog.value = false })
+        }
+    }
+}
+@Composable
+fun AddExercisePanel(){
+    Card(
+        modifier = Modifier
+            .padding(8.dp)
+            .fillMaxWidth()
+            .height(50.dp)
+    ) {
+        IconButton(
+            onClick = { showAddDialog.value = true }
+        ) {
+            Icon(
+                painter = painterResource(id = R.drawable.add),
+                contentDescription = "Add exercise"
+            )
+        }
+    }
+}
+@Composable
+fun ExericeCard(exercise: ExerciseClass) {
+    Card(
+        modifier = Modifier
+            .padding(8.dp)
+            .fillMaxWidth()
+            .height(100.dp)
+    ) {
+        Row(
+        )
+        {
+            Icon(
+                painter = painterResource(id = exercise.getPhotoResourceId(LocalContext.current)),
+                contentDescription = "Exercise photo",
+                modifier = Modifier.padding(8.dp)
+            )
+            Column {
+                Text(text = exercise.name)
+                Text(text = exercise.category)
+            }
         }
     }
 }
