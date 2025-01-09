@@ -40,6 +40,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -78,20 +80,28 @@ fun ExerciseIntent(
     val showDialog = remember { mutableStateOf(false) }
     val showDescDialog = remember { mutableStateOf(false) }
     val measurementsList = remember { mutableStateOf(exercise.measurementsList.toMutableList()) }
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(modifier = Modifier.fillMaxSize()
+        .padding(0.dp,12.dp,0.dp,0.dp)) {
         Column {
             Card(
                 modifier = Modifier
                     .padding(8.dp)
                     .fillMaxWidth()
             ) {
-                Column {
+                Column (
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ){
                     Image(
                         painter = painterResource(id = exerciseClass.getPhotoResourceId(LocalContext.current)),
                         contentDescription = "Exercise Image"
                     )
-                    Text(text = exerciseClass.name)
-                    Text(text = exerciseClass.category)
+                    Text(text = "${exerciseClass.name} - ${exerciseClass.category}"
+                        , fontWeight = FontWeight.Bold,
+                        fontSize = 30.sp
+                    )
+                    //Text(text = exerciseClass.name)
+                    //Text(text = exerciseClass.category)
                 }
             }
             Card(
