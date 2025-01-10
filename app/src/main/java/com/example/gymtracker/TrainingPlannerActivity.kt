@@ -86,6 +86,7 @@ fun MainView(name: String, modifier: Modifier = Modifier) {
                         currentDayIndex = daysOfWeek.size - 1
                     }
                     currentDay.value = daysOfWeek[currentDayIndex]
+                    PrintTrainingsFromDay(currentDay.value)
                 }
             ) {
                 Text(text = "<-")
@@ -103,6 +104,7 @@ fun MainView(name: String, modifier: Modifier = Modifier) {
                         currentDayIndex = 0
                     }
                     currentDay.value = daysOfWeek[currentDayIndex]
+                    PrintTrainingsFromDay(currentDay.value)
                 }
             ) {
                 Text(text = "->")
@@ -230,5 +232,10 @@ fun AddExericeToDay(onDismissRequest: () -> Unit) {
                 }
             }
         }
+    }
+}
+fun PrintTrainingsFromDay(day: DayTrainingPlan) {
+    for (exercise in day.exercises) {
+        Log.d("Exercise", exercise.name)
     }
 }
