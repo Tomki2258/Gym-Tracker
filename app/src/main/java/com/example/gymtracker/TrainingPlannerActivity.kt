@@ -25,6 +25,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -35,6 +36,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import java.util.Calendar
 
 class TrainingPlannerActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -43,32 +45,32 @@ class TrainingPlannerActivity : ComponentActivity() {
         setContent {
             Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                 MainView(
-                    name = "Android",
+                            name = "Android",
                     modifier = Modifier.padding(innerPadding)
                 )
             }
         }
     }
 }
-
 var showAddDialog = mutableStateOf(false)
-var currentDayIndex = 0;
 
 @Composable
 fun MainView(name: String, modifier: Modifier = Modifier) {
-    val daysOfWeek =
-        listOf(
-            DayTrainingPlan("Monday"),
-            DayTrainingPlan("Tuesday"),
-            DayTrainingPlan("Wednesday"),
-            DayTrainingPlan("Thursday"),
-            DayTrainingPlan("Friday"),
-            DayTrainingPlan("Saturday"),
-            DayTrainingPlan("Sunday")
-        )
-    val currentDay = remember { mutableStateOf(daysOfWeek[currentDayIndex]) }
-    daysOfWeek[0].exercises.add(ExerciseManager.exercises[0])
+
+    val calendar: Calendar = Calendar.getInstance()
+    val currentDayIndex = remember {
+        val dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK)
+        val adjustedDayIndex = (dayOfWeek + 5) % 7
+        mutableStateOf(adjustedDayIndex)
+    }
+
     showAddDialog = remember { mutableStateOf(false) }
+    val exercises = remember { mutableStateOf(TrainingManager.daysOfWeek[currentDayIndex.value].exercises.toMutableList()) }
+
+    LaunchedEffect(currentDayIndex.value) {
+        exercises.value = TrainingManager.daysOfWeek[currentDayIndex.value].exercises.toMutableList()
+    }
+
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -81,12 +83,10 @@ fun MainView(name: String, modifier: Modifier = Modifier) {
         ) {
             Button(
                 onClick = {
-                    currentDayIndex--
-                    if (currentDayIndex < 0) {
-                        currentDayIndex = daysOfWeek.size - 1
+                    currentDayIndex.value--
+                    if (currentDayIndex.value < 0) {
+                        currentDayIndex.value = TrainingManager.daysOfWeek.size - 1
                     }
-                    currentDay.value = daysOfWeek[currentDayIndex]
-                    PrintTrainingsFromDay(currentDay.value)
                 }
             ) {
                 Text(text = "<-")
@@ -99,12 +99,10 @@ fun MainView(name: String, modifier: Modifier = Modifier) {
 
             Button(
                 onClick = {
-                    currentDayIndex++
-                    if (currentDayIndex > daysOfWeek.size - 1) {
-                        currentDayIndex = 0
+                    currentDayIndex.value++
+                    if (currentDayIndex.value >= TrainingManager.daysOfWeek.size) {
+                        currentDayIndex.value = 0
                     }
-                    currentDay.value = daysOfWeek[currentDayIndex]
-                    PrintTrainingsFromDay(currentDay.value)
                 }
             ) {
                 Text(text = "->")
@@ -112,19 +110,61 @@ fun MainView(name: String, modifier: Modifier = Modifier) {
         }
 
         Text(
-            text = currentDay.value.day,
+            text = TrainingManager.daysOfWeek[currentDayIndex.value].day,
             modifier = Modifier.padding(8.dp)
         )
 
-        //DayCard()
         LazyColumn {
-            items(daysOfWeek[currentDayIndex].exercises) { exercise ->
+            items(exercises.value) { exercise ->
                 ExericeCard(exercise)
             }
         }
         AddExercisePanel()
         if (showAddDialog.value) {
-            AddExericeToDay(onDismissRequest = { showAddDialog.value = false })
+            AddExericeToDay(
+                onDismissRequest = { showAddDialog.value = false },
+                onAddExercise = { exercise ->
+                    val currentDay = TrainingManager.daysOfWeek[currentDayIndex.value]
+                    if (!currentDay.exercises.contains(exercise)) {
+                        currentDay.exercises.add(exercise)
+                        exercises.value = currentDay.exercises.toMutableList()
+                    }
+                }
+            )
+        }
+    }
+}
+
+@Composable
+fun AddExericeToDay(onDismissRequest: () -> Unit, onAddExercise: (ExerciseClass) -> Unit) {
+    Dialog(onDismissRequest = { onDismissRequest() }) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(200.dp)
+                .padding(16.dp),
+            shape = RoundedCornerShape(16.dp),
+        ) {
+            LazyColumn(
+                modifier = Modifier.horizontalScroll(rememberScrollState())
+            ) {
+                items(ExerciseManager.exercises) { exercise ->
+                    Row {
+                        Text(text = exercise.name)
+                        IconButton(
+                            onClick = {
+                                onAddExercise(exercise)
+                                onDismissRequest()
+                            }
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.add),
+                                contentDescription = "Add exercise"
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 }
@@ -176,64 +216,6 @@ fun MainViewPreview() {
     MainView("Android")
 }
 
-@Composable
-fun DayCard() {
-    Card(
-        modifier = Modifier
-            .padding(8.dp)
-            .fillMaxWidth()
-    ) {
-        Column {
-            Text(text = "Exercise")
-            IconButton(
-                onClick = { showAddDialog.value = true }
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.add),
-                    contentDescription = "Add exercise"
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun AddExericeToDay(onDismissRequest: () -> Unit) {
-    Dialog(onDismissRequest = { onDismissRequest() }) {
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(200.dp)
-                .padding(16.dp),
-            shape = RoundedCornerShape(16.dp),
-        ) {
-            LazyColumn(
-                modifier = Modifier.horizontalScroll(rememberScrollState())
-            ) {
-                items(ExerciseManager.exercises) { exercise ->
-                    Row {
-                        Text(text = exercise.name)
-                        IconButton(
-                            onClick = {
-                                Log.d(
-                                    "AddExericeToDay",
-                                    "Add ${exercise.name} to ${showAddDialog.value}"
-                                )
-
-                                showAddDialog.value = false
-                            }
-                        ) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.add),
-                                contentDescription = "Add exercise"
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
 fun PrintTrainingsFromDay(day: DayTrainingPlan) {
     for (exercise in day.exercises) {
         Log.d("Exercise", exercise.name)

@@ -15,7 +15,12 @@ class ExerciseClass(
     var bestMeasurement: MeasurementClass? = null
 ) : Serializable {
     fun getPhotoResourceId(context: Context): Int {
-        return context.resources.getIdentifier(photoString, "drawable", context.packageName)
+        val resourceId = context.resources.getIdentifier(photoString, "drawable", context.packageName)
+        return if (resourceId != 0) {
+            resourceId
+        } else {
+            context.resources.getIdentifier("information", "drawable", context.packageName)
+        }
     }
 
     fun SetBestMeasurement() {
