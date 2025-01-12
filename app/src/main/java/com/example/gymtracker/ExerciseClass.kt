@@ -4,15 +4,14 @@ package com.example.gymtracker
 import android.content.Context
 import android.util.Log
 import java.io.Serializable
-import java.nio.file.Path
 
 class ExerciseClass(
     val name: String,
     val category: String,
     val descFilePath: String,
     val photoString: String = name.replace(" ", "_").lowercase(),
-    val measurementsList: MutableList<MeasurementClass> = mutableListOf<MeasurementClass>(),
-    var bestMeasurement: MeasurementClass? = null
+    val measurementsList: MutableList<Measurement> = mutableListOf<Measurement>(),
+    var bestMeasurement: Measurement? = null
 ) : Serializable {
     fun getPhotoResourceId(context: Context): Int {
         val resourceId = context.resources.getIdentifier(photoString, "drawable", context.packageName)
@@ -28,10 +27,6 @@ class ExerciseClass(
             bestMeasurement = measurementsList.maxByOrNull { it.weight }
         }
     }
-    fun printList() {
-        for (measurement in measurementsList) {
-            Log.d("Reps: ${measurement.reps}", "Date: ${measurement.date}")
-        }
-    }
+
 
 }

@@ -32,10 +32,24 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.ViewModel
+import androidx.room.Room
+import com.example.gymtracker.roomdb.MeasurementDao
+import com.example.gymtracker.roomdb.MeasurementDatabase
+import com.example.gymtracker.roomdb.MeasurementEvent
+import com.example.gymtracker.roomdb.MeasurementViewModel
 import com.example.gymtracker.ui.theme.GymTrackerTheme
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
+    private val db by lazy {
+        Room.databaseBuilder(
+            applicationContext,
+            MeasurementDatabase::class.java,
+            "measurement_database"
+        ).build()
+    }
+    private val dao by lazy { db.measurementDao() }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         ExerciseManager.initialize(this)
@@ -46,13 +60,18 @@ class MainActivity : ComponentActivity() {
             Scaffold(
                 modifier = Modifier
                     .fillMaxSize()
-                    //.padding(4.dp, 16.dp, 4.dp, 0.dp)
+                //.padding(4.dp, 16.dp, 4.dp, 0.dp)
             ) { innerPadding ->
                 MainView(
-                    modifier = Modifier.padding(innerPadding)
+                    modifier = Modifier.padding(innerPadding),
                 )
             }
         }
+        // Create an InsertMeasurement event
+        //val event = MeasurementEvent.InsertMeasurement(measurement)
+
+        // Call the onEvent method with the event
+        //measurementViewModel.onEvent(event)
     }
 }
 
@@ -80,7 +99,6 @@ fun LoadCategories(exercises: List<ExerciseClass>): List<String> {
     return categories
 }
 
-@Preview(showBackground = true)
 @Composable
 fun MainView(modifier: Modifier = Modifier) {
     //val exerciseList = LoadExercises()
@@ -106,7 +124,7 @@ fun MainView(modifier: Modifier = Modifier) {
             Text(
                 modifier = Modifier.padding(0.dp, 16.dp, 0.dp, 0.dp),
                 text = UserManager.userData.userNick)
-            IconButton(onClick = { /* Handle click */ }) {
+            IconButton(onClick = { }) {
                 Icon(
                     painter = painterResource(R.drawable.icons8_settings_500),
                     contentDescription = "User Icon"

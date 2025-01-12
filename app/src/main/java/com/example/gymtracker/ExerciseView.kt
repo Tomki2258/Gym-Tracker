@@ -3,7 +3,6 @@ package com.example.gymtracker
 
 import android.os.Bundle
 import android.content.Context
-import android.content.res.AssetManager
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -40,43 +39,56 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import com.example.gymtracker.ui.theme.GymTrackerTheme
+import androidx.lifecycle.ViewModelProvider
+import androidx.room.Room
+import com.example.gymtracker.roomdb.MeasurementDatabase
+import com.example.gymtracker.roomdb.MeasurementEvent
+import com.example.gymtracker.roomdb.MeasurementViewModel
 import kotlinx.coroutines.launch
 import java.io.BufferedReader
-import java.io.File
-import java.io.InputStream
-import kotlin.io.path.Path
 
 var exercise = ExerciseClass("Default Name", "Default","no_desc.txt")
 
 class ExerciseView : ComponentActivity() {
+    private lateinit var measurementViewModel: MeasurementViewModel
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+        val db = Room.databaseBuilder(
+            applicationContext,
+            MeasurementDatabase::class.java,
+            "measurement_database"
+        ).build()
+        val dao = db.measurementDao()
+        measurementViewModel = ViewModelProvider(this, MeasurementViewModel.Factory(dao)).get(MeasurementViewModel::class.java)
         setContent {
-            //GymTrackerTheme {
-            //exercise = intent.getSerializableExtra("EXERCISE") as ExerciseClass
             val index = intent.getIntExtra("EXERCISE_INDEX", 0)
             val exerciseClass = ExerciseManager.exercises[index]
-            exercise = exerciseClass // Update the global exercise variable
-            ExerciseIntent(modifier = Modifier.fillMaxSize(), exerciseClass = exerciseClass)
-            //}
+            exercise = exerciseClass
+            ExerciseIntent(modifier = Modifier.fillMaxSize(), exerciseClass = exerciseClass, exerciseView = this)
         }
     }
+
+    fun addMeasurementDatabase(reps: Int, weight: Float, exerciseName: String) {
+        val measurement = Measurement(
+            reps = reps,
+            weight = weight,
+            exerciseName = exerciseName
+        )
+        val event = MeasurementEvent.InsertMeasurement(measurement)
+        measurementViewModel.onEvent(event)
+    }
 }
-
-
-@Preview(showBackground = true)
 @Composable
 fun ExerciseIntent(
     modifier: Modifier = Modifier,
-    exerciseClass: ExerciseClass = ExerciseClass("Default Name", "Default", "no_desc.txt")
+    exerciseClass: ExerciseClass = ExerciseClass("Default Name", "Default", "no_desc.txt"),
+    exerciseView: ExerciseView
 ) {
     val showDialog = remember { mutableStateOf(false) }
     val showDescDialog = remember { mutableStateOf(false) }
@@ -103,8 +115,6 @@ fun ExerciseIntent(
                         , fontWeight = FontWeight.Bold,
                         fontSize = 30.sp
                     )
-                    //Text(text = exerciseClass.name)
-                    //Text(text = exerciseClass.category)
                 }
             }
             Card(
@@ -163,25 +173,32 @@ fun ExerciseIntent(
         }
     }
     if (showDialog.value) {
-        AddMeasurementDialog(onDismissRequest = { showDialog.value = false }, measurementsList)
+        AddMeasurementDialog(onDismissRequest = { showDialog.value = false }, measurementsList, exerciseView)
     }
     if(showDescDialog.value){
         ShowExerciseInfo(onDismissRequest = {showDescDialog.value = false})
     }
 }
 
+
+
 fun AddMesurment(
     context: Context,
     reps: MutableIntState,
     weigh: MutableDoubleState,
-    measurementsList: MutableState<MutableList<MeasurementClass>>
+    measurementsList: MutableState<MutableList<Measurement>>
 ) {
     if (reps.value == 0 || weigh.value == 0.0) {
         ToastManager(context, "Reps or weight cannot be 0")
         return
     }
 
-    val newMeasurement = MeasurementClass(reps.value, weigh.value, exercise.category)
+    val newMeasurement = Measurement(
+        0,
+        reps.value,
+        weigh.value.toFloat(),
+        exercise.name
+    )
     exercise.measurementsList.add(newMeasurement)
     measurementsList.value = exercise.measurementsList.toMutableList()
     exercise.SetBestMeasurement()
@@ -191,7 +208,8 @@ fun AddMesurment(
 @Composable
 fun AddMeasurementDialog(
     onDismissRequest: () -> Unit,
-    measurementsList: MutableState<MutableList<MeasurementClass>>
+    measurementsList: MutableState<MutableList<Measurement>>,
+    exerciseView: ExerciseView
 ) {
     val reps = remember { mutableIntStateOf(0) }
     val weight = remember { mutableDoubleStateOf(0.0) }
@@ -224,6 +242,7 @@ fun AddMeasurementDialog(
                 }
                 Button(onClick = {
                     scope.launch {
+                        exerciseView.addMeasurementDatabase(reps.value, weight.doubleValue.toFloat(), exercise.name)
                         AddMesurment(context, reps, weight, measurementsList)
                         onDismissRequest()
                     }
@@ -242,10 +261,6 @@ fun WeekChart(){
 fun PrintProgress() {
     val progressWeightMap = mutableMapOf<Int, Double>()
 
-    for (measurement in exercise.measurementsList) {
-        val weekOfYear = measurement.getWeekOfYear()
-        progressWeightMap[weekOfYear] = progressWeightMap.getOrDefault(weekOfYear, 0.0) + measurement.weight
-    }
 
     val progressWeightList = progressWeightMap.toList()
 

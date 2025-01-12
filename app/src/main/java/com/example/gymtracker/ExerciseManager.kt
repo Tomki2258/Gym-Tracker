@@ -5,7 +5,6 @@ import android.content.Context
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
-import kotlin.io.path.Path
 
 object ExerciseManager {
     private const val PREFS_NAME = "exercise_prefs"
@@ -28,7 +27,7 @@ object ExerciseManager {
         )
         return exerciseList
     }
-    fun GetExerciseMeasurements(exercise: ExerciseClass): List<MeasurementClass> {
+    fun GetExerciseMeasurements(exercise: ExerciseClass): List<Measurement> {
         val index = exercises.indexOf(exercise)
         return exercises[index].measurementsList
     }
