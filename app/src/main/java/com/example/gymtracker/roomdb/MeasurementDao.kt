@@ -11,4 +11,6 @@ import kotlinx.coroutines.flow.Flow
 interface MeasurementDao {
     @Insert
     suspend fun insertMeasurement(measurement: Measurement)
+    @Query("DELETE FROM Measurement")
+    suspend fun clearAllTables()
 }

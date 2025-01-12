@@ -17,6 +17,11 @@ class MeasurementViewModel(
             }
         }
     }
+    fun clearAllTables() {
+        viewModelScope.launch {
+            dao.clearAllTables()
+        }
+    }
     class Factory(private val dao: MeasurementDao) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(MeasurementViewModel::class.java)) {

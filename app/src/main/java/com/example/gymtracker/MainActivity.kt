@@ -48,6 +48,7 @@ class MainActivity : ComponentActivity() {
             "measurement_database"
         ).build()
     }
+
     private val dao by lazy { db.measurementDao() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -64,6 +65,8 @@ class MainActivity : ComponentActivity() {
             ) { innerPadding ->
                 MainView(
                     modifier = Modifier.padding(innerPadding),
+                    MeasurementViewModel(dao)
+
                 )
             }
         }
@@ -100,7 +103,7 @@ fun LoadCategories(exercises: List<ExerciseClass>): List<String> {
 }
 
 @Composable
-fun MainView(modifier: Modifier = Modifier) {
+fun MainView(modifier: Modifier = Modifier,measurementViewModel: MeasurementViewModel) {
     //val exerciseList = LoadExercises()
     val categories = LoadCategories(ExerciseManager.exercises)
     var currentCategory by remember { mutableStateOf(categories.first()) }
@@ -124,7 +127,9 @@ fun MainView(modifier: Modifier = Modifier) {
             Text(
                 modifier = Modifier.padding(0.dp, 16.dp, 0.dp, 0.dp),
                 text = UserManager.userData.userNick)
-            IconButton(onClick = { }) {
+            IconButton(onClick = {
+                measurementViewModel.clearAllTables()
+            }) {
                 Icon(
                     painter = painterResource(R.drawable.icons8_settings_500),
                     contentDescription = "User Icon"
