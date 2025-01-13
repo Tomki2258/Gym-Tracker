@@ -239,7 +239,7 @@ fun ExerciseCard(exercise: ExerciseClass, index: Int) {
                 Row {
                     Column {
                         Text(text = exercise.name)
-                        Text(text = "Category: ${exercise.category}")
+                        Text(text = "Category: ${exercise.categoryString}")
                         Button(onClick = {
                             LaunchExerciseIntent(index, context)
                         }) {

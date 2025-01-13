@@ -20,7 +20,6 @@ object ExerciseManager {
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         val exercisesJson = prefs.getString(KEY_EXERCISES, "[]")
         exercises = LoadExercises()
-
         // Load measurements from the database
         val db = MeasurementDatabase.getInstance(context)
         loadMeasurementsFromDatabase(db)
@@ -36,9 +35,6 @@ object ExerciseManager {
             }
         }
     }
-    fun SetCategory(category: Categories) : String{
-        return category.toString()
-    }
     fun LoadExercises(): List<ExerciseClass> {
         val exerciseList = listOf(
             ExerciseClass("Chest fly", Categories.CHEST, "leg_press.txt"),
@@ -52,6 +48,7 @@ object ExerciseManager {
             ExerciseClass("Tricep Pushdown", Categories.TRICEPS, "leg_press.txt"),
             ExerciseClass("Seated Row", Categories.BACK, "leg_press.txt"),
             ExerciseClass("Lat Pulldown", Categories.BACK, "leg_press.txt"),
+            ExerciseClass("Cock sucking", Categories.ABS, "leg_press.txt"),
         )
         return exerciseList
     }

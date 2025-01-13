@@ -11,6 +11,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -31,6 +32,7 @@ import androidx.compose.runtime.MutableDoubleState
 import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableDoubleStateOf
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -137,7 +139,7 @@ fun ExerciseIntent(
                         contentDescription = "Exercise Image"
                     )
                     Text(
-                        text = "${exerciseClass.name} - ${exerciseClass.category}",
+                        text = "${exerciseClass.name} - ${exerciseClass.categoryString}",
                         fontWeight = FontWeight.Bold,
                         fontSize = 30.sp
                     )
@@ -150,10 +152,21 @@ fun ExerciseIntent(
                     .height(250.dp)
             ) {
                 if (measurementsList.value.isEmpty()) {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Box(modifier = Modifier.fillMaxSize()
+                        .padding(8.dp), contentAlignment = Alignment.Center) {
                         Text(text = "No measurements yet")
                     }
                 } else {
+                    Row(
+                        modifier = Modifier.padding(8.dp,8.dp,0.dp,0.dp)
+                    ){
+                        Text("Date"
+                            , modifier = Modifier.fillMaxWidth(0.33f))
+                        Text("Reps",
+                            modifier = Modifier.fillMaxWidth(0.33f))
+                        Text("Weight (kg)",
+                            modifier = Modifier.fillMaxWidth(0.33f))
+                    }
                     LazyColumn(
                         modifier = Modifier.padding(8.dp)
                     ) {
@@ -166,8 +179,12 @@ fun ExerciseIntent(
                                     }
                                 )
                             ) {
-                                Text(text = "Reps: ${measurement.reps}")
-                                Text(text = "Weight: ${measurement.weight}")
+                                Text(text = "TODO"
+                                    , modifier = Modifier.fillMaxWidth(0.33f))
+                                Text(text = "${measurement.reps}"
+                                    , modifier = Modifier.fillMaxWidth(0.33f))
+                                Text(text = "${measurement.weight}"
+                                    , modifier = Modifier.fillMaxWidth(0.33f))
                             }
                         }
                     }
@@ -256,7 +273,7 @@ fun AddMeasurementDialog(
     exerciseView: ExerciseView
 ) {
     val reps = remember { mutableIntStateOf(0) }
-    val weight = remember { mutableDoubleStateOf(0.0) }
+    val weight = remember { mutableFloatStateOf(0f) }
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
@@ -279,8 +296,8 @@ fun AddMeasurementDialog(
                         fontSize = 20.sp
                     )
                     TextField(
-                        value = weight.doubleValue.toString(),
-                        onValueChange = { weight.doubleValue = it.toDouble() },
+                        value = weight.value.toString(),
+                        onValueChange = { weight.floatValue= it.toFloat() },
                         label = { Text("Weight") }
                     )
                 }
@@ -288,7 +305,7 @@ fun AddMeasurementDialog(
                     scope.launch {
                         exerciseView.addMeasurementDatabase(
                             reps.value,
-                            weight.doubleValue.toFloat(),
+                            weight.floatValue,
                             exercise.name,
                             measurementsList
                         )
@@ -329,7 +346,7 @@ fun ShowDeleteMeasurement(
     val scope = rememberCoroutineScope()
     Dialog(onDismissRequest = { onDismissRequest() }) {
         Card(
-            modifier = Modifier.size(300.dp)
+            modifier = Modifier.width(300.dp).height(180.dp)
         ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally

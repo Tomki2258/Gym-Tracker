@@ -13,6 +13,11 @@ class ExerciseClass(
     var measurementsList: MutableList<Measurement> = mutableListOf<Measurement>(),
     var bestMeasurement: Measurement? = null
 ) : Serializable {
+    var categoryString = ""
+    init {
+        categoryString = category.toString().lowercase()
+        categoryString = categoryString.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+    }
     fun getPhotoResourceId(context: Context): Int {
         val resourceId = context.resources.getIdentifier(photoString, "drawable", context.packageName)
         return if (resourceId != 0) {
