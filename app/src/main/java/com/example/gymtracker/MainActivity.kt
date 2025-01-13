@@ -100,7 +100,7 @@ fun LoadCategories(exercises: List<ExerciseClass>): List<String> {
     val categories = mutableListOf<String>()
     categories.add("All")
     for (exercise in exercises) {
-        if (!categories.contains(exercise.category)) {
+        if (!categories.contains(exercise.category.toString())) {
             categories.add(exercise.category.toString())
         }
     }
@@ -211,7 +211,7 @@ fun ExerciseList(exercises: List<ExerciseClass>, currentCategory: String) {
             modifier = Modifier.fillMaxSize(),
         ) {
             items(exercises) { exercise ->
-                if (currentCategory == "All" || exercise.category == currentCategory) {
+                if (currentCategory == "All" || exercise.category.toString() == currentCategory) {
                     ExerciseCard(exercise, exercises.indexOf(exercise))
                 }
             }

@@ -36,21 +36,22 @@ object ExerciseManager {
             }
         }
     }
-
+    fun SetCategory(category: Categories) : String{
+        return category.toString()
+    }
     fun LoadExercises(): List<ExerciseClass> {
-
         val exerciseList = listOf(
-            ExerciseClass("Chest fly", "Chest", "leg_press.txt"),
-            ExerciseClass("Leg curl", "Legs", "leg_press.txt"),
-            ExerciseClass("Leg press", "Legs","leg_press.txt"),
-            ExerciseClass("Dumbbell biceps", "Arms","bench_press.txt"),
-            ExerciseClass("Bench press", "Chest", "bench_press.txt"),
-            ExerciseClass("Seated barbell press", "Shoulders", "leg_press.txt"),
-            ExerciseClass("Dumbbell press", "Arms", "leg_press.txt"),
-            ExerciseClass("Barbell Curl", "Arms", "leg_press.txt"),
-            ExerciseClass("Tricep Pushdown", "Arms", "leg_press.txt"),
-            ExerciseClass("Seated Row", "Arms", "leg_press.txt"),
-            ExerciseClass("Lat Pulldown", "Arms", "leg_press.txt"),
+            ExerciseClass("Chest fly", Categories.CHEST, "leg_press.txt"),
+            ExerciseClass("Leg curl", Categories.LEGS, "leg_press.txt"),
+            ExerciseClass("Leg press", Categories.LEGS,"leg_press.txt"),
+            ExerciseClass("Dumbbell biceps", Categories.BICEPS,"bench_press.txt"),
+            ExerciseClass("Bench press", Categories.CHEST, "bench_press.txt"),
+            ExerciseClass("Seated barbell press", Categories.SHOULDERS, "leg_press.txt"),
+            ExerciseClass("Dumbbell press", Categories.CHEST, "leg_press.txt"),
+            ExerciseClass("Barbell Curl", Categories.BACK, "leg_press.txt"),
+            ExerciseClass("Tricep Pushdown", Categories.TRICEPS, "leg_press.txt"),
+            ExerciseClass("Seated Row", Categories.BACK, "leg_press.txt"),
+            ExerciseClass("Lat Pulldown", Categories.BACK, "leg_press.txt"),
         )
         return exerciseList
     }

@@ -204,7 +204,7 @@ fun ExericeCard(exercise: ExerciseClass) {
             )
             Column {
                 Text(text = exercise.name)
-                Text(text = exercise.category)
+                Text(text = exercise.category.toString())
             }
         }
     }

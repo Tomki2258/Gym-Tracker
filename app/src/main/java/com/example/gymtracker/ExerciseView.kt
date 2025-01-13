@@ -51,7 +51,7 @@ import com.example.gymtracker.roomdb.MeasurementViewModel
 import kotlinx.coroutines.launch
 import java.io.BufferedReader
 
-var exercise = ExerciseClass("Default Name", "Default", "no_desc.txt")
+var exercise = ExerciseClass("Default Name", Categories.CALVES, "no_desc.txt")
 
 class ExerciseView : ComponentActivity() {
     private lateinit var measurementViewModel: MeasurementViewModel
@@ -107,7 +107,7 @@ class ExerciseView : ComponentActivity() {
 
 @Composable
 fun ExerciseIntent(
-    exerciseClass: ExerciseClass = ExerciseClass("Default Name", "Default", "no_desc.txt"),
+    exerciseClass: ExerciseClass = ExerciseClass("Default Name", Categories.CALVES, "no_desc.txt"),
     exerciseView: ExerciseView
 ) {
     val showDialog = remember { mutableStateOf(false) }
