@@ -1,13 +1,13 @@
 // ExerciseView.kt
 package com.example.gymtracker
 
-import android.os.Bundle
 import android.content.Context
+import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -40,7 +40,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -52,7 +51,7 @@ import com.example.gymtracker.roomdb.MeasurementViewModel
 import kotlinx.coroutines.launch
 import java.io.BufferedReader
 
-var exercise = ExerciseClass("Default Name", "Default","no_desc.txt")
+var exercise = ExerciseClass("Default Name", "Default", "no_desc.txt")
 
 class ExerciseView : ComponentActivity() {
     private lateinit var measurementViewModel: MeasurementViewModel
@@ -65,54 +64,81 @@ class ExerciseView : ComponentActivity() {
             "measurement_database"
         ).build()
         val dao = db.measurementDao()
-        measurementViewModel = ViewModelProvider(this, MeasurementViewModel.Factory(dao)).get(MeasurementViewModel::class.java)
+
+        measurementViewModel = ViewModelProvider(
+            this,
+            MeasurementViewModel.Factory(dao)
+        ).get(MeasurementViewModel::class.java)
         setContent {
             val index = intent.getIntExtra("EXERCISE_INDEX", 0)
             val exerciseClass = ExerciseManager.exercises[index]
             exercise = exerciseClass
-            ExerciseIntent(modifier = Modifier.fillMaxSize(), exerciseClass = exerciseClass, exerciseView = this)
+            ExerciseIntent(
+                exerciseClass = exerciseClass,
+                exerciseView = this
+            )
         }
     }
 
-    fun addMeasurementDatabase(reps: Int, weight: Float, exerciseName: String) {
+    fun addMeasurementDatabase(reps: Int, weight: Float, exerciseName: String, measurementsList: MutableState<MutableList<Measurement>>) {
         val measurement = Measurement(
             reps = reps,
             weight = weight,
             exerciseName = exerciseName
         )
+        if (reps == 0 || weight.toDouble() == 0.0) {
+            //ToastManager(context, "Reps or weight cannot be 0")
+            return
+        }
+        exercise.measurementsList.add(measurement)
+        exercise.SetBestMeasurement()
         val event = MeasurementEvent.InsertMeasurement(measurement)
         measurementViewModel.onEvent(event)
+        measurementsList.value = exercise.measurementsList.toMutableList()
+    }
+
+    fun deleteMeasurementDatabase(measurement: Measurement, measurementsList: MutableState<MutableList<Measurement>>) {
+        val event = MeasurementEvent.DeleteMeasurement(measurement)
+        measurementViewModel.onEvent(event)
+        exercise.measurementsList.remove(measurement)
+        measurementsList.value = exercise.measurementsList.toMutableList()
     }
 }
+
 @Composable
 fun ExerciseIntent(
-    modifier: Modifier = Modifier,
     exerciseClass: ExerciseClass = ExerciseClass("Default Name", "Default", "no_desc.txt"),
     exerciseView: ExerciseView
 ) {
     val showDialog = remember { mutableStateOf(false) }
     val showDescDialog = remember { mutableStateOf(false) }
+    val showDeleteDialog = remember { mutableStateOf(false) }
+    val clickedMeasurement = remember { mutableStateOf(Measurement(0, 0, 0.0f, "")) }
     val measurementsList = remember { mutableStateOf(exercise.measurementsList.toMutableList()) }
-    Box(modifier = Modifier.fillMaxSize()
-        .padding(0.dp,12.dp,0.dp,0.dp)) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(0.dp, 12.dp, 0.dp, 0.dp)
+    ) {
         Column {
             Card(
                 modifier = Modifier
                     .padding(8.dp)
                     .fillMaxWidth()
             ) {
-                Column (
-                    modifier = Modifier.fillMaxWidth()
-                        .padding(8.dp)
-                    ,
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
-                ){
+                ) {
                     Image(
                         painter = painterResource(id = exerciseClass.getPhotoResourceId(LocalContext.current)),
                         contentDescription = "Exercise Image"
                     )
-                    Text(text = "${exerciseClass.name} - ${exerciseClass.category}"
-                        , fontWeight = FontWeight.Bold,
+                    Text(
+                        text = "${exerciseClass.name} - ${exerciseClass.category}",
+                        fontWeight = FontWeight.Bold,
                         fontSize = 30.sp
                     )
                 }
@@ -128,11 +154,18 @@ fun ExerciseIntent(
                         Text(text = "No measurements yet")
                     }
                 } else {
-                    LazyColumn (
+                    LazyColumn(
                         modifier = Modifier.padding(8.dp)
-                    ){
+                    ) {
                         items(measurementsList.value) { measurement ->
-                            Row {
+                            Row(
+                                modifier = Modifier.clickable(
+                                    onClick = {
+                                        showDeleteDialog.value = true
+                                        clickedMeasurement.value = measurement
+                                    }
+                                )
+                            ) {
                                 Text(text = "Reps: ${measurement.reps}")
                                 Text(text = "Weight: ${measurement.weight}")
                             }
@@ -141,8 +174,8 @@ fun ExerciseIntent(
                 }
             }
             Text(text = "Progress")
-            Card(){
-                PrintProgress()
+            Card {
+                //PrintProgress()
             }
         }
         FloatingActionButton(
@@ -173,13 +206,24 @@ fun ExerciseIntent(
         }
     }
     if (showDialog.value) {
-        AddMeasurementDialog(onDismissRequest = { showDialog.value = false }, measurementsList, exerciseView)
+        AddMeasurementDialog(
+            onDismissRequest = { showDialog.value = false },
+            measurementsList,
+            exerciseView
+        )
     }
-    if(showDescDialog.value){
-        ShowExerciseInfo(onDismissRequest = {showDescDialog.value = false})
+    if (showDescDialog.value) {
+        ShowExerciseInfo(onDismissRequest = { showDescDialog.value = false })
+    }
+    if (showDeleteDialog.value) {
+        ShowDeleteMeasurement(
+            clickedMeasurement.value,
+            onDismissRequest = { showDeleteDialog.value = false },
+            exerciseView,
+            measurementsList
+        )
     }
 }
-
 
 
 fun AddMesurment(
@@ -242,8 +286,12 @@ fun AddMeasurementDialog(
                 }
                 Button(onClick = {
                     scope.launch {
-                        exerciseView.addMeasurementDatabase(reps.value, weight.doubleValue.toFloat(), exercise.name)
-                        AddMesurment(context, reps, weight, measurementsList)
+                        exerciseView.addMeasurementDatabase(
+                            reps.value,
+                            weight.doubleValue.toFloat(),
+                            exercise.name,
+                            measurementsList
+                        )
                         onDismissRequest()
                     }
                 }) {
@@ -253,34 +301,58 @@ fun AddMeasurementDialog(
         }
     }
 }
-@Composable
-fun WeekChart(){
-
-}
-@Composable
-fun PrintProgress() {
-    val progressWeightMap = mutableMapOf<Int, Double>()
 
 
-    val progressWeightList = progressWeightMap.toList()
-
-    for (pair in progressWeightList) {
-        //println("Week: ${pair.first}, Total Weight: ${pair.second}")
-    }
-    //Log.d("Progress", exercise.bestMeasurement?.weight.toString())
-}
 @Composable
 fun ShowExerciseInfo(onDismissRequest: () -> Unit) {
-    val exerciseDesc = LocalContext.current.assets.open(exercise.descFilePath).bufferedReader().use(BufferedReader::readText)
+    val exerciseDesc = LocalContext.current.assets.open(exercise.descFilePath).bufferedReader()
+        .use(BufferedReader::readText)
     Log.d("Exercise Desc", exercise.descFilePath)
     Dialog(onDismissRequest = { onDismissRequest() }) {
-        Card (
+        Card(
             modifier = Modifier.size(300.dp)
-        ){
+        ) {
             Text(
                 modifier = Modifier.padding(16.dp),
                 text = exerciseDesc
             )
+        }
+    }
+}
+@Composable
+fun ShowDeleteMeasurement(
+    measurement: Measurement,
+    onDismissRequest: () -> Unit,
+    exerciseView: ExerciseView,
+    measurementsList: MutableState<MutableList<Measurement>>
+) {
+    val scope = rememberCoroutineScope()
+    Dialog(onDismissRequest = { onDismissRequest() }) {
+        Card(
+            modifier = Modifier.size(300.dp)
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    modifier = Modifier.padding(16.dp),
+                    text = "Are you sure you want to delete this measurement?"
+                )
+                Text(
+                    modifier = Modifier.padding(16.dp),
+                    text = "Reps: ${measurement.reps} x Weight: ${measurement.weight}"
+                )
+                Button(
+                    onClick = {
+                        scope.launch {
+                            exerciseView.deleteMeasurementDatabase(measurement, measurementsList)
+                        }
+                        onDismissRequest()
+                    }
+                ) {
+                    Text(text = "Delete")
+                }
+            }
         }
     }
 }

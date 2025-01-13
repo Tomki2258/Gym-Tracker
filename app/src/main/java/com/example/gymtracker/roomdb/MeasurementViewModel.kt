@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 
 class MeasurementViewModel(
-    private val dao: MeasurementDao
+    val dao: MeasurementDao
 ) : ViewModel(){
     fun onEvent(event: MeasurementEvent){
         when(event){
@@ -15,11 +15,26 @@ class MeasurementViewModel(
                     dao.insertMeasurement(event.measurement)
                 }
             }
+
+            is MeasurementEvent.DeleteMeasurement -> {
+                viewModelScope.launch {
+                    dao.deleteMeasurement(event.measurement)
+                }
+            }
         }
     }
     fun clearAllTables() {
         viewModelScope.launch {
             dao.clearAllTables()
+        }
+    }
+    fun getMeasurementsByExercise(exerciseName: String) {
+        viewModelScope.launch {
+            dao.getMeasurementsByExercise(exerciseName).collect { measurements ->
+                measurements.forEach {
+                    println("Measurement: ${it.reps} reps, ${it.weight} kg")
+                }
+            }
         }
     }
     class Factory(private val dao: MeasurementDao) : ViewModelProvider.Factory {

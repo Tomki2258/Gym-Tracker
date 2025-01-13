@@ -10,7 +10,7 @@ class ExerciseClass(
     val category: String,
     val descFilePath: String,
     val photoString: String = name.replace(" ", "_").lowercase(),
-    val measurementsList: MutableList<Measurement> = mutableListOf<Measurement>(),
+    var measurementsList: MutableList<Measurement> = mutableListOf<Measurement>(),
     var bestMeasurement: Measurement? = null
 ) : Serializable {
     fun getPhotoResourceId(context: Context): Int {
