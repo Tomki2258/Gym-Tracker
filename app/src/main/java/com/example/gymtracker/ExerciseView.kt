@@ -38,6 +38,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -249,65 +250,90 @@ fun ExerciseIntent(
                     }
                 }
             }
-
-            Card (
+            val weekSize = 1.5f
+            val yearSize = 0.5f
+            val avgWeightSize = 1f
+            val weightDiffSize = 1f
+            Card(
                 modifier = Modifier
                     .padding(8.dp)
                     .fillMaxWidth()
                     .height(200.dp)
-            ){
+            ) {
                 LazyColumn {
-                    stickyHeader {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(8.dp)
-                                .background(MaterialTheme.colorScheme.surface)
-                        ) {
-                            Text(
-                                text = "Week",
-                                modifier = Modifier.weight(1.5f),
-                                fontWeight = FontWeight.Bold
-                            )
-                            Text(
-                                text = "Year",
-                                modifier = Modifier.weight(1f),
-                                fontWeight = FontWeight.Bold
-                            )
-                            Text(
-                                text = "AVG Weight",
-                                modifier = Modifier.weight(1f),
-                                fontWeight = FontWeight.Bold
-                            )
-                            Text(
-                                text = "Weight Diff",
-                                modifier = Modifier.weight(1f),
-                                fontWeight = FontWeight.Bold
-                            )
+                    if (weeklyProgressList.isEmpty()) {
+                        item {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(8.dp), contentAlignment = Alignment.Center
+                            ) {
+                                Text(text = ":(")
+                            }
                         }
-                    }
-                    items(weeklyProgressList) { weeklyProgress ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(8.dp)
-                        ) {
-                            Text(
-                                text = "${weeklyProgress.weekNumber} (${weeklyProgress.weekRange})",
-                                modifier = Modifier.weight(1.5f)
-                            )
-                            Text(
-                                text = "${weeklyProgress.year}",
-                                modifier = Modifier.weight(1f)
-                            )
-                            Text(
-                                text = "${roundTheNumber(weeklyProgress.avgWeight)}",
-                                modifier = Modifier.weight(1f)
-                            )
-                            Text(
-                                text = "${roundTheNumber(weeklyProgress.avgWeightDifference)}",
-                                modifier = Modifier.weight(1f)
-                            )
+                    } else {
+                        stickyHeader {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp)
+                                    .background(MaterialTheme.colorScheme.surface)
+                            ) {
+                                Text(
+                                    text = "Week",
+                                    modifier = Modifier.weight(weekSize),
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Text(
+                                    text = "Year",
+                                    modifier = Modifier.weight(yearSize),
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Text(
+                                    text = "AVG Weight",
+                                    modifier = Modifier.weight(avgWeightSize),
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Text(
+                                    text = "Weight Diff",
+                                    modifier = Modifier.weight(weightDiffSize),
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+                        items(weeklyProgressList) { weeklyProgress ->
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp)
+                            ) {
+                                Text(
+                                    text = "${weeklyProgress.weekNumber} (${weeklyProgress.weekRange})",
+                                    modifier = Modifier.weight(weekSize)
+                                )
+                                Text(
+                                    text = "${weeklyProgress.year}",
+                                    modifier = Modifier.weight(yearSize)
+                                )
+                                Text(
+                                    text = "${roundTheNumber(weeklyProgress.avgWeight)}",
+                                    modifier = Modifier.weight(avgWeightSize)
+                                )
+                                val avgDifference = weeklyProgress.avgWeightDifference
+                                Row(
+                                    modifier = Modifier.weight(weightDiffSize)
+                                ) {
+                                    Icon(
+                                        painter = painterResource(id = if (avgDifference >= 0) R.drawable.up else R.drawable.down),
+                                        contentDescription = "Weight Difference",
+                                        modifier = Modifier.size(22.dp),
+                                        tint = if (avgDifference >= 0) Color.Green else Color.Red
+                                    )
+                                    Text(
+                                        text = " ${roundTheNumber(avgDifference)}",
+                                    )
+                                }
+                            }
                         }
                     }
                 }
@@ -359,10 +385,12 @@ fun ExerciseIntent(
         )
     }
 }
+
 fun roundTheNumber(numInDouble: Float): String {
     return "%.1f".format(numInDouble)
 
 }
+
 @Composable
 fun AddMeasurementDialog(
     onDismissRequest: () -> Unit,
