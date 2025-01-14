@@ -1,5 +1,7 @@
-import android.util.Log
 import com.example.gymtracker.Measurement
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
 
 class WeeklyProgress(
     val measurements: List<Measurement>,
@@ -10,10 +12,10 @@ class WeeklyProgress(
     val avgWeight: Float = setAvgWeight()
     val avgWeightDifference: Float = calculateAvgWeightDifference()
     val firstDate: Long = measurements[0].date.time
+    val weekRange: String = calculateWeekRange()
 
     init {
         this.year = measurements[0].date.year + 1900
-        Log.d("Week number: $weekNumber", measurements.size.toString())
     }
 
     private fun setAvgWeight(): Float {
@@ -28,9 +30,20 @@ class WeeklyProgress(
 
     private fun calculateAvgWeightDifference(): Float {
         return if (lastWeek != null) {
-            this.avgWeight - lastWeek.avgWeight
+            -(lastWeek.avgWeight - this.avgWeight)
         } else {
             0.0f
         }
+    }
+
+    private fun calculateWeekRange(): String {
+        val calendar = Calendar.getInstance()
+        calendar.time = measurements[0].date
+        calendar.set(Calendar.DAY_OF_WEEK, calendar.firstDayOfWeek + 1)
+        val startDate = calendar.time
+        calendar.add(Calendar.DAY_OF_WEEK, 6)
+        val endDate = calendar.time
+        val sdf = SimpleDateFormat("dd MMM", Locale.getDefault())
+        return "${sdf.format(startDate)} - ${sdf.format(endDate)}"
     }
 }

@@ -6,7 +6,9 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,6 +26,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -117,6 +120,7 @@ fun formatStringDate(date: Long): String {
     val sdf = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
     return sdf.format(Date(date))
 }
+
 fun createWeeklyProgressList(measurements: List<Measurement>): MutableList<WeeklyProgress> {
     val weeklyProgressMap = measurements.groupBy { it.weekOfTheYear }
     val weeklyProgressList = mutableListOf<WeeklyProgress>()
@@ -130,6 +134,8 @@ fun createWeeklyProgressList(measurements: List<Measurement>): MutableList<Weekl
 
     return weeklyProgressList
 }
+
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ExerciseIntent(
     exerciseClass: ExerciseClass = ExerciseClass("Default Name", Categories.CALVES, "no_desc.txt"),
@@ -140,9 +146,9 @@ fun ExerciseIntent(
     val showDeleteDialog = remember { mutableStateOf(false) }
     val clickedMeasurement = remember { mutableStateOf(Measurement(0, 0, 0.0f, "")) }
     val measurementsList = remember { mutableStateOf(exercise.measurementsList.toMutableList()) }
-    var weeklyProgressList  = createWeeklyProgressList(measurementsList.value)
+    var weeklyProgressList = createWeeklyProgressList(measurementsList.value)
     measurementsList.value.sortByDescending { it.date }
-    weeklyProgressList.sortByDescending {  it.firstDate }
+    weeklyProgressList.sortByDescending { it.firstDate }
 
     Box(
         modifier = Modifier
@@ -187,62 +193,121 @@ fun ExerciseIntent(
                         Text(text = "No measurements yet")
                     }
                 } else {
-                    Row(
-                        modifier = Modifier.padding(8.dp, 8.dp, 0.dp, 0.dp)
-                    ) {
-                        Text(
-                            "Date", modifier = Modifier.fillMaxWidth(0.33f)
-                        )
-                        Text(
-                            "Reps",
-                            modifier = Modifier.fillMaxWidth(0.33f)
-                        )
-                        Text(
-                            "Weight (kg)",
-                            modifier = Modifier.fillMaxWidth(0.33f)
-                        )
-                    }
                     LazyColumn(
                         modifier = Modifier.padding(8.dp)
                     ) {
-                        items(measurementsList.value) { measurement ->
+                        stickyHeader {
                             Row(
-                                modifier = Modifier.clickable(
-                                    onClick = {
-                                        showDeleteDialog.value = true
-                                        clickedMeasurement.value = measurement
-                                    }
-                                )
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp)
+                                    .background(MaterialTheme.colorScheme.surface)
                             ) {
                                 Text(
-                                    text = "${
-                                        formatStringDate(
-                                            measurement.date.time
-                                        )
-                                    }", modifier = Modifier.fillMaxWidth(0.33f)
+                                    text = "Date",
+                                    modifier = Modifier.weight(1f),
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Text(
+                                    text = "Reps",
+                                    modifier = Modifier.weight(1f),
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Text(
+                                    text = "Weight (kg)",
+                                    modifier = Modifier.weight(1f),
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+                        items(measurementsList.value) { measurement ->
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable(
+                                        onClick = {
+                                            showDeleteDialog.value = true
+                                            clickedMeasurement.value = measurement
+                                        }
+                                    )
+                                    .padding(8.dp)
+                            ) {
+                                Text(
+                                    text = formatStringDate(measurement.date.time),
+                                    modifier = Modifier.weight(1f)
                                 )
                                 Text(
                                     text = "${measurement.reps}",
-                                    modifier = Modifier.fillMaxWidth(0.33f)
+                                    modifier = Modifier.weight(1f)
                                 )
                                 Text(
                                     text = "${measurement.weight}",
-                                    modifier = Modifier.fillMaxWidth(0.33f)
+                                    modifier = Modifier.weight(1f)
                                 )
                             }
                         }
                     }
                 }
             }
-            Text(text = "Progress")
-            Card {
+
+            Card (
+                modifier = Modifier
+                    .padding(8.dp)
+                    .fillMaxWidth()
+                    .height(200.dp)
+            ){
                 LazyColumn {
+                    stickyHeader {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(8.dp)
+                                .background(MaterialTheme.colorScheme.surface)
+                        ) {
+                            Text(
+                                text = "Week",
+                                modifier = Modifier.weight(1.5f),
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                text = "Year",
+                                modifier = Modifier.weight(1f),
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                text = "AVG Weight",
+                                modifier = Modifier.weight(1f),
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                text = "Weight Diff",
+                                modifier = Modifier.weight(1f),
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
                     items(weeklyProgressList) { weeklyProgress ->
-                        Row(){
-                            Text(text = "Week ${weeklyProgress.weekNumber}")
-                            Text(text = "Year ${weeklyProgress.year}")
-                            Text(text = "Year ${weeklyProgress.avgWeight}")
-                            Text(text = "Year ${weeklyProgress.avgWeightDifference}")
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(8.dp)
+                        ) {
+                            Text(
+                                text = "${weeklyProgress.weekNumber} (${weeklyProgress.weekRange})",
+                                modifier = Modifier.weight(1.5f)
+                            )
+                            Text(
+                                text = "${weeklyProgress.year}",
+                                modifier = Modifier.weight(1f)
+                            )
+                            Text(
+                                text = "${roundTheNumber(weeklyProgress.avgWeight)}",
+                                modifier = Modifier.weight(1f)
+                            )
+                            Text(
+                                text = "${roundTheNumber(weeklyProgress.avgWeightDifference)}",
+                                modifier = Modifier.weight(1f)
+                            )
                         }
                     }
                 }
@@ -294,7 +359,10 @@ fun ExerciseIntent(
         )
     }
 }
+fun roundTheNumber(numInDouble: Float): String {
+    return "%.1f".format(numInDouble)
 
+}
 @Composable
 fun AddMeasurementDialog(
     onDismissRequest: () -> Unit,
