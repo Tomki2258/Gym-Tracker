@@ -1,6 +1,7 @@
 // ExerciseView.kt
 package com.example.gymtracker
 
+import WeeklyProgress
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -119,9 +120,12 @@ fun formatStringDate(date: Long): String {
 fun createWeeklyProgressList(measurements: List<Measurement>): MutableList<WeeklyProgress> {
     val weeklyProgressMap = measurements.groupBy { it.weekOfTheYear }
     val weeklyProgressList = mutableListOf<WeeklyProgress>()
+    var lastWeek: WeeklyProgress? = null
 
     for ((weekNumber, weekMeasurements) in weeklyProgressMap) {
-        weeklyProgressList.add(WeeklyProgress(weekMeasurements, weekNumber))
+        val weeklyProgress = WeeklyProgress(weekMeasurements, weekNumber, lastWeek)
+        weeklyProgressList.add(weeklyProgress)
+        lastWeek = weeklyProgress
     }
 
     return weeklyProgressList
@@ -137,6 +141,8 @@ fun ExerciseIntent(
     val clickedMeasurement = remember { mutableStateOf(Measurement(0, 0, 0.0f, "")) }
     val measurementsList = remember { mutableStateOf(exercise.measurementsList.toMutableList()) }
     var weeklyProgressList  = createWeeklyProgressList(measurementsList.value)
+    measurementsList.value.sortByDescending { it.date }
+    weeklyProgressList.sortByDescending {  it.firstDate }
 
     Box(
         modifier = Modifier
@@ -236,6 +242,7 @@ fun ExerciseIntent(
                             Text(text = "Week ${weeklyProgress.weekNumber}")
                             Text(text = "Year ${weeklyProgress.year}")
                             Text(text = "Year ${weeklyProgress.avgWeight}")
+                            Text(text = "Year ${weeklyProgress.avgWeightDifference}")
                         }
                     }
                 }

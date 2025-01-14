@@ -22,6 +22,6 @@ interface MeasurementDao {
     @Query("SELECT * FROM Measurement")
     fun getAllMeasurements(): Flow<List<Measurement>>
 
-    @Query ("SELECT * FROM Measurement WHERE exerciseName = :exerciseName")
+    @Query ("SELECT * FROM Measurement WHERE exerciseName = :exerciseName ORDER BY date DESC")
     fun getMeasurementsByExercise(exerciseName: String): Flow<List<Measurement>>
 }
