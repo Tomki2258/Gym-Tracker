@@ -1,11 +1,10 @@
 package com.example.gymtracker
 
+import android.util.Log
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import java.sql.Date
 import java.time.Instant
-import java.time.ZoneId
-import java.time.temporal.WeekFields
-import java.util.Locale
 
 @Entity
 data class Measurement(
@@ -13,6 +12,13 @@ data class Measurement(
     val id: Int = 0,
     val reps:Int,
     val weight: Float,
-    val exerciseName: String
+    val exerciseName: String,
+    val date: java.util.Date = Date.from(Instant.now())
 ) {
+    val weekOfTheYear: Int
+        get() {
+            val calendar = java.util.Calendar.getInstance()
+            calendar.time = date
+            return calendar.get(java.util.Calendar.WEEK_OF_YEAR)
+        }
 }

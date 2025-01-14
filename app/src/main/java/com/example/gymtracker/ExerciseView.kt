@@ -1,7 +1,6 @@
 // ExerciseView.kt
 package com.example.gymtracker
 
-import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -11,7 +10,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -28,10 +26,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableDoubleState
-import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -52,12 +47,14 @@ import com.example.gymtracker.roomdb.MeasurementEvent
 import com.example.gymtracker.roomdb.MeasurementViewModel
 import kotlinx.coroutines.launch
 import java.io.BufferedReader
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 var exercise = ExerciseClass("Default Name", Categories.CALVES, "no_desc.txt")
 
 class ExerciseView : ComponentActivity() {
     private lateinit var measurementViewModel: MeasurementViewModel
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val db = Room.databaseBuilder(
@@ -82,14 +79,19 @@ class ExerciseView : ComponentActivity() {
         }
     }
 
-    fun addMeasurementDatabase(reps: Int, weight: Float, exerciseName: String, measurementsList: MutableState<MutableList<Measurement>>) {
+    fun addMeasurementDatabase(
+        reps: Int,
+        weight: Float,
+        exerciseName: String,
+        measurementsList: MutableState<MutableList<Measurement>>
+    ) {
         val measurement = Measurement(
             reps = reps,
             weight = weight,
             exerciseName = exerciseName
         )
         if (reps == 0 || weight.toDouble() == 0.0) {
-            //ToastManager(context, "Reps or weight cannot be 0")
+            ToastManager(this, "Reps or weight cannot be 0")
             return
         }
         exercise.measurementsList.add(measurement)
@@ -99,7 +101,10 @@ class ExerciseView : ComponentActivity() {
         measurementsList.value = exercise.measurementsList.toMutableList()
     }
 
-    fun deleteMeasurementDatabase(measurement: Measurement, measurementsList: MutableState<MutableList<Measurement>>) {
+    fun deleteMeasurementDatabase(
+        measurement: Measurement,
+        measurementsList: MutableState<MutableList<Measurement>>
+    ) {
         val event = MeasurementEvent.DeleteMeasurement(measurement)
         measurementViewModel.onEvent(event)
         exercise.measurementsList.remove(measurement)
@@ -107,6 +112,20 @@ class ExerciseView : ComponentActivity() {
     }
 }
 
+fun formatStringDate(date: Long): String {
+    val sdf = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
+    return sdf.format(Date(date))
+}
+fun createWeeklyProgressList(measurements: List<Measurement>): MutableList<WeeklyProgress> {
+    val weeklyProgressMap = measurements.groupBy { it.weekOfTheYear }
+    val weeklyProgressList = mutableListOf<WeeklyProgress>()
+
+    for ((weekNumber, weekMeasurements) in weeklyProgressMap) {
+        weeklyProgressList.add(WeeklyProgress(weekMeasurements, weekNumber))
+    }
+
+    return weeklyProgressList
+}
 @Composable
 fun ExerciseIntent(
     exerciseClass: ExerciseClass = ExerciseClass("Default Name", Categories.CALVES, "no_desc.txt"),
@@ -117,6 +136,8 @@ fun ExerciseIntent(
     val showDeleteDialog = remember { mutableStateOf(false) }
     val clickedMeasurement = remember { mutableStateOf(Measurement(0, 0, 0.0f, "")) }
     val measurementsList = remember { mutableStateOf(exercise.measurementsList.toMutableList()) }
+    var weeklyProgressList  = createWeeklyProgressList(measurementsList.value)
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -152,20 +173,28 @@ fun ExerciseIntent(
                     .height(250.dp)
             ) {
                 if (measurementsList.value.isEmpty()) {
-                    Box(modifier = Modifier.fillMaxSize()
-                        .padding(8.dp), contentAlignment = Alignment.Center) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(8.dp), contentAlignment = Alignment.Center
+                    ) {
                         Text(text = "No measurements yet")
                     }
                 } else {
                     Row(
-                        modifier = Modifier.padding(8.dp,8.dp,0.dp,0.dp)
-                    ){
-                        Text("Date"
-                            , modifier = Modifier.fillMaxWidth(0.33f))
-                        Text("Reps",
-                            modifier = Modifier.fillMaxWidth(0.33f))
-                        Text("Weight (kg)",
-                            modifier = Modifier.fillMaxWidth(0.33f))
+                        modifier = Modifier.padding(8.dp, 8.dp, 0.dp, 0.dp)
+                    ) {
+                        Text(
+                            "Date", modifier = Modifier.fillMaxWidth(0.33f)
+                        )
+                        Text(
+                            "Reps",
+                            modifier = Modifier.fillMaxWidth(0.33f)
+                        )
+                        Text(
+                            "Weight (kg)",
+                            modifier = Modifier.fillMaxWidth(0.33f)
+                        )
                     }
                     LazyColumn(
                         modifier = Modifier.padding(8.dp)
@@ -179,12 +208,21 @@ fun ExerciseIntent(
                                     }
                                 )
                             ) {
-                                Text(text = "TODO"
-                                    , modifier = Modifier.fillMaxWidth(0.33f))
-                                Text(text = "${measurement.reps}"
-                                    , modifier = Modifier.fillMaxWidth(0.33f))
-                                Text(text = "${measurement.weight}"
-                                    , modifier = Modifier.fillMaxWidth(0.33f))
+                                Text(
+                                    text = "${
+                                        formatStringDate(
+                                            measurement.date.time
+                                        )
+                                    }", modifier = Modifier.fillMaxWidth(0.33f)
+                                )
+                                Text(
+                                    text = "${measurement.reps}",
+                                    modifier = Modifier.fillMaxWidth(0.33f)
+                                )
+                                Text(
+                                    text = "${measurement.weight}",
+                                    modifier = Modifier.fillMaxWidth(0.33f)
+                                )
                             }
                         }
                     }
@@ -192,7 +230,15 @@ fun ExerciseIntent(
             }
             Text(text = "Progress")
             Card {
-                //PrintProgress()
+                LazyColumn {
+                    items(weeklyProgressList) { weeklyProgress ->
+                        Row(){
+                            Text(text = "Week ${weeklyProgress.weekNumber}")
+                            Text(text = "Year ${weeklyProgress.year}")
+                            Text(text = "Year ${weeklyProgress.avgWeight}")
+                        }
+                    }
+                }
             }
         }
         FloatingActionButton(
@@ -242,30 +288,6 @@ fun ExerciseIntent(
     }
 }
 
-
-fun AddMesurment(
-    context: Context,
-    reps: MutableIntState,
-    weigh: MutableDoubleState,
-    measurementsList: MutableState<MutableList<Measurement>>
-) {
-    if (reps.value == 0 || weigh.value == 0.0) {
-        ToastManager(context, "Reps or weight cannot be 0")
-        return
-    }
-
-    val newMeasurement = Measurement(
-        0,
-        reps.value,
-        weigh.value.toFloat(),
-        exercise.name
-    )
-    exercise.measurementsList.add(newMeasurement)
-    measurementsList.value = exercise.measurementsList.toMutableList()
-    exercise.SetBestMeasurement()
-    ToastManager(context, "Measurement added")
-}
-
 @Composable
 fun AddMeasurementDialog(
     onDismissRequest: () -> Unit,
@@ -297,7 +319,7 @@ fun AddMeasurementDialog(
                     )
                     TextField(
                         value = weight.value.toString(),
-                        onValueChange = { weight.floatValue= it.toFloat() },
+                        onValueChange = { weight.floatValue = it.toFloat() },
                         label = { Text("Weight") }
                     )
                 }
@@ -336,6 +358,7 @@ fun ShowExerciseInfo(onDismissRequest: () -> Unit) {
         }
     }
 }
+
 @Composable
 fun ShowDeleteMeasurement(
     measurement: Measurement,
@@ -346,7 +369,9 @@ fun ShowDeleteMeasurement(
     val scope = rememberCoroutineScope()
     Dialog(onDismissRequest = { onDismissRequest() }) {
         Card(
-            modifier = Modifier.width(300.dp).height(180.dp)
+            modifier = Modifier
+                .width(300.dp)
+                .height(180.dp)
         ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally
