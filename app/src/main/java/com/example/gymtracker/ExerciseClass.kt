@@ -8,7 +8,6 @@ import java.io.Serializable
 class ExerciseClass(
     val name: String,
     val category: Categories,
-    val descFilePath: String,
     val photoString: String = name.replace(" ", "_").lowercase(),
     var measurementsList: MutableList<Measurement> = mutableListOf<Measurement>(),
     var bestMeasurement: Measurement? = null

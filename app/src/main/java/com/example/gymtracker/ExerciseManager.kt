@@ -2,7 +2,6 @@
 package com.example.gymtracker
 
 import android.content.Context
-import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
@@ -49,18 +48,18 @@ object ExerciseManager {
     }
     fun LoadExercises(): List<ExerciseClass> {
         val exerciseList = listOf(
-            ExerciseClass("Chest fly", Categories.CHEST, "leg_press.txt"),
-            ExerciseClass("Leg curl", Categories.LEGS, "leg_press.txt"),
-            ExerciseClass("Leg press", Categories.LEGS,"leg_press.txt"),
-            ExerciseClass("Dumbbell biceps", Categories.BICEPS,"bench_press.txt"),
-            ExerciseClass("Bench press", Categories.CHEST, "bench_press.txt"),
-            ExerciseClass("Seated barbell press", Categories.SHOULDERS, "leg_press.txt"),
-            ExerciseClass("Dumbbell press", Categories.CHEST, "leg_press.txt"),
-            ExerciseClass("Barbell Curl", Categories.BACK, "leg_press.txt"),
-            ExerciseClass("Tricep Pushdown", Categories.TRICEPS, "leg_press.txt"),
-            ExerciseClass("Seated Row", Categories.BACK, "leg_press.txt"),
-            ExerciseClass("Lat Pulldown", Categories.BACK, "leg_press.txt"),
-            ExerciseClass("Cock sucking", Categories.ABS, "leg_press.txt"),
+            ExerciseClass("Chest fly", Categories.CHEST),
+            ExerciseClass("Leg curl", Categories.LEGS),
+            ExerciseClass("Leg press", Categories.LEGS),
+            ExerciseClass("Dumbbell biceps", Categories.BICEPS),
+            ExerciseClass("Bench press", Categories.CHEST),
+            ExerciseClass("Seated barbell press", Categories.SHOULDERS),
+            ExerciseClass("Dumbbell press", Categories.CHEST),
+            ExerciseClass("Barbell Curl", Categories.BACK),
+            ExerciseClass("Tricep Pushdown", Categories.TRICEPS),
+            ExerciseClass("Seated Row", Categories.BACK),
+            ExerciseClass("Lat Pulldown", Categories.BACK),
+            ExerciseClass("Cock sucking", Categories.ABS),
         )
         return exerciseList
     }

@@ -56,7 +56,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-var exercise = ExerciseClass("Default Name", Categories.CALVES, "no_desc.txt")
+var exercise = ExerciseClass("Default Name", Categories.CALVES)
 
 class ExerciseView : ComponentActivity() {
     private lateinit var measurementViewModel: MeasurementViewModel
@@ -448,9 +448,6 @@ fun AddMeasurementDialog(
 
 @Composable
 fun ShowExerciseInfo(onDismissRequest: () -> Unit) {
-    val exerciseDesc = LocalContext.current.assets.open(exercise.descFilePath).bufferedReader()
-        .use(BufferedReader::readText)
-    Log.d("Exercise Desc", exercise.descFilePath)
     Dialog(onDismissRequest = { onDismissRequest() }) {
         Card(
             modifier = Modifier.size(300.dp)
