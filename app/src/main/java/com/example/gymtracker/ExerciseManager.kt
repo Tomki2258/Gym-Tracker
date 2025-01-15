@@ -2,6 +2,7 @@
 package com.example.gymtracker
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
@@ -23,6 +24,8 @@ object ExerciseManager {
         // Load measurements from the database
         val db = MeasurementDatabase.getInstance(context)
         loadMeasurementsFromDatabase(db)
+        LoadDescriptions()
+        val apiManager = ApiManager
     }
 
     private fun loadMeasurementsFromDatabase(db: MeasurementDatabase) {
@@ -33,6 +36,15 @@ object ExerciseManager {
                     measurement.exerciseName == exercise.name
                 }.toMutableList()
             }
+        }
+    }
+    fun LoadDescriptions(){
+        exercises.forEach { exercise ->
+            Thread {
+                val url = exercise.name.replace(" ", "").lowercase()
+                val description = ApiManager.getExercise(url)
+                exercise.exerciseDecs = description
+            }.start()
         }
     }
     fun LoadExercises(): List<ExerciseClass> {

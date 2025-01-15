@@ -14,6 +14,7 @@ class ExerciseClass(
     var bestMeasurement: Measurement? = null
 ) : Serializable {
     var categoryString = ""
+    var exerciseDecs = ""
     init {
         categoryString = category.toString().lowercase()
         categoryString = categoryString.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }

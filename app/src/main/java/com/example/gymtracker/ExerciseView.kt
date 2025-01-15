@@ -84,6 +84,7 @@ class ExerciseView : ComponentActivity() {
         }
     }
 
+
     fun addMeasurementDatabase(
         reps: Int,
         weight: Float,
@@ -456,7 +457,7 @@ fun ShowExerciseInfo(onDismissRequest: () -> Unit) {
         ) {
             Text(
                 modifier = Modifier.padding(16.dp),
-                text = exerciseDesc
+                text = exercise.exerciseDecs
             )
         }
     }
