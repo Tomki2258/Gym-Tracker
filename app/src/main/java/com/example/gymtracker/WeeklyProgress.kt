@@ -30,10 +30,8 @@ class WeeklyProgress(
     }
 
     private fun calculateAvgWeightDifference(): Float {
-        return if (measurements.size > 1) {
-            val lastMeasurement = measurements[measurements.size - 2]
-            val currentMeasurement = measurements.last()
-            currentMeasurement.weight - lastMeasurement.weight
+        return if (lastWeek != null) {
+            lastWeek.avgWeight - avgWeight
         } else {
             0.0f
         }

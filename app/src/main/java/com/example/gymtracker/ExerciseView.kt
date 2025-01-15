@@ -150,7 +150,9 @@ class ExerciseView : ComponentActivity() {
         val showDeleteDialog = remember { mutableStateOf(false) }
         val clickedMeasurement = remember { mutableStateOf(Measurement(0, 0, 0.0f, "")) }
         val measurementsList = remember { mutableStateOf(exercise.measurementsList.toMutableList()) }
-
+        val sortedMeasurementsList = remember(measurementsList.value) {
+            measurementsList.value.sortedByDescending { it.date.time }
+        }
         val weeklyProgressList = remember(measurementsList.value) {
             createWeeklyProgressList(measurementsList.value).sortedByDescending { it.firstDate }
         }
@@ -229,7 +231,7 @@ class ExerciseView : ComponentActivity() {
                                     )
                                 }
                             }
-                            items(measurementsList.value) { measurement ->
+                            items(sortedMeasurementsList) { measurement ->
                                 Row(
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -281,6 +283,7 @@ class ExerciseView : ComponentActivity() {
                                 }
                             }
                         } else {
+
                             stickyHeader {
                                 Row(
                                     modifier = Modifier
@@ -338,8 +341,16 @@ class ExerciseView : ComponentActivity() {
                                             modifier = Modifier.size(22.dp),
                                             tint = if (avgDifference >= 0) Color.Green else Color.Red
                                         )
+                                        val currentIndex = weeklyProgressList.indexOf(weeklyProgress)
+                                        val prevIndex = currentIndex + 1
+
+                                        val result = if (prevIndex < weeklyProgressList.size) {
+                                            weeklyProgressList[prevIndex].avgWeightDifference
+                                        } else {
+                                            0f
+                                        }
                                         Text(
-                                            text = " ${roundTheNumber(avgDifference)}",
+                                            text = " ${roundTheNumber(result)}",
                                         )
                                     }
                                 }
