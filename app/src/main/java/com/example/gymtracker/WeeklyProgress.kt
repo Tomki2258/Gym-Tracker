@@ -1,3 +1,4 @@
+import android.util.Log
 import com.example.gymtracker.Measurement
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -29,8 +30,10 @@ class WeeklyProgress(
     }
 
     private fun calculateAvgWeightDifference(): Float {
-        return if (lastWeek != null) {
-            -(lastWeek.avgWeight - this.avgWeight)
+        return if (measurements.size > 1) {
+            val lastMeasurement = measurements[measurements.size - 2]
+            val currentMeasurement = measurements.last()
+            currentMeasurement.weight - lastMeasurement.weight
         } else {
             0.0f
         }

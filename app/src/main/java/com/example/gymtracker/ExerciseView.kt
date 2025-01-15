@@ -3,7 +3,6 @@ package com.example.gymtracker
 
 import WeeklyProgress
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -51,7 +50,6 @@ import com.example.gymtracker.roomdb.MeasurementDatabase
 import com.example.gymtracker.roomdb.MeasurementEvent
 import com.example.gymtracker.roomdb.MeasurementViewModel
 import kotlinx.coroutines.launch
-import java.io.BufferedReader
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -114,388 +112,399 @@ class ExerciseView : ComponentActivity() {
         val event = MeasurementEvent.DeleteMeasurement(measurement)
         measurementViewModel.onEvent(event)
         exercise.measurementsList.remove(measurement)
+        exercise.SetBestMeasurement()
         measurementsList.value = exercise.measurementsList.toMutableList()
     }
-}
 
-fun formatStringDate(date: Long): String {
-    val sdf = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
-    return sdf.format(Date(date))
-}
-
-fun createWeeklyProgressList(measurements: List<Measurement>): MutableList<WeeklyProgress> {
-    val weeklyProgressMap = measurements.groupBy { it.weekOfTheYear }
-    val weeklyProgressList = mutableListOf<WeeklyProgress>()
-    var lastWeek: WeeklyProgress? = null
-
-    for ((weekNumber, weekMeasurements) in weeklyProgressMap) {
-        val weeklyProgress = WeeklyProgress(weekMeasurements, weekNumber, lastWeek)
-        weeklyProgressList.add(weeklyProgress)
-        lastWeek = weeklyProgress
+    fun formatStringDate(date: Long): String {
+        val sdf = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
+        return sdf.format(Date(date))
     }
 
-    return weeklyProgressList
-}
+    fun createWeeklyProgressList(measurements: List<Measurement>): MutableList<WeeklyProgress> {
+        val weeklyProgressMap = measurements.groupBy { it.weekOfTheYear }
+        val weeklyProgressList = mutableListOf<WeeklyProgress>()
+        var lastWeek: WeeklyProgress? = null
 
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-fun ExerciseIntent(
-    exerciseClass: ExerciseClass = ExerciseClass("Default Name", Categories.CALVES, "no_desc.txt"),
-    exerciseView: ExerciseView
-) {
-    val showDialog = remember { mutableStateOf(false) }
-    val showDescDialog = remember { mutableStateOf(false) }
-    val showDeleteDialog = remember { mutableStateOf(false) }
-    val clickedMeasurement = remember { mutableStateOf(Measurement(0, 0, 0.0f, "")) }
-    val measurementsList = remember { mutableStateOf(exercise.measurementsList.toMutableList()) }
-    var weeklyProgressList = createWeeklyProgressList(measurementsList.value)
-    measurementsList.value.sortByDescending { it.date }
-    weeklyProgressList.sortByDescending { it.firstDate }
+        for ((weekNumber, weekMeasurements) in weeklyProgressMap) {
+            val weeklyProgress = WeeklyProgress(weekMeasurements, weekNumber, lastWeek)
+            weeklyProgressList.add(weeklyProgress)
+            lastWeek = weeklyProgress
+        }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(0.dp, 12.dp, 0.dp, 0.dp)
+        return weeklyProgressList
+    }
+
+    @OptIn(ExperimentalFoundationApi::class)
+    @Composable
+    fun ExerciseIntent(
+        exerciseClass: ExerciseClass = ExerciseClass(
+            "Default Name",
+            Categories.CALVES,
+            "no_desc.txt"
+        ),
+        exerciseView: ExerciseView
     ) {
-        Column {
-            Card(
-                modifier = Modifier
-                    .padding(8.dp)
-                    .fillMaxWidth()
-            ) {
-                Column(
+        val showDialog = remember { mutableStateOf(false) }
+        val showDescDialog = remember { mutableStateOf(false) }
+        val showDeleteDialog = remember { mutableStateOf(false) }
+        val clickedMeasurement = remember { mutableStateOf(Measurement(0, 0, 0.0f, "")) }
+        val measurementsList = remember { mutableStateOf(exercise.measurementsList.toMutableList()) }
+
+        val weeklyProgressList = remember(measurementsList.value) {
+            createWeeklyProgressList(measurementsList.value).sortedByDescending { it.firstDate }
+        }
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(0.dp, 12.dp, 0.dp, 0.dp)
+        ) {
+            Column {
+                Card(
                     modifier = Modifier
+                        .padding(8.dp)
                         .fillMaxWidth()
-                        .padding(8.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Image(
-                        painter = painterResource(id = exerciseClass.getPhotoResourceId(LocalContext.current)),
-                        contentDescription = "Exercise Image"
-                    )
-                    Text(
-                        text = "${exerciseClass.name} - ${exerciseClass.categoryString}",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 30.sp
-                    )
-                }
-            }
-            Card(
-                modifier = Modifier
-                    .padding(8.dp)
-                    .fillMaxWidth()
-                    .height(250.dp)
-            ) {
-                if (measurementsList.value.isEmpty()) {
-                    Box(
+                    Column(
                         modifier = Modifier
-                            .fillMaxSize()
-                            .padding(8.dp), contentAlignment = Alignment.Center
+                            .fillMaxWidth()
+                            .padding(8.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Text(text = "No measurements yet")
-                    }
-                } else {
-                    LazyColumn(
-                        modifier = Modifier.padding(8.dp)
-                    ) {
-                        stickyHeader {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(8.dp)
-                                    .background(MaterialTheme.colorScheme.surface)
-                            ) {
-                                Text(
-                                    text = "Date",
-                                    modifier = Modifier.weight(1f),
-                                    fontWeight = FontWeight.Bold
+                        Image(
+                            painter = painterResource(
+                                id = exerciseClass.getPhotoResourceId(
+                                    LocalContext.current
                                 )
-                                Text(
-                                    text = "Reps",
-                                    modifier = Modifier.weight(1f),
-                                    fontWeight = FontWeight.Bold
-                                )
-                                Text(
-                                    text = "Weight (kg)",
-                                    modifier = Modifier.weight(1f),
-                                    fontWeight = FontWeight.Bold
-                                )
-                            }
-                        }
-                        items(measurementsList.value) { measurement ->
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clickable(
-                                        onClick = {
-                                            showDeleteDialog.value = true
-                                            clickedMeasurement.value = measurement
-                                        }
-                                    )
-                                    .padding(8.dp)
-                            ) {
-                                Text(
-                                    text = formatStringDate(measurement.date.time),
-                                    modifier = Modifier.weight(1f)
-                                )
-                                Text(
-                                    text = "${measurement.reps}",
-                                    modifier = Modifier.weight(1f)
-                                )
-                                Text(
-                                    text = "${measurement.weight}",
-                                    modifier = Modifier.weight(1f)
-                                )
-                            }
-                        }
+                            ),
+                            contentDescription = "Exercise Image"
+                        )
+                        Text(
+                            text = "${exerciseClass.name} - ${exerciseClass.categoryString}",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 30.sp
+                        )
                     }
                 }
-            }
-            val weekSize = 1.5f
-            val yearSize = 0.5f
-            val avgWeightSize = 1f
-            val weightDiffSize = 1f
-            Card(
-                modifier = Modifier
-                    .padding(8.dp)
-                    .fillMaxWidth()
-                    .height(200.dp)
-            ) {
-                LazyColumn {
-                    if (weeklyProgressList.isEmpty()) {
-                        item {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(8.dp), contentAlignment = Alignment.Center
-                            ) {
-                                Text(text = ":(")
-                            }
+                Card(
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .fillMaxWidth()
+                        .height(250.dp)
+                ) {
+                    if (measurementsList.value.isEmpty()) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(8.dp), contentAlignment = Alignment.Center
+                        ) {
+                            Text(text = "No measurements yet")
                         }
                     } else {
-                        stickyHeader {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(8.dp)
-                                    .background(MaterialTheme.colorScheme.surface)
-                            ) {
-                                Text(
-                                    text = "Week",
-                                    modifier = Modifier.weight(weekSize),
-                                    fontWeight = FontWeight.Bold
-                                )
-                                Text(
-                                    text = "Year",
-                                    modifier = Modifier.weight(yearSize),
-                                    fontWeight = FontWeight.Bold
-                                )
-                                Text(
-                                    text = "AVG Weight",
-                                    modifier = Modifier.weight(avgWeightSize),
-                                    fontWeight = FontWeight.Bold
-                                )
-                                Text(
-                                    text = "Weight Diff",
-                                    modifier = Modifier.weight(weightDiffSize),
-                                    fontWeight = FontWeight.Bold
-                                )
-                            }
-                        }
-                        items(weeklyProgressList) { weeklyProgress ->
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(8.dp)
-                            ) {
-                                Text(
-                                    text = "${weeklyProgress.weekNumber} (${weeklyProgress.weekRange})",
-                                    modifier = Modifier.weight(weekSize)
-                                )
-                                Text(
-                                    text = "${weeklyProgress.year}",
-                                    modifier = Modifier.weight(yearSize)
-                                )
-                                Text(
-                                    text = "${roundTheNumber(weeklyProgress.avgWeight)}",
-                                    modifier = Modifier.weight(avgWeightSize)
-                                )
-                                val avgDifference = weeklyProgress.avgWeightDifference
+                        LazyColumn(
+                            modifier = Modifier.padding(8.dp)
+                        ) {
+                            stickyHeader {
                                 Row(
-                                    modifier = Modifier.weight(weightDiffSize)
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(8.dp)
+                                        .background(MaterialTheme.colorScheme.surface)
                                 ) {
-                                    Icon(
-                                        painter = painterResource(id = if (avgDifference >= 0) R.drawable.up else R.drawable.down),
-                                        contentDescription = "Weight Difference",
-                                        modifier = Modifier.size(22.dp),
-                                        tint = if (avgDifference >= 0) Color.Green else Color.Red
+                                    Text(
+                                        text = "Date",
+                                        modifier = Modifier.weight(1f),
+                                        fontWeight = FontWeight.Bold
                                     )
                                     Text(
-                                        text = " ${roundTheNumber(avgDifference)}",
+                                        text = "Reps",
+                                        modifier = Modifier.weight(1f),
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                    Text(
+                                        text = "Weight (kg)",
+                                        modifier = Modifier.weight(1f),
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                            }
+                            items(measurementsList.value) { measurement ->
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clickable(
+                                            onClick = {
+                                                showDeleteDialog.value = true
+                                                clickedMeasurement.value = measurement
+                                            }
+                                        )
+                                        .padding(8.dp)
+                                ) {
+                                    Text(
+                                        text = formatStringDate(measurement.date.time),
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                    Text(
+                                        text = "${measurement.reps}",
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                    Text(
+                                        text = "${measurement.weight}",
+                                        modifier = Modifier.weight(1f)
                                     )
                                 }
                             }
                         }
                     }
                 }
+                val weekSize = 1.5f
+                val yearSize = 0.5f
+                val avgWeightSize = 1f
+                val weightDiffSize = 1f
+
+                Card(
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .fillMaxWidth()
+                        .height(200.dp)
+                ) {
+                    LazyColumn {
+                        if (weeklyProgressList.isEmpty()) {
+                            item {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding(8.dp), contentAlignment = Alignment.Center
+                                ) {
+                                    Text(text = ":(")
+                                }
+                            }
+                        } else {
+                            stickyHeader {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(8.dp)
+                                        .background(MaterialTheme.colorScheme.surface)
+                                ) {
+                                    Text(
+                                        text = "Week",
+                                        modifier = Modifier.weight(weekSize),
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                    Text(
+                                        text = "Year",
+                                        modifier = Modifier.weight(yearSize),
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                    Text(
+                                        text = "AVG Weight",
+                                        modifier = Modifier.weight(avgWeightSize),
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                    Text(
+                                        text = "Weight Diff",
+                                        modifier = Modifier.weight(weightDiffSize),
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                            }
+                            items(weeklyProgressList) { weeklyProgress ->
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(8.dp)
+                                ) {
+                                    Text(
+                                        text = "${weeklyProgress.weekNumber} (${weeklyProgress.weekRange})",
+                                        modifier = Modifier.weight(weekSize)
+                                    )
+                                    Text(
+                                        text = "${weeklyProgress.year}",
+                                        modifier = Modifier.weight(yearSize)
+                                    )
+                                    Text(
+                                        text = "${roundTheNumber(weeklyProgress.avgWeight)}",
+                                        modifier = Modifier.weight(avgWeightSize)
+                                    )
+                                    val avgDifference = weeklyProgress.avgWeightDifference
+                                    Row(
+                                        modifier = Modifier.weight(weightDiffSize)
+                                    ) {
+                                        Icon(
+                                            painter = painterResource(id = if (avgDifference >= 0) R.drawable.up else R.drawable.down),
+                                            contentDescription = "Weight Difference",
+                                            modifier = Modifier.size(22.dp),
+                                            tint = if (avgDifference >= 0) Color.Green else Color.Red
+                                        )
+                                        Text(
+                                            text = " ${roundTheNumber(avgDifference)}",
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            FloatingActionButton(
+                onClick = { showDescDialog.value = true },
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .padding(16.dp)
+                    .requiredSize(56.dp)
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.information),
+                    contentDescription = "Exercise Info",
+                    modifier = Modifier.fillMaxSize(0.6f)
+                )
+            }
+            FloatingActionButton(
+                onClick = { showDialog.value = true },
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(16.dp)
+                    .requiredSize(56.dp)
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.add),
+                    contentDescription = "Add measurement",
+                    modifier = Modifier.fillMaxSize(0.6f)
+                )
             }
         }
-        FloatingActionButton(
-            onClick = { showDescDialog.value = true },
-            modifier = Modifier
-                .align(Alignment.BottomStart)
-                .padding(16.dp)
-                .requiredSize(56.dp)
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.information),
-                contentDescription = "Exercise Info",
-                modifier = Modifier.fillMaxSize(0.6f)
+        if (showDialog.value) {
+            AddMeasurementDialog(
+                onDismissRequest = { showDialog.value = false },
+                measurementsList,
+                exerciseView
             )
         }
-        FloatingActionButton(
-            onClick = { showDialog.value = true },
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(16.dp)
-                .requiredSize(56.dp)
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.add),
-                contentDescription = "Add measurement",
-                modifier = Modifier.fillMaxSize(0.6f)
+        if (showDescDialog.value) {
+            ShowExerciseInfo(onDismissRequest = { showDescDialog.value = false })
+        }
+        if (showDeleteDialog.value) {
+            ShowDeleteMeasurement(
+                clickedMeasurement.value,
+                onDismissRequest = { showDeleteDialog.value = false },
+                exerciseView,
+                measurementsList
             )
         }
     }
-    if (showDialog.value) {
-        AddMeasurementDialog(
-            onDismissRequest = { showDialog.value = false },
-            measurementsList,
-            exerciseView
-        )
+
+    fun roundTheNumber(numInDouble: Float): String {
+        return "%.1f".format(numInDouble)
     }
-    if (showDescDialog.value) {
-        ShowExerciseInfo(onDismissRequest = { showDescDialog.value = false })
-    }
-    if (showDeleteDialog.value) {
-        ShowDeleteMeasurement(
-            clickedMeasurement.value,
-            onDismissRequest = { showDeleteDialog.value = false },
-            exerciseView,
-            measurementsList
-        )
-    }
-}
 
-fun roundTheNumber(numInDouble: Float): String {
-    return "%.1f".format(numInDouble)
+    @Composable
+    fun AddMeasurementDialog(
+        onDismissRequest: () -> Unit,
+        measurementsList: MutableState<MutableList<Measurement>>,
+        exerciseView: ExerciseView
+    ) {
+        val reps = remember { mutableIntStateOf(0) }
+        val weight = remember { mutableFloatStateOf(0f) }
+        val context = LocalContext.current
+        val scope = rememberCoroutineScope()
 
-}
-
-@Composable
-fun AddMeasurementDialog(
-    onDismissRequest: () -> Unit,
-    measurementsList: MutableState<MutableList<Measurement>>,
-    exerciseView: ExerciseView
-) {
-    val reps = remember { mutableIntStateOf(0) }
-    val weight = remember { mutableFloatStateOf(0f) }
-    val context = LocalContext.current
-    val scope = rememberCoroutineScope()
-
-    Dialog(onDismissRequest = { onDismissRequest() }) {
-        Card {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
+        Dialog(onDismissRequest = { onDismissRequest() }) {
+            Card {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    TextField(
-                        modifier = Modifier.width(75.dp),
-                        value = reps.value.toString(),
-                        onValueChange = { reps.value = it.toInt() },
-                        label = { Text("Reps") }
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        TextField(
+                            modifier = Modifier.width(75.dp),
+                            value = reps.value.toString(),
+                            onValueChange = { reps.value = it.toInt() },
+                            label = { Text("Reps") }
+                        )
+                        Text(
+                            text = " x ",
+                            fontSize = 20.sp
+                        )
+                        TextField(
+                            value = weight.value.toString(),
+                            onValueChange = { weight.floatValue = it.toFloat() },
+                            label = { Text("Weight") }
+                        )
+                    }
+                    Button(onClick = {
+                        scope.launch {
+                            exerciseView.addMeasurementDatabase(
+                                reps.value,
+                                weight.floatValue,
+                                exercise.name,
+                                measurementsList
+                            )
+                            onDismissRequest()
+                        }
+                    }) {
+                        Text(text = "Add measurement")
+                    }
+                }
+            }
+        }
+    }
+
+    @Composable
+    fun ShowExerciseInfo(onDismissRequest: () -> Unit) {
+        Dialog(onDismissRequest = { onDismissRequest() }) {
+            Card(
+                modifier = Modifier.size(300.dp)
+            ) {
+                Text(
+                    modifier = Modifier.padding(16.dp),
+                    text = exercise.exerciseDecs
+                )
+            }
+        }
+    }
+
+    @Composable
+    fun ShowDeleteMeasurement(
+        measurement: Measurement,
+        onDismissRequest: () -> Unit,
+        exerciseView: ExerciseView,
+        measurementsList: MutableState<MutableList<Measurement>>
+    ) {
+        val scope = rememberCoroutineScope()
+        Dialog(onDismissRequest = { onDismissRequest() }) {
+            Card(
+                modifier = Modifier
+                    .width(300.dp)
+                    .height(180.dp)
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        modifier = Modifier.padding(16.dp),
+                        text = "Are you sure you want to delete this measurement?"
                     )
                     Text(
-                        text = " x ",
-                        fontSize = 20.sp
+                        modifier = Modifier.padding(16.dp),
+                        text = "Reps: ${measurement.reps} x Weight: ${measurement.weight}"
                     )
-                    TextField(
-                        value = weight.value.toString(),
-                        onValueChange = { weight.floatValue = it.toFloat() },
-                        label = { Text("Weight") }
-                    )
-                }
-                Button(onClick = {
-                    scope.launch {
-                        exerciseView.addMeasurementDatabase(
-                            reps.value,
-                            weight.floatValue,
-                            exercise.name,
-                            measurementsList
-                        )
-                        onDismissRequest()
-                    }
-                }) {
-                    Text(text = "Add measurement")
-                }
-            }
-        }
-    }
-}
-
-
-@Composable
-fun ShowExerciseInfo(onDismissRequest: () -> Unit) {
-    Dialog(onDismissRequest = { onDismissRequest() }) {
-        Card(
-            modifier = Modifier.size(300.dp)
-        ) {
-            Text(
-                modifier = Modifier.padding(16.dp),
-                text = exercise.exerciseDecs
-            )
-        }
-    }
-}
-
-@Composable
-fun ShowDeleteMeasurement(
-    measurement: Measurement,
-    onDismissRequest: () -> Unit,
-    exerciseView: ExerciseView,
-    measurementsList: MutableState<MutableList<Measurement>>
-) {
-    val scope = rememberCoroutineScope()
-    Dialog(onDismissRequest = { onDismissRequest() }) {
-        Card(
-            modifier = Modifier
-                .width(300.dp)
-                .height(180.dp)
-        ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    modifier = Modifier.padding(16.dp),
-                    text = "Are you sure you want to delete this measurement?"
-                )
-                Text(
-                    modifier = Modifier.padding(16.dp),
-                    text = "Reps: ${measurement.reps} x Weight: ${measurement.weight}"
-                )
-                Button(
-                    onClick = {
-                        scope.launch {
-                            exerciseView.deleteMeasurementDatabase(measurement, measurementsList)
+                    Button(
+                        onClick = {
+                            scope.launch {
+                                exerciseView.deleteMeasurementDatabase(
+                                    measurement,
+                                    measurementsList
+                                )
+                            }
+                            onDismissRequest()
                         }
-                        onDismissRequest()
+                    ) {
+                        Text(text = "Delete")
                     }
-                ) {
-                    Text(text = "Delete")
                 }
             }
         }
-    }
-}
+    }}

@@ -127,8 +127,6 @@ fun MainView(modifier: Modifier = Modifier, measurementViewModel: MeasurementVie
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxWidth()) {
-            // Existing content...
-
             Row(
                 modifier = Modifier
                     .fillMaxWidth()

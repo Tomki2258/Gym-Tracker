@@ -27,10 +27,15 @@ class ExerciseClass(
         }
     }
 
+    var weightDiff: Float = 0f
+
     fun SetBestMeasurement() {
-        if (measurementsList.isNotEmpty()) {
-            bestMeasurement = measurementsList.maxByOrNull { it.weight }
-        }
+        bestMeasurement = measurementsList.maxByOrNull { it.weight }
+        weightDiff = bestMeasurement?.let { best ->
+            measurementsList.lastOrNull()?.let { last ->
+                last.weight - best.weight
+            } ?: 0f
+        } ?: 0f
     }
 
 

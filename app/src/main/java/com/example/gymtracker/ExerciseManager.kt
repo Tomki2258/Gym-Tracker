@@ -23,8 +23,14 @@ object ExerciseManager {
         // Load measurements from the database
         val db = MeasurementDatabase.getInstance(context)
         loadMeasurementsFromDatabase(db)
-        LoadDescriptions()
-        val apiManager = ApiManager
+        Thread{
+            LoadDescriptions()
+        }.start()
+        Thread {
+            exercises.forEach { exercise ->
+                exercise.SetBestMeasurement()
+            }
+        }.start()
     }
 
     private fun loadMeasurementsFromDatabase(db: MeasurementDatabase) {
