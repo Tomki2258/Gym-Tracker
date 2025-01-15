@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -25,10 +26,13 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TimeInput
+import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -42,9 +46,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.room.Room
 import com.example.gymtracker.roomdb.MeasurementDatabase
 import com.example.gymtracker.roomdb.MeasurementViewModel
+import java.util.Calendar
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 class MainActivity : ComponentActivity() {
     private val db by lazy {
@@ -110,94 +117,129 @@ fun LoadCategories(exercises: List<ExerciseClass>): List<String> {
 
 @Composable
 fun MainView(modifier: Modifier = Modifier, measurementViewModel: MeasurementViewModel) {
-    //val exerciseList = LoadExercises()
+    HideStatusBar()
+
     val categories = LoadCategories(ExerciseManager.exercises)
     var currentCategory by remember { mutableStateOf(categories.first()) }
     val context = LocalContext.current
+    val showNickameDialog = remember { mutableStateOf(false) }
+    val showHourDialog = remember { mutableStateOf(false) }
 
-    Column(modifier = Modifier.fillMaxWidth()) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Color.LightGray)
-                .padding(0.dp, 16.dp, 0.dp, 0.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-        ) {
-            IconButton(onClick = {
-                LaunchUserIntent(context)
-            }) {
-                Icon(
-                    painter = painterResource(R.drawable.icons8_male_user_100),
-                    contentDescription = "User Icon"
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            // Existing content...
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.LightGray)
+                    .padding(0.dp, 4.dp, 0.dp, 0.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                IconButton(onClick = {
+                    LaunchUserIntent(context)
+                }) {
+                    Icon(
+                        painter = painterResource(R.drawable.icons8_male_user_100),
+                        contentDescription = "User Icon"
+                    )
+                }
+                Text(
+                    modifier = Modifier.padding(0.dp, 16.dp, 0.dp, 0.dp),
+                    text = UserManager.userData.userNick
                 )
+                IconButton(onClick = {
+                    measurementViewModel.clearAllTables()
+                }) {
+                    Icon(
+                        painter = painterResource(R.drawable.icons8_settings_500),
+                        contentDescription = "User Icon"
+                    )
+                }
             }
-            Text(
-                modifier = Modifier.padding(0.dp, 16.dp, 0.dp, 0.dp),
-                text = UserManager.userData.userNick
-            )
-            IconButton(onClick = {
-                measurementViewModel.clearAllTables()
-            }) {
-                Icon(
-                    painter = painterResource(R.drawable.icons8_settings_500),
-                    contentDescription = "User Icon"
-                )
-            }
-        }
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Color.LightGray)
-                .padding(0.dp, 0.dp, 0.dp, 8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            IconButton(onClick = {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.LightGray)
+                    .padding(0.dp, 0.dp, 0.dp, 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                IconButton(onClick = {
+                    var catIndex = categories.indexOf(currentCategory)
+                    catIndex -= 1
+                    if (catIndex < 0) {
+                        catIndex = categories.size - 1
+                    }
+                    currentCategory = categories[catIndex]
+                    Log.d(currentCategory, currentCategory)
+                }) {
+                    Icon(
+                        modifier = Modifier
+                            .size(25.dp)
+                            .scale(scaleX = -1f, scaleY = 1f),
+                        painter = painterResource(R.drawable.right_arrow),
+                        contentDescription = "Filter Icon"
+                    )
+                }
                 var catIndex = categories.indexOf(currentCategory)
-                catIndex -= 1
-                if (catIndex < 0) {
-                    catIndex = categories.size - 1
-                }
-                currentCategory = categories[catIndex]
-                Log.d(currentCategory, currentCategory)
-            }) {
-                Icon(
-                    modifier = Modifier
-                        .size(25.dp)
-                        .scale(scaleX = -1f, scaleY = 1f),
-                    painter = painterResource(R.drawable.right_arrow),
-                    contentDescription = "Filter Icon"
+                Text(
+                    text = "${currentCategory}\n${catIndex + 1} / ${categories.size}",
+                    textAlign = TextAlign.Center
                 )
-                //Text(text = "<-")
+                IconButton(onClick = {
+                    catIndex += 1
+                    if (catIndex > categories.size - 1) {
+                        catIndex = 0
+                    }
+                    currentCategory = categories[catIndex]
+                    Log.d(currentCategory, currentCategory)
+                }) {
+                    Icon(
+                        modifier = Modifier.size(25.dp),
+                        painter = painterResource(R.drawable.right_arrow),
+                        contentDescription = "Filter Icon"
+                    )
+                }
             }
-            var catIndex = categories.indexOf(currentCategory)
-            Text(
-                text = "${currentCategory}\n${catIndex + 1} / ${categories.size}",
-                textAlign = TextAlign.Center
-            )
-            IconButton(onClick = {
-                catIndex += 1
-                if (catIndex > categories.size - 1) {
-                    catIndex = 0
-                }
-                currentCategory = categories[catIndex]
-                Log.d(currentCategory, currentCategory)
-            }) {
-                Icon(
-                    modifier = Modifier.size(25.dp),
-                    painter = painterResource(R.drawable.right_arrow),
-                    contentDescription = "Filter Icon"
-                )
-                //Text(text = "->")
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .horizontalScroll(rememberScrollState())
+                    .padding(0.dp, 0.dp, 0.dp, 65.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                ExerciseList(ExerciseManager.exercises, currentCategory)
             }
         }
-        Column(
+
+        // Row of buttons at the bottom
+        Row(
             modifier = Modifier
-                .fillMaxSize()
-                .horizontalScroll(rememberScrollState())
-                .padding(0.dp, 0.dp, 0.dp, 16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .align(Alignment.BottomStart)
+                .fillMaxWidth()
+                .background(Color.LightGray)
+                .padding(8.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            ExerciseList(ExerciseManager.exercises, currentCategory)
+            Button(onClick = { /* TODO: Add User Profile functionality */ }) {
+                Text(text = "User Profile")
+            }
+            Button(onClick = { LaunchTrainingPlanIntent(context) }) {
+                Text(text = "Training Plan")
+            }
+            Button(onClick = { showHourDialog.value = true }) {
+                Text(text = "Suplements")
+            }
+        }
+
+        if (showNickameDialog.value) {
+            ChangeNickDialog { showNickameDialog.value = false }
+        }
+        if (showHourDialog.value) {
+            HourPicker(
+                onConfirm = { showHourDialog.value = false },
+                onDismiss = { showHourDialog.value = false }
+            )
         }
     }
 }
@@ -270,4 +312,51 @@ fun LaunchExerciseIntent(exerciseIndex: Int, context: Context) {
 fun LaunchUserIntent(context: Context) {
     val intent = Intent(context, UserActivity::class.java)
     context.startActivity(intent)
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun HourPicker(
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val currentTime = Calendar.getInstance()
+
+    val timePickerState = rememberTimePickerState(
+        initialHour = currentTime.get(Calendar.HOUR_OF_DAY),
+        initialMinute = currentTime.get(Calendar.MINUTE),
+        is24Hour = true,
+    )
+    Dialog(onDismissRequest = { onDismiss() }) {
+        Card {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.padding(8.dp)
+            ) {
+                TimeInput(
+                    state = timePickerState,
+                )
+                Button(onClick = {
+                    onConfirm
+                    SetSumplementsHour(timePickerState.hour, timePickerState.minute)
+                }) {
+                    Text("Confirm")
+                }
+            }
+        }
+    }
+
+}
+
+fun LaunchTrainingPlanIntent(context: Context) {
+    val intent = Intent(context, TrainingPlannerActivity::class.java)
+    context.startActivity(intent)
+}
+@Composable
+fun HideStatusBar() {
+    val systemUiController = rememberSystemUiController()
+
+    // Hide the status bar
+    systemUiController.isStatusBarVisible = false
+    systemUiController.isNavigationBarVisible = false
 }

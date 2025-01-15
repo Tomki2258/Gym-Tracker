@@ -65,7 +65,10 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation("com.squareup.retrofit2:converter-gson:2.3.0")}
+    implementation("com.squareup.retrofit2:converter-gson:2.3.0")
+    implementation("com.google.accompanist:accompanist-systemuicontroller:0.36.0")
+
+}
 dependencies {
     implementation(libs.androidx.espresso.core)
     val room_version = "2.6.1"

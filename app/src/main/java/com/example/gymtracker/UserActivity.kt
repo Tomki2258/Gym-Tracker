@@ -66,40 +66,40 @@ fun SetSumplementsHour(hour: Int, minute: Int) {
     Log.d("Hour", hour.toString())
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun HourPicker(
-    onConfirm: () -> Unit,
-    onDismiss: () -> Unit,
-) {
-    val currentTime = Calendar.getInstance()
-
-    val timePickerState = rememberTimePickerState(
-        initialHour = currentTime.get(Calendar.HOUR_OF_DAY),
-        initialMinute = currentTime.get(Calendar.MINUTE),
-        is24Hour = true,
-    )
-    Dialog(onDismissRequest = { onDismiss() }) {
-        Card(
-        ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.padding(8.dp)
-            ) {
-                TimeInput(
-                    state = timePickerState,
-                )
-                Button(onClick = {
-                    onConfirm
-                    SetSumplementsHour(timePickerState.hour, timePickerState.minute)
-                }) {
-                    Text("Confirm")
-                }
-            }
-        }
-    }
-
-}
+//@OptIn(ExperimentalMaterial3Api::class)
+//@Composable
+//fun HourPicker(
+//    onConfirm: () -> Unit,
+//    onDismiss: () -> Unit,
+//) {
+//    val currentTime = Calendar.getInstance()
+//
+//    val timePickerState = rememberTimePickerState(
+//        initialHour = currentTime.get(Calendar.HOUR_OF_DAY),
+//        initialMinute = currentTime.get(Calendar.MINUTE),
+//        is24Hour = true,
+//    )
+//    Dialog(onDismissRequest = { onDismiss() }) {
+//        Card(
+//        ) {
+//            Column(
+//                horizontalAlignment = Alignment.CenterHorizontally,
+//                modifier = Modifier.padding(8.dp)
+//            ) {
+//                TimeInput(
+//                    state = timePickerState,
+//                )
+//                Button(onClick = {
+//                    onConfirm
+//                    SetSumplementsHour(timePickerState.hour, timePickerState.minute)
+//                }) {
+//                    Text("Confirm")
+//                }
+//            }
+//        }
+//    }
+//
+//}
 
 @Composable
 fun Greeting(name: String, modifier: Modifier = Modifier) {
@@ -200,7 +200,7 @@ fun ChangeNickDialog(onDismissRequest: () -> Unit) {
         }
     }
 }
-fun LaunchTrainingPlanIntent(context: Context) {
-    val intent = Intent(context, TrainingPlannerActivity::class.java)
-    context.startActivity(intent)
-}
+//fun LaunchTrainingPlanIntent(context: Context) {
+//    val intent = Intent(context, TrainingPlannerActivity::class.java)
+//    context.startActivity(intent)
+//}
