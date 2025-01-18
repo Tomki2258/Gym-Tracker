@@ -148,7 +148,7 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
     }
 
     if (showNickameDialog.value) {
-        ChangeNickDialog { showNickameDialog.value = false }
+        //ChangeNickDialog { showNickameDialog.value = false }
     }
     if (showHourDialog.value) {
         HourPicker(
@@ -158,48 +158,48 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
     }
 }
 
-@Composable
-fun ChangeNickDialog(onDismissRequest: () -> Unit) {
-    val newNick = remember { mutableStateOf("") }
-    val context = LocalContext.current
-
-    Dialog(onDismissRequest = { onDismissRequest() }) {
-        Card {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.padding(16.dp)
-            ) {
-                Text(
-                    text = "Change Nickname",
-                    fontSize = 20.sp,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
-                TextField(
-                    value = newNick.value,
-                    onValueChange = { newNick.value = it },
-                    label = { Text("New Nickname") },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 8.dp)
-                )
-                Row(
-                    horizontalArrangement = Arrangement.SpaceEvenly,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Button(onClick = {
-                        UserManager.changeUserNick(context, newNick.value)
-                        onDismissRequest()
-                    }) {
-                        Text(text = "Save")
-                    }
-                    Button(onClick = { onDismissRequest() }) {
-                        Text(text = "Cancel")
-                    }
-                }
-            }
-        }
-    }
-}
+//@Composable
+//fun ChangeNickDialog(onDismissRequest: () -> Unit) {
+//    val newNick = remember { mutableStateOf("") }
+//    val context = LocalContext.current
+//
+//    Dialog(onDismissRequest = { onDismissRequest() }) {
+//        Card {
+//            Column(
+//                horizontalAlignment = Alignment.CenterHorizontally,
+//                modifier = Modifier.padding(16.dp)
+//            ) {
+//                Text(
+//                    text = "Change Nickname",
+//                    fontSize = 20.sp,
+//                    modifier = Modifier.padding(bottom = 8.dp)
+//                )
+//                TextField(
+//                    value = newNick.value,
+//                    onValueChange = { newNick.value = it },
+//                    label = { Text("New Nickname") },
+//                    modifier = Modifier
+//                        .fillMaxWidth()
+//                        .padding(bottom = 8.dp)
+//                )
+//                Row(
+//                    horizontalArrangement = Arrangement.SpaceEvenly,
+//                    modifier = Modifier.fillMaxWidth()
+//                ) {
+//                    Button(onClick = {
+//                        UserManager.changeUserNick(context, newNick.value)
+//                        onDismissRequest()
+//                    }) {
+//                        Text(text = "Save")
+//                    }
+//                    Button(onClick = { onDismissRequest() }) {
+//                        Text(text = "Cancel")
+//                    }
+//                }
+//            }
+//        }
+//    }
+//}
 //fun LaunchTrainingPlanIntent(context: Context) {
 //    val intent = Intent(context, TrainingPlannerActivity::class.java)
 //    context.startActivity(intent)

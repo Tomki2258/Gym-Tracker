@@ -31,6 +31,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TimeInput
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
@@ -46,6 +47,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.room.Room
 import com.example.gymtracker.roomdb.MeasurementDatabase
@@ -83,11 +85,8 @@ class MainActivity : ComponentActivity() {
                 )
             }
         }
-        // Create an InsertMeasurement event
         //val event = MeasurementEvent.InsertMeasurement(measurement)
-
-        // Call the onEvent method with the event
-        //measurementViewModel.onEvent(event)
+     //measurementViewModel.onEvent(event)
     }
 }
 
@@ -219,7 +218,7 @@ fun MainView(modifier: Modifier = Modifier, measurementViewModel: MeasurementVie
                 .padding(8.dp),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            Button(onClick = { /* TODO: Add User Profile functionality */ }) {
+            Button(onClick = { showNickameDialog.value = true }) {
                 Text(text = "User Profile")
             }
             Button(onClick = { LaunchTrainingPlanIntent(context) }) {
@@ -357,4 +356,46 @@ fun HideStatusBar() {
     // Hide the status bar
     systemUiController.isStatusBarVisible = false
     systemUiController.isNavigationBarVisible = false
+}
+@Composable
+fun ChangeNickDialog(onDismissRequest: () -> Unit) {
+    val newNick = remember { mutableStateOf("") }
+    val context = LocalContext.current
+
+    Dialog(onDismissRequest = { onDismissRequest() }) {
+        Card {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Text(
+                    text = "Change Nickname",
+                    fontSize = 20.sp,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+                TextField(
+                    value = newNick.value,
+                    onValueChange = { newNick.value = it },
+                    label = { Text("New Nickname") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp)
+                )
+                Row(
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Button(onClick = {
+                        UserManager.changeUserNick(context, newNick.value)
+                        onDismissRequest()
+                    }) {
+                        Text(text = "Save")
+                    }
+                    Button(onClick = { onDismissRequest() }) {
+                        Text(text = "Cancel")
+                    }
+                }
+            }
+        }
+    }
 }
