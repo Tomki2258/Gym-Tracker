@@ -335,7 +335,7 @@ class ExerciseView : ComponentActivity() {
                                     )
                                     val avgDifference = weeklyProgress.avgWeightDifference
                                     Text(
-                                        text = "${roundTheNumber(avgDifference)}",
+                                        text = "${roundTheNumber(weeklyProgress.avgWeight)}",
                                         modifier = Modifier.weight(avgWeightSize)
                                     )
                                     val tint = GetTint(avgDifference)
@@ -448,7 +448,7 @@ class ExerciseView : ComponentActivity() {
                     Button(onClick = {
                         scope.launch {
                             exerciseView.addMeasurementDatabase(
-                                reps.value,
+                                reps.intValue,
                                 weight.floatValue,
                                 exercise.name,
                                 measurementsList

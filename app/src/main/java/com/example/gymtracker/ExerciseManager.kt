@@ -17,8 +17,8 @@ object ExerciseManager {
     var exercises by mutableStateOf(listOf<ExerciseClass>())
 
     fun initialize(context: Context) {
-        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        val exercisesJson = prefs.getString(KEY_EXERCISES, "[]")
+        //val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        //val exercisesJson = prefs.getString(KEY_EXERCISES, "[]")
         exercises = LoadExercises()
         // Load measurements from the database
         val db = MeasurementDatabase.getInstance(context)
