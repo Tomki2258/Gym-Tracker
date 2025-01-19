@@ -30,11 +30,11 @@ class WeeklyProgress(
     }
 
     private fun calculateAvgWeightDifference(): Float {
-        return if (lastWeek != null) {
-            lastWeek.avgWeight - avgWeight
-        } else {
-            0.0f
+        Log.d("Current Week $weekNumber with value $avgWeight", "Last Week ${lastWeek?.weekNumber} with value ${lastWeek?.avgWeight}")
+        if (lastWeek == null) {
+            return 0.0f
         }
+        return avgWeight - lastWeek.avgWeight
     }
 
     private fun calculateWeekRange(): String {

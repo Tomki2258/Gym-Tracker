@@ -26,11 +26,6 @@ object ExerciseManager {
         Thread{
             LoadDescriptions()
         }.start()
-        Thread {
-            exercises.forEach { exercise ->
-                exercise.SetBestMeasurement()
-            }
-        }.start()
     }
 
     private fun loadMeasurementsFromDatabase(db: MeasurementDatabase) {

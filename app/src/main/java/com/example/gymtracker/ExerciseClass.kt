@@ -2,7 +2,6 @@
 package com.example.gymtracker
 
 import android.content.Context
-import android.util.Log
 import java.io.Serializable
 
 class ExerciseClass(
@@ -14,10 +13,13 @@ class ExerciseClass(
 ) : Serializable {
     var categoryString = ""
     var exerciseDecs = ""
+
     init {
         categoryString = category.toString().lowercase()
         categoryString = categoryString.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+        setBestMeasurement() // Ensure bestMeasurement is set during initialization
     }
+
     fun getPhotoResourceId(context: Context): Int {
         val resourceId = context.resources.getIdentifier(photoString, "drawable", context.packageName)
         return if (resourceId != 0) {
@@ -29,14 +31,7 @@ class ExerciseClass(
 
     var weightDiff: Float = 0f
 
-    fun SetBestMeasurement() {
-        bestMeasurement = measurementsList.maxByOrNull { it.weight }
-        weightDiff = bestMeasurement?.let { best ->
-            measurementsList.lastOrNull()?.let { last ->
-                last.weight - best.weight
-            } ?: 0f
-        } ?: 0f
+    fun setBestMeasurement() {
+        bestMeasurement = measurementsList.maxByOrNull { it.reps * it.weight }
     }
-
-
 }

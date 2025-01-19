@@ -3,6 +3,7 @@ package com.example.gymtracker
 
 import WeeklyProgress
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -99,10 +100,10 @@ class ExerciseView : ComponentActivity() {
             return
         }
         exercise.measurementsList.add(measurement)
-        exercise.SetBestMeasurement()
         val event = MeasurementEvent.InsertMeasurement(measurement)
         measurementViewModel.onEvent(event)
         measurementsList.value = exercise.measurementsList.toMutableList()
+        exercise.setBestMeasurement()
     }
 
     fun deleteMeasurementDatabase(
@@ -112,7 +113,7 @@ class ExerciseView : ComponentActivity() {
         val event = MeasurementEvent.DeleteMeasurement(measurement)
         measurementViewModel.onEvent(event)
         exercise.measurementsList.remove(measurement)
-        exercise.SetBestMeasurement()
+        exercise.setBestMeasurement()
         measurementsList.value = exercise.measurementsList.toMutableList()
     }
 
@@ -123,15 +124,20 @@ class ExerciseView : ComponentActivity() {
 
     fun createWeeklyProgressList(measurements: List<Measurement>): MutableList<WeeklyProgress> {
         val weeklyProgressMap = measurements.groupBy { it.weekOfTheYear }
-        val weeklyProgressList = mutableListOf<WeeklyProgress>()
-        var lastWeek: WeeklyProgress? = null
+        val sortedMap = weeklyProgressMap.entries.sortedBy { it.value.first().date }
 
-        for ((weekNumber, weekMeasurements) in weeklyProgressMap) {
+        val weeklyProgressList = mutableListOf<WeeklyProgress>()
+
+        var lastWeek: WeeklyProgress? = null
+        for ((weekNumber, weekMeasurements) in sortedMap) {
             val weeklyProgress = WeeklyProgress(weekMeasurements, weekNumber, lastWeek)
             weeklyProgressList.add(weeklyProgress)
             lastWeek = weeklyProgress
         }
-
+        //weeklyProgressList.sortBy { it.firstDate }
+//        for (weeklyProgress in weeklyProgressList) {
+//            Log.d("Weekly Progress", "Week ${weeklyProgress.weekNumber} with value ${weeklyProgress.avgWeight}")
+//        }
         return weeklyProgressList
     }
 
@@ -157,6 +163,7 @@ class ExerciseView : ComponentActivity() {
             createWeeklyProgressList(measurementsList.value).sortedByDescending { it.firstDate }
         }
 
+        Log.d("Best Measurement", exercise.bestMeasurement?.weight.toString())
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -283,7 +290,6 @@ class ExerciseView : ComponentActivity() {
                                 }
                             }
                         } else {
-
                             stickyHeader {
                                 Row(
                                     modifier = Modifier
@@ -327,30 +333,24 @@ class ExerciseView : ComponentActivity() {
                                         text = "${weeklyProgress.year}",
                                         modifier = Modifier.weight(yearSize)
                                     )
+                                    val avgDifference = weeklyProgress.avgWeightDifference
                                     Text(
-                                        text = "${roundTheNumber(weeklyProgress.avgWeight)}",
+                                        text = "${roundTheNumber(avgDifference)}",
                                         modifier = Modifier.weight(avgWeightSize)
                                     )
-                                    val avgDifference = weeklyProgress.avgWeightDifference
+                                    val tint = GetTint(avgDifference)
                                     Row(
                                         modifier = Modifier.weight(weightDiffSize)
                                     ) {
                                         Icon(
-                                            painter = painterResource(id = if (avgDifference >= 0) R.drawable.up else R.drawable.down),
+                                            painter = painterResource(id = GetRDrawable(avgDifference)),
                                             contentDescription = "Weight Difference",
                                             modifier = Modifier.size(22.dp),
-                                            tint = if (avgDifference >= 0) Color.Green else Color.Red
+                                            tint = tint
                                         )
-                                        val currentIndex = weeklyProgressList.indexOf(weeklyProgress)
-                                        val prevIndex = currentIndex + 1
 
-                                        val result = if (prevIndex < weeklyProgressList.size) {
-                                            weeklyProgressList[prevIndex].avgWeightDifference
-                                        } else {
-                                            0f
-                                        }
                                         Text(
-                                            text = " ${roundTheNumber(result)}",
+                                            text = " ${roundTheNumber(avgDifference)}",
                                         )
                                     }
                                 }
@@ -519,3 +519,15 @@ class ExerciseView : ComponentActivity() {
             }
         }
     }}
+fun GetTint(value: Float): Color{
+    if(value == 0.0f) return Color.Gray
+
+    if(value > 0) return Color.Green
+    return Color.Red
+}
+fun GetRDrawable(value: Float): Int{
+    if(value == 0.0f) return R.drawable.none
+
+    if(value > 0) return R.drawable.up
+    return R.drawable.down
+}
