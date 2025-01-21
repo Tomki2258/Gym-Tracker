@@ -50,17 +50,17 @@ object ExerciseManager {
     fun LoadExercises(): List<ExerciseClass> {
         val exerciseList = listOf(
             ExerciseClass("Chest fly", Categories.CHEST),
-            ExerciseClass("Leg curl", Categories.LEGS),
-            ExerciseClass("Leg press", Categories.LEGS),
-            ExerciseClass("Dumbbell biceps", Categories.BICEPS),
             ExerciseClass("Bench press", Categories.CHEST),
-            ExerciseClass("Seated barbell press", Categories.SHOULDERS),
-            ExerciseClass("Dumbbell press", Categories.CHEST),
-            ExerciseClass("Barbell Curl", Categories.BACK),
+            ExerciseClass("Dumbbell Chest Press", Categories.CHEST),
+            ExerciseClass("Pec Deck", Categories.CHEST),
+            ExerciseClass("Reverse Machine Fly", Categories.SHOULDERS),
+            ExerciseClass("Shoulder Press", Categories.SHOULDERS),
+            ExerciseClass("Barbell Curl", Categories.BICEPS),
             ExerciseClass("Tricep Pushdown", Categories.TRICEPS),
-            ExerciseClass("Seated Row", Categories.BACK),
+            ExerciseClass("Cable Grip", Categories.BACK),
             ExerciseClass("Lat Pulldown", Categories.BACK),
-            ExerciseClass("Cock sucking", Categories.ABS),
+            ExerciseClass("Machine Crunch", Categories.ABS),
+            ExerciseClass("Leg Raise" , Categories.ABS),
         )
         return exerciseList
     }

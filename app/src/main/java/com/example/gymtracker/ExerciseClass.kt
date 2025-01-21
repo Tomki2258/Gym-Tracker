@@ -17,7 +17,7 @@ class ExerciseClass(
     init {
         categoryString = category.toString().lowercase()
         categoryString = categoryString.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
-        setBestMeasurement() // Ensure bestMeasurement is set during initialization
+        setBestMeasurement()
     }
 
     fun getPhotoResourceId(context: Context): Int {

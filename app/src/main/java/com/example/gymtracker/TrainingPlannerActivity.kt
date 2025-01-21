@@ -1,3 +1,4 @@
+// app/src/main/java/com/example/gymtracker/TrainingPlannerActivity.kt
 package com.example.gymtracker
 
 import DayTrainingPlan
@@ -6,36 +7,18 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.foundation.shape.RoundedCornerShape // Add this import
 import java.util.Calendar
 
 class TrainingPlannerActivity : ComponentActivity() {
@@ -45,18 +28,19 @@ class TrainingPlannerActivity : ComponentActivity() {
         setContent {
             Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                 MainView(
-                            name = "Android",
+                    name = "Android",
                     modifier = Modifier.padding(innerPadding)
                 )
             }
         }
     }
 }
+
 var showAddDialog = mutableStateOf(false)
 
 @Composable
 fun MainView(name: String, modifier: Modifier = Modifier) {
-
+    val context = LocalContext.current
     val calendar: Calendar = Calendar.getInstance()
     val currentDayIndex = remember {
         val dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK)
@@ -65,10 +49,13 @@ fun MainView(name: String, modifier: Modifier = Modifier) {
     }
 
     showAddDialog = remember { mutableStateOf(false) }
-    val exercises = remember { mutableStateOf(TrainingManager.daysOfWeek[currentDayIndex.value].exercises.toMutableList()) }
+    val exercises = remember { mutableStateOf(mutableListOf<ExerciseClass>()) }
 
     LaunchedEffect(currentDayIndex.value) {
-        exercises.value = TrainingManager.daysOfWeek[currentDayIndex.value].exercises.toMutableList()
+        val trainingPlans = TrainingManager.getTrainingPlan(context, TrainingManager.daysOfWeek[currentDayIndex.value].day)
+        exercises.value = trainingPlans.flatMap { it.exercises.split(",") }.mapNotNull { exerciseName ->
+            ExerciseManager.exercises.find { it.name == exerciseName }
+        }.toMutableList()
     }
 
     Column(
@@ -116,7 +103,7 @@ fun MainView(name: String, modifier: Modifier = Modifier) {
 
         LazyColumn {
             items(exercises.value) { exercise ->
-                ExericeCard(exercise)
+                ExericeCard(exercise, currentDayIndex.value, exercises)
             }
         }
         AddExercisePanel()
@@ -128,6 +115,7 @@ fun MainView(name: String, modifier: Modifier = Modifier) {
                     if (!currentDay.exercises.contains(exercise)) {
                         currentDay.exercises.add(exercise)
                         exercises.value = currentDay.exercises.toMutableList()
+                        TrainingManager.saveTrainingPlan(context, currentDay.day, currentDay.exercises.joinToString(",") { it.name })
                     }
                 }
             )
@@ -145,9 +133,7 @@ fun AddExericeToDay(onDismissRequest: () -> Unit, onAddExercise: (ExerciseClass)
                 .padding(16.dp),
             shape = RoundedCornerShape(16.dp),
         ) {
-            LazyColumn(
-                modifier = Modifier.horizontalScroll(rememberScrollState())
-            ) {
+            LazyColumn {
                 items(ExerciseManager.exercises) { exercise ->
                     Row {
                         Text(text = exercise.name)
@@ -168,8 +154,9 @@ fun AddExericeToDay(onDismissRequest: () -> Unit, onAddExercise: (ExerciseClass)
         }
     }
 }
+
 @Composable
-fun AddExercisePanel(){
+fun AddExercisePanel() {
     Card(
         modifier = Modifier
             .padding(8.dp)
@@ -186,31 +173,43 @@ fun AddExercisePanel(){
         }
     }
 }
+
 @Composable
-fun ExericeCard(exercise: ExerciseClass) {
+fun ExericeCard(exercise: ExerciseClass, dayIndex: Int, exercises: MutableState<MutableList<ExerciseClass>>) {
+    val context = LocalContext.current
     Card(
         modifier = Modifier
             .padding(8.dp)
             .fillMaxWidth()
             .height(100.dp)
     ) {
-        Row(
-        )
-        {
+        Row {
             Icon(
-                painter = painterResource(id = exercise.getPhotoResourceId(LocalContext.current)),
+                painter = painterResource(id = exercise.getPhotoResourceId(context)),
                 contentDescription = "Exercise photo",
                 modifier = Modifier.padding(8.dp)
             )
             Column {
                 Text(text = exercise.name)
                 Text(text = exercise.categoryString)
+                IconButton(
+                    onClick = {
+                        val currentDay = TrainingManager.daysOfWeek[dayIndex]
+                        currentDay.exercises.remove(exercise)
+                        exercises.value = currentDay.exercises.toMutableList()
+                        TrainingManager.removeExerciseFromPlan(context, currentDay.day, exercise.name)
+                    }
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.none),
+                        contentDescription = "Remove exercise"
+                    )
+                }
             }
         }
     }
 }
 
-@Preview(showBackground = true)
 @Composable
 fun MainViewPreview() {
     MainView("Android")

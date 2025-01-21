@@ -416,8 +416,8 @@ class ExerciseView : ComponentActivity() {
         measurementsList: MutableState<MutableList<Measurement>>,
         exerciseView: ExerciseView
     ) {
-        val reps = remember { mutableIntStateOf(0) }
-        val weight = remember { mutableFloatStateOf(0f) }
+        val reps = remember { mutableStateOf<String>("") }
+        val weight = remember { mutableStateOf<String>("") }
         val context = LocalContext.current
         val scope = rememberCoroutineScope()
 
@@ -432,7 +432,7 @@ class ExerciseView : ComponentActivity() {
                         TextField(
                             modifier = Modifier.width(75.dp),
                             value = reps.value.toString(),
-                            onValueChange = { reps.value = it.toInt() },
+                            onValueChange = { reps.value = it },
                             label = { Text("Reps") }
                         )
                         Text(
@@ -440,16 +440,28 @@ class ExerciseView : ComponentActivity() {
                             fontSize = 20.sp
                         )
                         TextField(
-                            value = weight.value.toString(),
-                            onValueChange = { weight.floatValue = it.toFloat() },
+                            value = weight.value,
+                            onValueChange = { weight.value = it },
                             label = { Text("Weight") }
                         )
                     }
                     Button(onClick = {
+                        val repsInt = reps.value.toIntOrNull()
+                        val weightFloat = weight.value.toFloatOrNull()
+
+                        if (repsInt == null || weightFloat == null) {
+                            ToastManager(context, "Reps must be an integer and weight must be a number")
+                            return@Button
+                        }
+                        if (repsInt <= 0 || weightFloat <= 0.0f) {
+                            ToastManager(context, "Reps or weight cannot be less than or equal to 0")
+                            return@Button
+                        }
+
                         scope.launch {
                             exerciseView.addMeasurementDatabase(
-                                reps.intValue,
-                                weight.floatValue,
+                                reps.value.toInt(),
+                                weight.value.toFloat(),
                                 exercise.name,
                                 measurementsList
                             )

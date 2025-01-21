@@ -70,7 +70,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         ExerciseManager.initialize(this)
         UserManager.initialize(this)
-        TrainingManager.init(this)
+        //TrainingManager.init(this)
         enableEdgeToEdge()
         setContent {
             Scaffold(
