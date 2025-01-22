@@ -218,14 +218,32 @@ fun MainView(modifier: Modifier = Modifier, measurementViewModel: MeasurementVie
                 .padding(8.dp),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            Button(onClick = { showNickameDialog.value = true }) {
-                Text(text = "User Profile")
+            IconButton(
+                onClick = { showNickameDialog.value = true },
+                modifier = Modifier.width(50.dp)
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.icons8_male_user_100),
+                    contentDescription = "User Icon"
+                )
             }
-            Button(onClick = { LaunchTrainingPlanIntent(context) }) {
-                Text(text = "Training Plan")
+            IconButton(
+                onClick = { LaunchTrainingPlanIntent(context) },
+                modifier = Modifier.width(100.dp)
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.calendar),
+                    contentDescription = "User Icon"
+                )
             }
-            Button(onClick = { showHourDialog.value = true }) {
-                Text(text = "Suplements")
+            IconButton(
+                onClick = { showHourDialog.value = true },
+                modifier = Modifier.width(100.dp)
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.meds),
+                    contentDescription = "User Icon"
+                )
             }
         }
 
@@ -330,6 +348,8 @@ fun HourPicker(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.padding(8.dp)
             ) {
+                Text(text = "Set supplements notification",
+                    modifier = Modifier.padding(4.dp))
                 TimeInput(
                     state = timePickerState,
                 )
