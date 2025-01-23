@@ -10,12 +10,12 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -202,7 +202,7 @@ fun MainView(modifier: Modifier = Modifier, measurementViewModel: MeasurementVie
                 modifier = Modifier
                     .fillMaxSize()
                     .horizontalScroll(rememberScrollState())
-                    .padding(0.dp, 0.dp, 0.dp, 65.dp),
+                    .padding(0.dp, 0.dp, 0.dp, 47.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 ExerciseList(ExerciseManager.exercises, currentCategory)
@@ -215,12 +215,12 @@ fun MainView(modifier: Modifier = Modifier, measurementViewModel: MeasurementVie
                 .align(Alignment.BottomStart)
                 .fillMaxWidth()
                 .background(Color.LightGray)
-                .padding(8.dp),
+                .padding(2.dp),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
             IconButton(
                 onClick = { showNickameDialog.value = true },
-                modifier = Modifier.width(50.dp)
+                modifier = Modifier.weight(1f)
             ) {
                 Icon(
                     painter = painterResource(R.drawable.icons8_male_user_100),
@@ -229,7 +229,7 @@ fun MainView(modifier: Modifier = Modifier, measurementViewModel: MeasurementVie
             }
             IconButton(
                 onClick = { LaunchTrainingPlanIntent(context) },
-                modifier = Modifier.width(100.dp)
+                modifier = Modifier.weight(1f)
             ) {
                 Icon(
                     painter = painterResource(R.drawable.calendar),
@@ -238,7 +238,7 @@ fun MainView(modifier: Modifier = Modifier, measurementViewModel: MeasurementVie
             }
             IconButton(
                 onClick = { showHourDialog.value = true },
-                modifier = Modifier.width(100.dp)
+                modifier = Modifier.weight(1f)
             ) {
                 Icon(
                     painter = painterResource(R.drawable.meds),
@@ -292,16 +292,23 @@ fun ExerciseCard(exercise: ExerciseClass, index: Int) {
         ) {
             Column(
                 modifier = Modifier.padding(16.dp)
+                .clickable {
+                    LaunchExerciseIntent(index, context)
+                }
             ) {
                 Row {
-                    Column {
-                        Text(text = exercise.name)
-                        Text(text = "Category: ${exercise.categoryString}")
-                        Button(onClick = {
-                            LaunchExerciseIntent(index, context)
-                        }) {
-                            Text(text = "Choose")
-                        }
+                    Column (
+                        modifier = Modifier.width(200.dp)
+                    ){
+                        Text(text = exercise.name
+                        , fontSize = 24.sp)
+                        Text(text = "Category: ${exercise.categoryString}"
+                        , fontSize = 16.sp)
+//                        Button(onClick = {
+//                            LaunchExerciseIntent(index, context)
+//                        }) {
+//                            Text(text = "Choose")
+//                        }
                     }
                     if (photoId != 0) {
                         Image(
