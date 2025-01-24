@@ -479,7 +479,8 @@ class ExerciseView : ComponentActivity() {
     fun ShowExerciseInfo(onDismissRequest: () -> Unit) {
         Dialog(onDismissRequest = { onDismissRequest() }) {
             Card(
-                modifier = Modifier.size(300.dp)
+                modifier = Modifier.height(200.dp)
+                    .width(400.dp)
             ) {
                 Text(
                     modifier = Modifier.padding(16.dp),
