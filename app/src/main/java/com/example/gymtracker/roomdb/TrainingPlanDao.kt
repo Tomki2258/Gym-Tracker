@@ -16,4 +16,7 @@ interface TrainingPlanDao {
 
     @Query("SELECT * FROM training_plan WHERE day = :day")
     suspend fun getTrainingPlanByDay(day: String): MutableList<TrainingPlan>
+
+    @Query("DELETE FROM training_plan WHERE day = :day AND exercise = :exercise")
+    suspend fun deleteTrainingPlanByDay(day: String, exercise: String)
 }

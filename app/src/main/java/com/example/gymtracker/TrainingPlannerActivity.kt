@@ -1,15 +1,14 @@
 // app/src/main/java/com/example/gymtracker/TrainingPlannerActivity.kt
 package com.example.gymtracker
 
-import DayTrainingPlan
+import android.content.Context
 import android.os.Bundle
-import android.util.Log
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -30,12 +29,11 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -58,135 +56,160 @@ class TrainingPlannerActivity : ComponentActivity() {
 }
 
 var showAddDialog = mutableStateOf(false)
+var showRemoveDialog = mutableStateOf(false)
+var selectedToRemove = mutableStateOf(ExerciseClass("", Categories.CHEST))
 
-fun getExercisesFromDay(day: DayTrainingPlan): MutableList<ExerciseClass> {
+fun loadExercisesForDay(context: Context, day: String): MutableList<ExerciseClass> {
     val exercises = mutableListOf<ExerciseClass>()
-    for (exercise in day.exercises) {
-        exercises.add(ExerciseManager.exercises.find { it.name == exercise.name }!!)
+    val planTrainings = TrainingManager.getTrainingPlan(context, day)
+    planTrainings.forEach { training ->
+        val exercise = ExerciseManager.exercises.find { it.name == training.exercise }
+        if (exercise != null) {
+            exercises.add(exercise)
+        }
     }
     return exercises
+}
+
+var exercisesView = mutableStateOf(mutableListOf<ExerciseClass>())
+var currentDayIndex = mutableStateOf(0)
+
+fun getStringDay(dayIndex: Int): String {
+    return when (dayIndex) {
+        0 -> "Monday"
+        1 -> "Tuesday"
+        2 -> "Wednesday"
+        3 -> "Thursday"
+        4 -> "Friday"
+        5 -> "Saturday"
+        6 -> "Sunday"
+        else -> "Monday"
+    }
 }
 
 @Composable
 fun MainView(name: String, modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val calendar: Calendar = Calendar.getInstance()
-    val currentDayIndex = remember {
+    currentDayIndex = remember {
         val dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK)
         val adjustedDayIndex = (dayOfWeek - 1) % 7
         mutableStateOf(adjustedDayIndex)
     }
 
     showAddDialog = remember { mutableStateOf(false) }
-    var exercises = remember { mutableStateOf(mutableListOf<ExerciseClass>()) }
-
-    LaunchedEffect(currentDayIndex.value) {
-        //NEED TO FIX LOADING EXERCISES
-
-
-        exercises.value.clear()
-
-        val planTrainings = TrainingManager.getTrainingPlan(
-            context,
-            TrainingManager.daysOfWeek[currentDayIndex.value].day
-        )
-        planTrainings.forEach { trainingPlan ->
-            val exercise = ExerciseManager.exercises.find { it.name.equals(trainingPlan.exercise) }
-            if (exercise != null) {
-                Log.d("found", exercise.name)
-                exercises.value.add(exercise)
-            }
-        }
-        Log.d(TrainingManager.daysOfWeek[currentDayIndex.value].day.toString(), exercises.value.size.toString())
-    }
-
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally
+    exercisesView.value = loadExercisesForDay(
+        context,
+        TrainingManager.daysOfWeek[currentDayIndex.value].day
+    )
+    Box(
+        modifier = Modifier.fillMaxSize()
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Button(
-                onClick = {
-                    currentDayIndex.value--
-                    if (currentDayIndex.value < 0) {
-                        currentDayIndex.value = TrainingManager.daysOfWeek.size - 1
-                    }
-                }
-            ) {
-                Text(text = "<-")
-            }
-
             Text(
-                text = "Training Planner",
+                text = TrainingManager.daysOfWeek[currentDayIndex.value].day,
                 modifier = Modifier.padding(8.dp)
             )
 
-            Button(
-                onClick = {
-                    currentDayIndex.value++
-                    if (currentDayIndex.value >= TrainingManager.daysOfWeek.size) {
-                        currentDayIndex.value = 0
-                    }
+            LazyColumn {
+                items(exercisesView.value) { exercise ->
+                    ExericeCard(exercise, currentDayIndex.value)
                 }
+            }
+
+            FloatingActionButton(
+                onClick = { showAddDialog.value = true },
+                modifier = Modifier
+                    .padding(16.dp)
+                    .requiredSize(56.dp)
             ) {
-                Text(text = "->")
+                Icon(
+                    painter = painterResource(id = R.drawable.add),
+                    contentDescription = "Add measurement",
+                    modifier = Modifier.fillMaxSize(0.6f)
+                )
             }
-        }
 
-        Text(
-            text = TrainingManager.daysOfWeek[currentDayIndex.value].day,
-            modifier = Modifier.padding(8.dp)
-        )
-
-        LazyColumn {
-            items(exercises.value) { exercise ->
-                Log.d("Exercise", exercise.name)
-                ExericeCard(exercise, currentDayIndex.value, exercises)
-            }
-        }
-        //AddExercisePanel()
-        FloatingActionButton(
-            onClick = { showAddDialog.value = true  },
-            modifier = Modifier
-                .padding(16.dp)
-                .requiredSize(56.dp)
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.add),
-                contentDescription = "Add measurement",
-                modifier = Modifier.fillMaxSize(0.6f)
-            )
-        }
-        if (showAddDialog.value) {
-            AddExericeToDay(
-                currentDayIndex = currentDayIndex.value,
-                onDismissRequest = { showAddDialog.value = false },
-                onAddExercise = { exercise ->
-                    val currentDay = TrainingManager.daysOfWeek[currentDayIndex.value]
-                    if (!currentDay.exercises.contains(exercise)) {
+            if (showAddDialog.value) {
+                AddExericeToDay(
+                    onDismissRequest = { showAddDialog.value = false },
+                    onAddExercise = { exercise ->
+                        val currentDay = TrainingManager.daysOfWeek[currentDayIndex.value]
                         currentDay.exercises.add(exercise)
-                        exercises.value = currentDay.exercises.toMutableList()
+                        exercisesView.value = currentDay.exercises.toMutableList()
                         TrainingManager.saveTrainingPlan(
                             context,
                             currentDay.day,
                             exercise.name
                         )
-                    } else {
-                        Toast.makeText(context, "Exercise already added", Toast.LENGTH_SHORT).show()
                     }
+                )
+            }
+
+            if (showRemoveDialog.value) {
+                RemoveExerciseCard(selectedToRemove.value)
+            }
+        }
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp)
+                .align(Alignment.BottomCenter),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            IconButton(
+                modifier = Modifier
+                    .size(25.dp)
+                    .scale(scaleX = -1f, scaleY = 1f),
+                onClick = {
+                    currentDayIndex.value--
+                    if (currentDayIndex.value < 0) {
+                        currentDayIndex.value = TrainingManager.daysOfWeek.size - 1
+                    }
+                    exercisesView.value = loadExercisesForDay(
+                        context,
+                        TrainingManager.daysOfWeek[currentDayIndex.value].day
+                    )
                 }
-            )
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.right_arrow),
+                    contentDescription = "Previous day"
+                )
+            }
+
+            IconButton(
+                modifier = Modifier
+                    .size(25.dp)
+                    .scale(scaleX = 1f, scaleY = 1f),
+                onClick = {
+                    currentDayIndex.value++
+                    if (currentDayIndex.value >= TrainingManager.daysOfWeek.size) {
+                        currentDayIndex.value = 0
+                    }
+                    exercisesView.value = loadExercisesForDay(
+                        context,
+                        TrainingManager.daysOfWeek[currentDayIndex.value].day
+                    )
+                }
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.right_arrow),
+                    contentDescription = "Next day"
+                )
+            }
         }
     }
 }
-
 @Composable
-fun AddExericeToDay(currentDayIndex: Int, onDismissRequest: () -> Unit, onAddExercise: (ExerciseClass) -> Unit) {
+fun AddExericeToDay(
+    onDismissRequest: () -> Unit,
+    onAddExercise: (ExerciseClass) -> Unit
+) {
     Dialog(onDismissRequest = { onDismissRequest() }) {
         Card(
             modifier = Modifier
@@ -200,14 +223,12 @@ fun AddExericeToDay(currentDayIndex: Int, onDismissRequest: () -> Unit, onAddExe
                     Row(
                         modifier = Modifier
                             .clickable {
-                                val currentDay = TrainingManager.daysOfWeek[currentDayIndex]
-                                if (currentDay.exercises.contains(exercise)) {
+                                if (exercisesView.value.contains(exercise)) {
                                     onDismissRequest()
-                                    //Toast.makeText(LocalContext.current, "Exercise already added", Toast.LENGTH_SHORT).show()
-                                } else {
-                                    onAddExercise(exercise)
-                                    onDismissRequest()
+                                    return@clickable
                                 }
+                                onAddExercise(exercise)
+                                onDismissRequest()
                             }
                             .padding(8.dp)
                     ) {
@@ -256,7 +277,6 @@ fun AddExercisePanel() {
 fun ExericeCard(
     exercise: ExerciseClass,
     dayIndex: Int,
-    exercises: MutableState<MutableList<ExerciseClass>>
 ) {
     val context = LocalContext.current
     Card(
@@ -264,6 +284,10 @@ fun ExericeCard(
             .padding(8.dp)
             .fillMaxWidth()
             .height(100.dp)
+            .clickable {
+                showRemoveDialog.value = true
+                selectedToRemove.value = exercise
+            },
     ) {
         Row {
             Icon(
@@ -274,64 +298,54 @@ fun ExericeCard(
             Column {
                 Text(text = exercise.name)
                 Text(text = exercise.categoryString)
-                IconButton(
-                    onClick = {
-                        val currentDay = TrainingManager.daysOfWeek[dayIndex]
-                        currentDay.exercises.remove(exercise)
-                        exercises.value = currentDay.exercises.toMutableList()
-                        TrainingManager.removeExerciseFromPlan(
-                            context,
-                            currentDay.day,
-                            exercise.name
-                        )
-                    }
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.none),
-                        contentDescription = "Remove exercise"
-                    )
-                }
             }
         }
     }
 }
 
 @Composable
-fun MainViewPreview() {
-    MainView("Android")
-}
-
-fun PrintTrainingsFromDay(day: DayTrainingPlan) {
-    for (exercise in day.exercises) {
-        Log.d("Exercise", exercise.name)
-    }
-}
-@Composable
-fun RemoveExerciseCard(exercise: ExerciseClass){
-    Card(
-        modifier = Modifier
-            .padding(8.dp)
-            .fillMaxWidth()
-            .height(100.dp)
+fun RemoveExerciseCard(exercise: ExerciseClass) {
+    val context = LocalContext.current
+    Dialog(
+        onDismissRequest = {
+            showRemoveDialog.value = false
+        }
     ) {
-        Row {
-            Icon(
-                painter = painterResource(id = R.drawable.add),
-                contentDescription = "Exercise photo",
-                modifier = Modifier.padding(8.dp)
-            )
-            Column {
-                Text(text = exercise.name)
-                Text(text = exercise.categoryString)
-                IconButton(
-                    onClick = {
-                        // Remove exercise from the training plan
-                    }
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(100.dp)
+                .padding(16.dp),
+            shape = RoundedCornerShape(16.dp),
+        ) {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(text = "Do you want to remove ${exercise.name} from the training plan?")
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Icon(
-                        painter = painterResource(id = exercise.getPhotoResourceId(LocalContext.current)),
-                        contentDescription = "Remove exercise"
-                    )
+                    Button(
+                        onClick = {
+                            showRemoveDialog.value = false
+                            TrainingManager.removeExerciseFromPlan(
+                                context,
+                                getStringDay(currentDayIndex.value),
+                                exercise.name
+                            )
+                        }
+                    ) {
+                        Text(text = "Yes")
+                    }
+                    Button(
+                        onClick = {
+                            showRemoveDialog.value = false
+                        }
+                    ) {
+                        Text(text = "No")
+                    }
                 }
             }
         }

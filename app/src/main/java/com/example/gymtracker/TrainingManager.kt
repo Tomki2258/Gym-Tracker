@@ -3,6 +3,7 @@ package com.example.gymtracker
 
 import DayTrainingPlan
 import android.content.Context
+import android.util.Log
 import androidx.room.Room
 import com.example.gymtracker.roomdb.TrainingplanDatabase
 import com.example.gymtracker.roomdb.TrainingPlan
@@ -51,12 +52,14 @@ object TrainingManager {
     fun removeExerciseFromPlan(context: Context, day: String, exercise: String) {
         val db = getDatabase(context)
         val trainingPlans = getTrainingPlan(context, day)
-        val updatedPlans = trainingPlans.map { plan ->
-            val updatedExercises = plan.exercise.split(",").filter { it != exercise }.joinToString(",")
-            plan.copy(exercise = updatedExercises)
-        }
-        runBlocking {
-            updatedPlans.forEach { db.trainingPlanDao().update(it) }
+        Log.d("TrainingManager", "Removing $exercise from $day")
+        trainingPlans.forEach {
+            if (it.exercise == exercise) {
+                Log.d("TrainingManager", "Deleting $exercise from $day")
+                runBlocking {
+                    db.trainingPlanDao().deleteTrainingPlanByDay(day, exercise)
+                }
+            }
         }
     }
     fun deleteDatabase(context: Context) {
