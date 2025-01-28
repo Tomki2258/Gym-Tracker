@@ -59,25 +59,45 @@ class TrainingPlannerActivity : ComponentActivity() {
 
 var showAddDialog = mutableStateOf(false)
 
+fun getExercisesFromDay(day: DayTrainingPlan): MutableList<ExerciseClass> {
+    val exercises = mutableListOf<ExerciseClass>()
+    for (exercise in day.exercises) {
+        exercises.add(ExerciseManager.exercises.find { it.name == exercise.name }!!)
+    }
+    return exercises
+}
+
 @Composable
 fun MainView(name: String, modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val calendar: Calendar = Calendar.getInstance()
     val currentDayIndex = remember {
         val dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK)
-        val adjustedDayIndex = (dayOfWeek + 5) % 7
+        val adjustedDayIndex = (dayOfWeek - 1) % 7
         mutableStateOf(adjustedDayIndex)
     }
 
     showAddDialog = remember { mutableStateOf(false) }
-    val exercises = remember { mutableStateOf(mutableListOf<ExerciseClass>()) }
+    var exercises = remember { mutableStateOf(mutableListOf<ExerciseClass>()) }
 
     LaunchedEffect(currentDayIndex.value) {
+        //NEED TO FIX LOADING EXERCISES
+
+
+        exercises.value.clear()
+
         val planTrainings = TrainingManager.getTrainingPlan(
             context,
             TrainingManager.daysOfWeek[currentDayIndex.value].day
         )
-
+        planTrainings.forEach { trainingPlan ->
+            val exercise = ExerciseManager.exercises.find { it.name.equals(trainingPlan.exercise) }
+            if (exercise != null) {
+                Log.d("found", exercise.name)
+                exercises.value.add(exercise)
+            }
+        }
+        Log.d(TrainingManager.daysOfWeek[currentDayIndex.value].day.toString(), exercises.value.size.toString())
     }
 
     Column(
@@ -124,7 +144,8 @@ fun MainView(name: String, modifier: Modifier = Modifier) {
         )
 
         LazyColumn {
-            items(exercises.value.distinct()) { exercise ->
+            items(exercises.value) { exercise ->
+                Log.d("Exercise", exercise.name)
                 ExericeCard(exercise, currentDayIndex.value, exercises)
             }
         }

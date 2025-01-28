@@ -8,5 +8,5 @@ import androidx.room.PrimaryKey
 data class TrainingPlan(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val day: String,
-    val exercises: String
+    val exercise: String
 )

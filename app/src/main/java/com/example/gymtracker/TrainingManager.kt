@@ -33,9 +33,9 @@ object TrainingManager {
         return db!!
     }
 
-    fun saveTrainingPlan(context: Context, day: String, exercises: String) {
+    fun saveTrainingPlan(context: Context, day: String, exercise: String) {
         val db = getDatabase(context)
-        val trainingPlan = TrainingPlan(day = day, exercises = exercises)
+        val trainingPlan = TrainingPlan(day = day, exercise = exercise)
         runBlocking {
             db.trainingPlanDao().insert(trainingPlan)
         }
@@ -52,8 +52,8 @@ object TrainingManager {
         val db = getDatabase(context)
         val trainingPlans = getTrainingPlan(context, day)
         val updatedPlans = trainingPlans.map { plan ->
-            val updatedExercises = plan.exercises.split(",").filter { it != exercise }.joinToString(",")
-            plan.copy(exercises = updatedExercises)
+            val updatedExercises = plan.exercise.split(",").filter { it != exercise }.joinToString(",")
+            plan.copy(exercise = updatedExercises)
         }
         runBlocking {
             updatedPlans.forEach { db.trainingPlanDao().update(it) }
