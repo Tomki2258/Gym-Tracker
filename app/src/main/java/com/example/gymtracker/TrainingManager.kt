@@ -41,7 +41,7 @@ object TrainingManager {
         }
     }
 
-    fun getTrainingPlan(context: Context, day: String): List<TrainingPlan> {
+    fun getTrainingPlan(context: Context, day: String): MutableList<TrainingPlan> {
         val db = getDatabase(context)
         return runBlocking {
             db.trainingPlanDao().getTrainingPlanByDay(day)
@@ -58,5 +58,8 @@ object TrainingManager {
         runBlocking {
             updatedPlans.forEach { db.trainingPlanDao().update(it) }
         }
+    }
+    fun deleteDatabase(context: Context) {
+        context.deleteDatabase("training_plan_database")
     }
 }

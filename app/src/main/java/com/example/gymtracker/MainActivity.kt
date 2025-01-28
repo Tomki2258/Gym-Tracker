@@ -147,6 +147,7 @@ fun MainView(modifier: Modifier = Modifier, measurementViewModel: MeasurementVie
                 )
                 IconButton(onClick = {
                     measurementViewModel.clearAllTables()
+                    TrainingManager.deleteDatabase(context)
                 }) {
                     Icon(
                         painter = painterResource(R.drawable.icons8_settings_500),

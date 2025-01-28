@@ -73,14 +73,11 @@ fun MainView(name: String, modifier: Modifier = Modifier) {
     val exercises = remember { mutableStateOf(mutableListOf<ExerciseClass>()) }
 
     LaunchedEffect(currentDayIndex.value) {
-        val trainingPlans = TrainingManager.getTrainingPlan(
+        val planTrainings = TrainingManager.getTrainingPlan(
             context,
             TrainingManager.daysOfWeek[currentDayIndex.value].day
         )
-        exercises.value =
-            trainingPlans.flatMap { it.exercises.split(",") }.mapNotNull { exerciseName ->
-                ExerciseManager.exercises.find { it.name == exerciseName }
-            }.toMutableList()
+
     }
 
     Column(
@@ -156,7 +153,8 @@ fun MainView(name: String, modifier: Modifier = Modifier) {
                         TrainingManager.saveTrainingPlan(
                             context,
                             currentDay.day,
-                            currentDay.exercises.joinToString(",") { it.name })
+                            exercise.name
+                        )
                     } else {
                         Toast.makeText(context, "Exercise already added", Toast.LENGTH_SHORT).show()
                     }

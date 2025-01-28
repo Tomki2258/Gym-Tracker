@@ -15,5 +15,5 @@ interface TrainingPlanDao {
     suspend fun update(trainingPlan: TrainingPlan)
 
     @Query("SELECT * FROM training_plan WHERE day = :day")
-    suspend fun getTrainingPlanByDay(day: String): List<TrainingPlan>
+    suspend fun getTrainingPlanByDay(day: String): MutableList<TrainingPlan>
 }

@@ -69,4 +69,13 @@ object ExerciseManager {
         val index = exercises.indexOf(exercise)
         return exercises[index].measurementsList
     }
+
+    fun getExerciseByName(exercise: String): ExerciseClass {
+        exercises.forEach { exerciseIt ->
+            if (exerciseIt.name == exercise) {
+                return exerciseIt
+            }
+        }
+        return ExerciseClass("Not found", Categories.CHEST)
+    }
 }
