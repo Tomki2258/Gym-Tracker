@@ -27,6 +27,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -418,6 +419,7 @@ class ExerciseView : ComponentActivity() {
     ) {
         val reps = remember { mutableStateOf<String>("") }
         val weight = remember { mutableStateOf<String>("") }
+        val isDoubleWeight = remember { mutableStateOf<Boolean>(false) }
         val context = LocalContext.current
         val scope = rememberCoroutineScope()
 
@@ -445,6 +447,17 @@ class ExerciseView : ComponentActivity() {
                             label = { Text("Weight") }
                         )
                     }
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ){
+                        Text(
+                            text="weight on both sides"
+                        )
+                        RadioButton(
+                            selected = isDoubleWeight.value,
+                            onClick = { isDoubleWeight.value = !isDoubleWeight.value }
+                        )
+                    }
                     Button(onClick = {
                         val repsInt = reps.value.toIntOrNull()
                         val weightFloat = weight.value.toFloatOrNull()
@@ -461,7 +474,7 @@ class ExerciseView : ComponentActivity() {
                         scope.launch {
                             exerciseView.addMeasurementDatabase(
                                 reps.value.toInt(),
-                                weight.value.toFloat(),
+                                weight.value.toFloat() * if(isDoubleWeight.value) 2 else 1,
                                 exercise.name,
                                 measurementsList
                             )

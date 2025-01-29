@@ -55,6 +55,9 @@ import com.example.gymtracker.roomdb.MeasurementViewModel
 import java.util.Calendar
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
+
+private lateinit var service: NotifycationsService
+
 class MainActivity : ComponentActivity() {
     private val db by lazy {
         Room.databaseBuilder(
@@ -70,6 +73,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         ExerciseManager.initialize(this)
         UserManager.initialize(this)
+        service = NotifycationsService(this)
         //TrainingManager.init(this)
         enableEdgeToEdge()
         setContent {
@@ -362,8 +366,8 @@ fun HourPicker(
                     state = timePickerState,
                 )
                 Button(onClick = {
-                    onConfirm
                     SetSumplementsHour(timePickerState.hour, timePickerState.minute)
+                    service.showNotification()
                 }) {
                     Text("Confirm")
                 }
