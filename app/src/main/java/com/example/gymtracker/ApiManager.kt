@@ -6,7 +6,7 @@ import okhttp3.Request
 import java.io.IOException
 
 object ApiManager {
-    const val BASE_URL = "http://192.168.1.75:8080/";
+    const val BASE_URL = "http://192.168.1.53:8080/";
     init {
 //        Thread {
 //            val url = "chestfly"
