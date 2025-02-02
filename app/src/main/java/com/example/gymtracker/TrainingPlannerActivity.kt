@@ -2,6 +2,7 @@
 package com.example.gymtracker
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -37,6 +38,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import java.util.Calendar
 
@@ -106,7 +108,7 @@ fun MainView(name: String, modifier: Modifier = Modifier) {
         modifier = Modifier.fillMaxSize()
     ) {
         Column(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxSize().padding(0.dp, 24.dp, 0.dp, 0.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
@@ -285,19 +287,37 @@ fun ExericeCard(
             .fillMaxWidth()
             .height(100.dp)
             .clickable {
-                showRemoveDialog.value = true
-                selectedToRemove.value = exercise
+                val exerciseIndex = ExerciseManager.exercises.indexOf(exercise)
+                LaunchExerciseIntent(exerciseIndex, context)
             },
     ) {
-        Row {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Icon(
                 painter = painterResource(id = exercise.getPhotoResourceId(context)),
                 contentDescription = "Exercise photo",
                 modifier = Modifier.padding(8.dp)
             )
-            Column {
-                Text(text = exercise.name)
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(text = exercise.name,
+                    fontSize = 20.sp)
                 Text(text = exercise.categoryString)
+            }
+            Spacer(modifier = Modifier.weight(1f))
+            IconButton(
+                onClick = {
+                    showRemoveDialog.value = true
+                    selectedToRemove.value = exercise
+                }
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.none),
+                    contentDescription = "Remove exercise"
+                )
             }
         }
     }
@@ -314,12 +334,12 @@ fun RemoveExerciseCard(exercise: ExerciseClass) {
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(100.dp)
-                .padding(16.dp),
+                .height(100.dp),
             shape = RoundedCornerShape(16.dp),
         ) {
             Column(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier.fillMaxSize()
+                    .padding(8.dp),
                 verticalArrangement = Arrangement.Center
             ) {
                 Text(text = "Do you want to remove ${exercise.name} from the training plan?")
@@ -349,5 +369,11 @@ fun RemoveExerciseCard(exercise: ExerciseClass) {
                 }
             }
         }
+    }
+    fun LaunchExerciseIntent(exerciseIndex: Int, context: Context) {
+        val intent = Intent(context, ExerciseView::class.java).apply {
+            putExtra("EXERCISE_INDEX", exerciseIndex)
+        }
+        context.startActivity(intent)
     }
 }

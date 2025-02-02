@@ -46,4 +46,5 @@
     </string>
     <string name="title_activity_user">UserActivity</string>
     <string name="title_activity_training_planner">TrainingPlannerActivity</string>
+    <string name="serwer_ip">http://83.6.8.137/</string>
 </resources>
