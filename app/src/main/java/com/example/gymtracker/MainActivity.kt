@@ -11,6 +11,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -43,6 +44,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
@@ -57,7 +59,6 @@ import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 
 private lateinit var service: NotifycationsService
-
 class MainActivity : ComponentActivity() {
     private val db by lazy {
         Room.databaseBuilder(
@@ -74,12 +75,14 @@ class MainActivity : ComponentActivity() {
         ExerciseManager.initialize(this)
         UserManager.initialize(this)
         service = NotifycationsService(this)
+
         //TrainingManager.init(this)
         enableEdgeToEdge()
         setContent {
             Scaffold(
                 modifier = Modifier
                     .fillMaxSize()
+
                 //.padding(4.dp, 16.dp, 4.dp, 0.dp)
             ) { innerPadding ->
                 MainView(
@@ -127,8 +130,24 @@ fun MainView(modifier: Modifier = Modifier, measurementViewModel: MeasurementVie
     val context = LocalContext.current
     val showNickameDialog = remember { mutableStateOf(false) }
     val showHourDialog = remember { mutableStateOf(false) }
+    var totalDrag by remember { mutableStateOf(0f) }
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .pointerInput(Unit) {
+                detectHorizontalDragGestures(
+                    onHorizontalDrag = { change, dragAmount ->
+                        change.consume()
+                        totalDrag += dragAmount
+                        Log.d("PRZESUNIECIE: ", "amount: $dragAmount total: $totalDrag")
+                    },
+                    onDragEnd = {
+                        totalDrag = 0f
+                    }
+                )
+            }
+    ) {
         Column(modifier = Modifier.fillMaxWidth()) {
             Row(
                 modifier = Modifier
@@ -147,7 +166,7 @@ fun MainView(modifier: Modifier = Modifier, measurementViewModel: MeasurementVie
                 }
                 Text(
                     modifier = Modifier.padding(0.dp, 16.dp, 0.dp, 0.dp),
-                    text = UserManager.userData.userNick
+                    text = UserManager.wellcomeMessage
                 )
                 IconButton(onClick = {
                     measurementViewModel.clearAllTables()

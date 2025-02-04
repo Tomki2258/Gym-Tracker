@@ -9,11 +9,24 @@ object UserManager {
     private const val PREFS_NAME = "user_prefs"
     private const val KEY_USER_NICK = "user_name"
     var userData by mutableStateOf(UserData(userNick = ""))
-
+    var wellcomeMessage by mutableStateOf("")
+    private val wellcomeMessages = listOf(
+        "Welcome back",
+        "Hello",
+        "Hi",
+        "Good to see you",
+        "Nice to see you",
+        "Welcome",
+        "Hey",
+        "Hi there",
+        "Hello there",
+        "Good to see you again"
+    )
     fun initialize(context: Context) {
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         val userName = prefs.getString(KEY_USER_NICK, context.getString(R.string.user_name)) ?: context.getString(R.string.user_name)
         userData = UserData(userNick = userName)
+        wellcomeMessage = setWellcomeMessage()
     }
 
     fun changeUserNick(context: Context, newNick: String) {
@@ -37,6 +50,8 @@ object UserManager {
             apply()
         }
         ToastManager(context, "Nickname changed to ${newNick}")
-
+    }
+    fun setWellcomeMessage(): String {
+        return wellcomeMessages.random() + ", ${userData.userNick}"
     }
 }

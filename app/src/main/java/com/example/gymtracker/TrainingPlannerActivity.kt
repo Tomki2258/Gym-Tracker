@@ -4,10 +4,12 @@ package com.example.gymtracker
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,11 +32,14 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -89,10 +94,25 @@ fun getStringDay(dayIndex: Int): String {
     }
 }
 
+fun IncreaseDayIndex() {
+    currentDayIndex.value++
+    if (currentDayIndex.value >= TrainingManager.daysOfWeek.size) {
+        currentDayIndex.value = 0
+    }
+}
+
+fun DecreateDayIndex() {
+    currentDayIndex.value--
+    if (currentDayIndex.value < 0) {
+        currentDayIndex.value = TrainingManager.daysOfWeek.size - 1
+    }
+}
+
 @Composable
 fun MainView(name: String, modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val calendar: Calendar = Calendar.getInstance()
+    var totalDrag by remember { mutableStateOf(0f) }
     currentDayIndex = remember {
         val dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK)
         val adjustedDayIndex = (dayOfWeek - 1) % 7
@@ -105,17 +125,58 @@ fun MainView(name: String, modifier: Modifier = Modifier) {
         TrainingManager.daysOfWeek[currentDayIndex.value].day
     )
     Box(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier
+            .fillMaxSize()
+            .pointerInput(Unit) {
+                detectHorizontalDragGestures(
+                    onHorizontalDrag = { change, dragAmount ->
+                        change.consume()
+                        totalDrag += dragAmount
+                        Log.d("PRZESUNIECIE: ", "amount: " + dragAmount + " total: " + totalDrag)
+                    },
+                    onDragEnd = {
+                        if (totalDrag < -25) {
+                            IncreaseDayIndex()
+                            exercisesView.value = loadExercisesForDay(
+                                context,
+                                TrainingManager.daysOfWeek[currentDayIndex.value].day
+                            )
+                        } else if (totalDrag > 25) {
+                            DecreateDayIndex()
+                            exercisesView.value = loadExercisesForDay(
+                                context,
+                                TrainingManager.daysOfWeek[currentDayIndex.value].day
+                            )
+                        }
+//                        if (totalDrag < -15) {
+//                            if (viewModel.currentPage.value < screenCount - 1)
+//                                viewModel.updateCurrentPage(currentPage + 1)
+//                            else
+//                                viewModel.updateCurrentPage(0)
+//                        } else if (totalDrag > 15) {
+//                            if (viewModel.currentPage.value > 0)
+//                                viewModel.updateCurrentPage(currentPage - 1)
+//                            else
+//                                viewModel.updateCurrentPage(screenCount - 1)
+//                        }
+                        totalDrag = 0f
+                    }
+                )
+            }, contentAlignment = Alignment.Center
     ) {
         Column(
-            modifier = Modifier.fillMaxSize().padding(0.dp, 24.dp, 0.dp, 0.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(0.dp, 24.dp, 0.dp, 0.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
                 text = TrainingManager.daysOfWeek[currentDayIndex.value].day,
                 modifier = Modifier.padding(8.dp)
             )
-
+            if(!exercisesView.value.isEmpty()) {
+                WarmUpButton()
+            }
             LazyColumn {
                 items(exercisesView.value) { exercise ->
                     ExericeCard(exercise, currentDayIndex.value)
@@ -168,10 +229,8 @@ fun MainView(name: String, modifier: Modifier = Modifier) {
                     .size(25.dp)
                     .scale(scaleX = -1f, scaleY = 1f),
                 onClick = {
-                    currentDayIndex.value--
-                    if (currentDayIndex.value < 0) {
-                        currentDayIndex.value = TrainingManager.daysOfWeek.size - 1
-                    }
+                    DecreateDayIndex()
+
                     exercisesView.value = loadExercisesForDay(
                         context,
                         TrainingManager.daysOfWeek[currentDayIndex.value].day
@@ -189,10 +248,8 @@ fun MainView(name: String, modifier: Modifier = Modifier) {
                     .size(25.dp)
                     .scale(scaleX = 1f, scaleY = 1f),
                 onClick = {
-                    currentDayIndex.value++
-                    if (currentDayIndex.value >= TrainingManager.daysOfWeek.size) {
-                        currentDayIndex.value = 0
-                    }
+                    IncreaseDayIndex()
+
                     exercisesView.value = loadExercisesForDay(
                         context,
                         TrainingManager.daysOfWeek[currentDayIndex.value].day
@@ -207,6 +264,7 @@ fun MainView(name: String, modifier: Modifier = Modifier) {
         }
     }
 }
+
 @Composable
 fun AddExericeToDay(
     onDismissRequest: () -> Unit,
@@ -303,8 +361,10 @@ fun ExericeCard(
             Column(
                 modifier = Modifier.weight(1f)
             ) {
-                Text(text = exercise.name,
-                    fontSize = 20.sp)
+                Text(
+                    text = exercise.name,
+                    fontSize = 20.sp
+                )
                 Text(text = exercise.categoryString)
             }
             Spacer(modifier = Modifier.weight(1f))
@@ -338,7 +398,8 @@ fun RemoveExerciseCard(exercise: ExerciseClass) {
             shape = RoundedCornerShape(16.dp),
         ) {
             Column(
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier
+                    .fillMaxSize()
                     .padding(8.dp),
                 verticalArrangement = Arrangement.Center
             ) {
@@ -375,5 +436,32 @@ fun RemoveExerciseCard(exercise: ExerciseClass) {
             putExtra("EXERCISE_INDEX", exerciseIndex)
         }
         context.startActivity(intent)
+    }
+}
+
+@Composable
+fun WarmUpButton() {
+    Card(
+        modifier = Modifier
+            .padding(8.dp)
+            .fillMaxWidth()
+            .height(50.dp)
+            .clickable {
+                var url = "warmup"
+                val description = ApiManager.getWarpUp(url)
+                Log.d("WarmUp", description)
+            }
+    ) {
+        Column (
+            modifier = Modifier.fillMaxSize()
+            , horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "Warm Up !",
+                fontSize = 24.sp,
+                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                modifier = Modifier.padding(8.dp)
+            )
+        }
     }
 }

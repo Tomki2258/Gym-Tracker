@@ -30,4 +30,20 @@ object ApiManager {
             "Exception: ${exc.message}"
         }
     }
+    fun getWarpUp(url: String): String {
+        val client = OkHttpClient()
+        val request = Request.Builder()
+            .url(BASE_URL+url)
+            .build()
+        return try {
+            client.newCall(request).execute().use { response ->
+                if (!response.isSuccessful) {
+                    throw IOException("error: ${response.code()}")
+                }
+                response.body()?.string().orEmpty()
+            }
+        } catch (exc: Exception) {
+            "Exception: ${exc.message}"
+        }
+    }
 }
