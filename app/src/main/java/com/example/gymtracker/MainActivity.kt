@@ -1,6 +1,10 @@
 // MainActivity.kt
 package com.example.gymtracker
 
+
+import AndroidAlarmScheduler
+import android.app.AlarmManager
+import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -56,9 +60,13 @@ import com.example.gymtracker.roomdb.MeasurementDatabase
 import com.example.gymtracker.roomdb.MeasurementViewModel
 import java.util.Calendar
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.ZoneId
 
 
 private lateinit var service: NotifycationsService
+private lateinit var alarmScheduler: AndroidAlarmScheduler
 class MainActivity : ComponentActivity() {
     private val db by lazy {
         Room.databaseBuilder(
@@ -131,7 +139,7 @@ fun MainView(modifier: Modifier = Modifier, measurementViewModel: MeasurementVie
     val showNickameDialog = remember { mutableStateOf(false) }
     val showHourDialog = remember { mutableStateOf(false) }
     var totalDrag by remember { mutableStateOf(0f) }
-
+    alarmScheduler = AndroidAlarmScheduler(context)
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -366,6 +374,7 @@ fun HourPicker(
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
 ) {
+    val context = LocalContext.current
     val currentTime = Calendar.getInstance()
 
     val timePickerState = rememberTimePickerState(
@@ -385,15 +394,26 @@ fun HourPicker(
                     state = timePickerState,
                 )
                 Button(onClick = {
-                    SetSumplementsHour(timePickerState.hour, timePickerState.minute)
-                    service.showNotification()
+                    // Cancel the previous alarm
+                    val previousAlarmItem = AlarmItem(
+                        LocalDateTime.of(currentTime.get(Calendar.YEAR), currentTime.get(Calendar.MONTH) + 1, currentTime.get(Calendar.DAY_OF_MONTH), timePickerState.hour, timePickerState.minute),
+                        "Time to take your supplements!"
+                    )
+                    alarmScheduler.cancelAlarm(previousAlarmItem)
+
+                    // Schedule the new alarm
+                    val newAlarmItem = AlarmItem(
+                        LocalDateTime.of(currentTime.get(Calendar.YEAR), currentTime.get(Calendar.MONTH) + 1, currentTime.get(Calendar.DAY_OF_MONTH), timePickerState.hour, timePickerState.minute),
+                        "Time to take your supplements!"
+                    )
+                    alarmScheduler.scheduleAlarm(newAlarmItem)
+                    onConfirm()
                 }) {
                     Text("Confirm")
                 }
             }
         }
     }
-
 }
 
 fun LaunchTrainingPlanIntent(context: Context) {
@@ -450,3 +470,4 @@ fun ChangeNickDialog(onDismissRequest: () -> Unit) {
         }
     }
 }
+

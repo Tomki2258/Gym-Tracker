@@ -13,12 +13,12 @@ class NotifycationsApp : Application() {
     }
 
     private fun createNotificationChannel() {
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-          val channel  = NotificationChannel(
-               NotifycationsService.CHANNEL_ID,
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                NotifycationsService.CHANNEL_ID,
                 "Gym Tracker",
                 NotificationManager.IMPORTANCE_DEFAULT
-          )
+            )
             channel.description = "Gym Tracker Notification"
 
             val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager

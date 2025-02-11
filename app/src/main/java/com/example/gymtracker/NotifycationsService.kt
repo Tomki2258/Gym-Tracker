@@ -10,17 +10,18 @@ class NotifycationsService(
     private val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
     fun showNotification() {
-        //You can also create INTENT to call it on notification click
-        val notifycation = NotificationCompat.Builder(context, CHANNEL_ID)
+        // You can also create INTENT to call it on notification click
+        val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setContentTitle("Gym Tracker")
-            .setContentText("Don't forget your supplements !")
+            .setContentText("Don't forget your supplements!")
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .build()
 
-        notificationManager.notify(1, notifycation)
+        notificationManager.notify(1, notification)
     }
-    companion object{
+
+    companion object {
         const val CHANNEL_ID = "notifyGymTracker"
     }
 }
