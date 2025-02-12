@@ -39,12 +39,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import com.example.gymtracker.ui.theme.GymTrackerTheme
 import java.util.Calendar
 
 class TrainingPlannerActivity : ComponentActivity() {
@@ -52,11 +55,13 @@ class TrainingPlannerActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                MainView(
-                    name = "Android",
-                    modifier = Modifier.padding(innerPadding)
-                )
+            GymTrackerTheme {
+                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                    MainView(
+                        name = "Android",
+                        modifier = Modifier.padding(innerPadding)
+                    )
+                }
             }
         }
     }
@@ -174,7 +179,7 @@ fun MainView(name: String, modifier: Modifier = Modifier) {
                 text = TrainingManager.daysOfWeek[currentDayIndex.value].day,
                 modifier = Modifier.padding(8.dp)
             )
-            if(!exercisesView.value.isEmpty()) {
+            if (!exercisesView.value.isEmpty()) {
                 WarmUpButton()
             }
             LazyColumn {
@@ -356,7 +361,8 @@ fun ExericeCard(
             Icon(
                 painter = painterResource(id = exercise.getPhotoResourceId(context)),
                 contentDescription = "Exercise photo",
-                modifier = Modifier.padding(8.dp)
+                tint = colorResource(id = R.color.images),
+                        modifier = Modifier.padding(8.dp)
             )
             Column(
                 modifier = Modifier.weight(1f)
@@ -452,9 +458,8 @@ fun WarmUpButton() {
                 Log.d("WarmUp", description)
             }
     ) {
-        Column (
-            modifier = Modifier.fillMaxSize()
-            , horizontalAlignment = Alignment.CenterHorizontally
+        Column(
+            modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
                 text = "Warm Up !",

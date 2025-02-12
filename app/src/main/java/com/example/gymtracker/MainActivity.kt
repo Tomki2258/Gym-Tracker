@@ -9,11 +9,14 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.widget.Space
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.horizontalScroll
@@ -21,8 +24,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -34,6 +39,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -48,8 +54,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -58,6 +66,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.room.Room
 import com.example.gymtracker.roomdb.MeasurementDatabase
 import com.example.gymtracker.roomdb.MeasurementViewModel
+import com.example.gymtracker.ui.theme.GymTrackerTheme
 import java.util.Calendar
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import java.time.LocalDate
@@ -67,6 +76,7 @@ import java.time.ZoneId
 
 private lateinit var service: NotifycationsService
 private lateinit var alarmScheduler: AndroidAlarmScheduler
+
 class MainActivity : ComponentActivity() {
     private val db by lazy {
         Room.databaseBuilder(
@@ -87,21 +97,21 @@ class MainActivity : ComponentActivity() {
         //TrainingManager.init(this)
         enableEdgeToEdge()
         setContent {
-            Scaffold(
-                modifier = Modifier
-                    .fillMaxSize()
-
-                //.padding(4.dp, 16.dp, 4.dp, 0.dp)
-            ) { innerPadding ->
-                MainView(
-                    modifier = Modifier.padding(innerPadding),
-                    MeasurementViewModel(dao)
-
-                )
+            GymTrackerTheme {
+                Scaffold(
+                    modifier = Modifier
+                        .fillMaxSize()
+                    //.padding(4.dp, 16.dp, 4.dp, 0.dp)
+                ) { innerPadding ->
+                    MainView(
+                        modifier = Modifier.padding(innerPadding),
+                        MeasurementViewModel(dao)
+                    )
+                }
             }
         }
         //val event = MeasurementEvent.InsertMeasurement(measurement)
-     //measurementViewModel.onEvent(event)
+        //measurementViewModel.onEvent(event)
     }
 }
 
@@ -131,7 +141,7 @@ fun LoadCategories(exercises: List<ExerciseClass>): List<String> {
 
 @Composable
 fun MainView(modifier: Modifier = Modifier, measurementViewModel: MeasurementViewModel) {
-    HideStatusBar()
+    //HideStatusBar()
 
     val categories = LoadCategories(ExerciseManager.exercises)
     var currentCategory by remember { mutableStateOf(categories.first()) }
@@ -140,10 +150,12 @@ fun MainView(modifier: Modifier = Modifier, measurementViewModel: MeasurementVie
     val showHourDialog = remember { mutableStateOf(false) }
     var totalDrag by remember { mutableStateOf(0f) }
     alarmScheduler = AndroidAlarmScheduler(context)
+    Log.d("Color", MaterialTheme.colorScheme.background.toString())
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .pointerInput(Unit) {
+            .pointerInput(Unit)
+            {
                 detectHorizontalDragGestures(
                     onHorizontalDrag = { change, dragAmount ->
                         change.consume()
@@ -160,36 +172,37 @@ fun MainView(modifier: Modifier = Modifier, measurementViewModel: MeasurementVie
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color.LightGray)
+                    .background(MaterialTheme.colorScheme.background)
                     .padding(0.dp, 4.dp, 0.dp, 0.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                IconButton(onClick = {
-                    LaunchUserIntent(context)
-                }) {
-                    Icon(
-                        painter = painterResource(R.drawable.icons8_male_user_100),
-                        contentDescription = "User Icon"
-                    )
-                }
-                Text(
-                    modifier = Modifier.padding(0.dp, 16.dp, 0.dp, 0.dp),
-                    text = UserManager.wellcomeMessage
-                )
-                IconButton(onClick = {
-                    measurementViewModel.clearAllTables()
-                    TrainingManager.deleteDatabase(context)
-                }) {
-                    Icon(
-                        painter = painterResource(R.drawable.icons8_settings_500),
-                        contentDescription = "User Icon"
-                    )
-                }
+                Spacer(modifier = Modifier.height(32.dp))
+//                IconButton(onClick = {
+//                    LaunchUserIntent(context)
+//                }) {
+//                    Icon(
+//                        painter = painterResource(R.drawable.icons8_male_user_100),
+//                        contentDescription = "User Icon"
+//                    )
+//                }
+//                Text(
+//                    modifier = Modifier.padding(0.dp, 16.dp, 0.dp, 0.dp),
+//                    text = UserManager.wellcomeMessage
+//                )
+//                IconButton(onClick = {
+//                    measurementViewModel.clearAllTables()
+//                    TrainingManager.deleteDatabase(context)
+//                }) {
+//                    Icon(
+//                        painter = painterResource(R.drawable.icons8_settings_500),
+//                        contentDescription = "User Icon"
+//                    )
+//                }
             }
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color.LightGray)
+                    //.background(Color.LightGray)
                     .padding(0.dp, 0.dp, 0.dp, 8.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
@@ -234,20 +247,21 @@ fun MainView(modifier: Modifier = Modifier, measurementViewModel: MeasurementVie
                 modifier = Modifier
                     .fillMaxSize()
                     .horizontalScroll(rememberScrollState())
-                    .padding(0.dp, 0.dp, 0.dp, 47.dp),
+                    .padding(0.dp, 0.dp, 0.dp, 64.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 ExerciseList(ExerciseManager.exercises, currentCategory)
             }
         }
 
-        // Row of buttons at the bottom
         Row(
             modifier = Modifier
                 .align(Alignment.BottomStart)
                 .fillMaxWidth()
-                .background(Color.LightGray)
-                .padding(2.dp),
+                .background(MaterialTheme.colorScheme.background)
+
+                //.background(Color.LightGray)
+                .padding(0.dp, 2.dp, 0.dp, 16.dp),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
             IconButton(
@@ -292,13 +306,46 @@ fun MainView(modifier: Modifier = Modifier, measurementViewModel: MeasurementVie
 }
 
 @Composable
+fun WelcomeCard(userName: String) {
+    val randomText = UserManager.wellcomeMessage
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Card(
+            modifier = Modifier
+                .width(350.dp)
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Text(
+                    text = "$randomText $userName!",
+                    fontSize = 24.sp
+                )
+                Text(
+                    text = "Let's get started!",
+                    fontSize = 16.sp
+                )
+            }
+        }
+    }
+}
+
+@Composable
 fun ExerciseList(exercises: List<ExerciseClass>, currentCategory: String) {
+    val userName = UserManager.getUserName()
     Box(
         modifier = Modifier.fillMaxSize(),
     ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
         ) {
+            item {
+                WelcomeCard(userName)
+            }
             items(exercises) { exercise ->
                 if (currentCategory == "All" || exercise.category.toString() == currentCategory) {
                     ExerciseCard(exercise, exercises.indexOf(exercise))
@@ -320,22 +367,26 @@ fun ExerciseCard(exercise: ExerciseClass, index: Int) {
     ) {
         Card(
             modifier = Modifier
-                .width(350.dp)
+                .width(350.dp),
+            border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline),
         ) {
             Column(
-                modifier = Modifier.padding(16.dp)
-                .clickable {
-                    LaunchExerciseIntent(index, context)
-                }
+                modifier = Modifier
+                    .padding(16.dp)
+                    .clickable {
+                        LaunchExerciseIntent(index, context)
+                    }
             ) {
                 Row {
-                    Column (
+                    Column(
                         modifier = Modifier.width(200.dp)
-                    ){
-                        Text(text = exercise.name
-                        , fontSize = 24.sp)
-                        Text(text = "Category: ${exercise.categoryString}"
-                        , fontSize = 16.sp)
+                    ) {
+                        Text(
+                            text = exercise.name, fontSize = 24.sp
+                        )
+                        Text(
+                            text = "Category: ${exercise.categoryString}", fontSize = 16.sp
+                        )
 //                        Button(onClick = {
 //                            LaunchExerciseIntent(index, context)
 //                        }) {
@@ -345,7 +396,8 @@ fun ExerciseCard(exercise: ExerciseClass, index: Int) {
                     if (photoId != 0) {
                         Image(
                             painter = painterResource(id = photoId),
-                            contentDescription = "${exercise.name} image"
+                            contentDescription = "${exercise.name} image",
+                            colorFilter = ColorFilter.tint(colorResource(id = R.color.images))
                         )
                     } else {
                         Text(text = "Image not found")
@@ -388,22 +440,36 @@ fun HourPicker(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.padding(8.dp)
             ) {
-                Text(text = "Set supplements notification",
-                    modifier = Modifier.padding(4.dp))
+                Text(
+                    text = "Set supplements notification",
+                    modifier = Modifier.padding(4.dp)
+                )
                 TimeInput(
                     state = timePickerState,
                 )
                 Button(onClick = {
                     // Cancel the previous alarm
                     val previousAlarmItem = AlarmItem(
-                        LocalDateTime.of(currentTime.get(Calendar.YEAR), currentTime.get(Calendar.MONTH) + 1, currentTime.get(Calendar.DAY_OF_MONTH), timePickerState.hour, timePickerState.minute),
+                        LocalDateTime.of(
+                            currentTime.get(Calendar.YEAR),
+                            currentTime.get(Calendar.MONTH) + 1,
+                            currentTime.get(Calendar.DAY_OF_MONTH),
+                            timePickerState.hour,
+                            timePickerState.minute
+                        ),
                         "Time to take your supplements!"
                     )
                     alarmScheduler.cancelAlarm(previousAlarmItem)
 
                     // Schedule the new alarm
                     val newAlarmItem = AlarmItem(
-                        LocalDateTime.of(currentTime.get(Calendar.YEAR), currentTime.get(Calendar.MONTH) + 1, currentTime.get(Calendar.DAY_OF_MONTH), timePickerState.hour, timePickerState.minute),
+                        LocalDateTime.of(
+                            currentTime.get(Calendar.YEAR),
+                            currentTime.get(Calendar.MONTH) + 1,
+                            currentTime.get(Calendar.DAY_OF_MONTH),
+                            timePickerState.hour,
+                            timePickerState.minute
+                        ),
                         "Time to take your supplements!"
                     )
                     alarmScheduler.scheduleAlarm(newAlarmItem)
@@ -420,6 +486,7 @@ fun LaunchTrainingPlanIntent(context: Context) {
     val intent = Intent(context, TrainingPlannerActivity::class.java)
     context.startActivity(intent)
 }
+
 @Composable
 fun HideStatusBar() {
     val systemUiController = rememberSystemUiController()
@@ -428,6 +495,7 @@ fun HideStatusBar() {
     systemUiController.isStatusBarVisible = false
     systemUiController.isNavigationBarVisible = false
 }
+
 @Composable
 fun ChangeNickDialog(onDismissRequest: () -> Unit) {
     val newNick = remember { mutableStateOf("") }

@@ -51,6 +51,7 @@ import androidx.room.Room
 import com.example.gymtracker.roomdb.MeasurementDatabase
 import com.example.gymtracker.roomdb.MeasurementEvent
 import com.example.gymtracker.roomdb.MeasurementViewModel
+import com.example.gymtracker.ui.theme.GymTrackerTheme
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -74,13 +75,15 @@ class ExerciseView : ComponentActivity() {
             MeasurementViewModel.Factory(dao)
         ).get(MeasurementViewModel::class.java)
         setContent {
-            val index = intent.getIntExtra("EXERCISE_INDEX", 0)
-            val exerciseClass = ExerciseManager.exercises[index]
-            exercise = exerciseClass
-            ExerciseIntent(
-                exerciseClass = exerciseClass,
-                exerciseView = this
-            )
+            GymTrackerTheme {
+                val index = intent.getIntExtra("EXERCISE_INDEX", 0)
+                val exerciseClass = ExerciseManager.exercises[index]
+                exercise = exerciseClass
+                ExerciseIntent(
+                    exerciseClass = exerciseClass,
+                    exerciseView = this
+                )
+            }
         }
     }
 

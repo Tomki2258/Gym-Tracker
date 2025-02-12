@@ -52,6 +52,9 @@ object UserManager {
         ToastManager(context, "Nickname changed to ${newNick}")
     }
     fun setWellcomeMessage(): String {
-        return wellcomeMessages.random() + ", ${userData.userNick}"
+        return wellcomeMessages.random();
+    }
+    fun getUserName() : String{
+        return userData.userNick
     }
 }
