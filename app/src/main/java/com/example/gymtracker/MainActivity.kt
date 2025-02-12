@@ -3,20 +3,16 @@ package com.example.gymtracker
 
 
 import AndroidAlarmScheduler
-import android.app.AlarmManager
-import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import android.widget.Space
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.horizontalScroll
@@ -35,6 +31,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -43,6 +40,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TimeInput
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
@@ -54,11 +52,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Color.Companion.Green
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -67,11 +67,9 @@ import androidx.room.Room
 import com.example.gymtracker.roomdb.MeasurementDatabase
 import com.example.gymtracker.roomdb.MeasurementViewModel
 import com.example.gymtracker.ui.theme.GymTrackerTheme
-import java.util.Calendar
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
-import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.ZoneId
+import java.util.Calendar
 
 
 private lateinit var service: NotifycationsService
@@ -154,26 +152,13 @@ fun MainView(modifier: Modifier = Modifier, measurementViewModel: MeasurementVie
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .pointerInput(Unit)
-            {
-                detectHorizontalDragGestures(
-                    onHorizontalDrag = { change, dragAmount ->
-                        change.consume()
-                        totalDrag += dragAmount
-                        Log.d("PRZESUNIECIE: ", "amount: $dragAmount total: $totalDrag")
-                    },
-                    onDragEnd = {
-                        totalDrag = 0f
-                    }
-                )
-            }
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(MaterialTheme.colorScheme.background)
-                    .padding(0.dp, 4.dp, 0.dp, 0.dp),
+                    .padding(0.dp, 16.dp, 0.dp, 0.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 Spacer(modifier = Modifier.height(32.dp))
@@ -213,7 +198,7 @@ fun MainView(modifier: Modifier = Modifier, measurementViewModel: MeasurementVie
                         catIndex = categories.size - 1
                     }
                     currentCategory = categories[catIndex]
-                    Log.d(currentCategory, currentCategory)
+                    //Log.d(currentCategory, currentCategory)
                 }) {
                     Icon(
                         modifier = Modifier
@@ -225,7 +210,7 @@ fun MainView(modifier: Modifier = Modifier, measurementViewModel: MeasurementVie
                 }
                 var catIndex = categories.indexOf(currentCategory)
                 Text(
-                    text = "${currentCategory}\n${catIndex + 1} / ${categories.size}",
+                    text = "${currentCategory.lowercase().replaceFirstChar { it.uppercase() }}\n${catIndex + 1} / ${categories.size}",
                     textAlign = TextAlign.Center
                 )
                 IconButton(onClick = {
@@ -247,7 +232,35 @@ fun MainView(modifier: Modifier = Modifier, measurementViewModel: MeasurementVie
                 modifier = Modifier
                     .fillMaxSize()
                     .horizontalScroll(rememberScrollState())
-                    .padding(0.dp, 0.dp, 0.dp, 64.dp),
+                    .padding(0.dp, 0.dp, 0.dp, 64.dp)
+                    .pointerInput(Unit)
+                    {
+                        detectHorizontalDragGestures(
+                            onHorizontalDrag = { change, dragAmount ->
+                                change.consume()
+                                totalDrag += dragAmount
+                                Log.d("PRZESUNIECIE: ", "amount: $dragAmount total: $totalDrag")
+                            },
+                            onDragEnd = {
+                                if (totalDrag < -25) {
+                                    var catIndex = categories.indexOf(currentCategory)
+                                    catIndex += 1
+                                    if (catIndex > categories.size - 1) {
+                                        catIndex = 0
+                                    }
+                                    currentCategory = categories[catIndex]
+                                } else if (totalDrag > 25) {
+                                    var catIndex = categories.indexOf(currentCategory)
+                                    catIndex -= 1
+                                    if (catIndex < 0) {
+                                        catIndex = categories.size - 1
+                                    }
+                                    currentCategory = categories[catIndex]
+                                }
+                                totalDrag = 0f
+                            }
+                        )
+                    },
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 ExerciseList(ExerciseManager.exercises, currentCategory)
@@ -316,8 +329,10 @@ fun WelcomeCard(userName: String) {
     ) {
         Card(
             modifier = Modifier
-                .width(350.dp)
-        ) {
+                .width(350.dp),
+            border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline),
+
+            ) {
             Column(
                 modifier = Modifier.padding(16.dp)
             ) {
@@ -387,17 +402,15 @@ fun ExerciseCard(exercise: ExerciseClass, index: Int) {
                         Text(
                             text = "Category: ${exercise.categoryString}", fontSize = 16.sp
                         )
-//                        Button(onClick = {
-//                            LaunchExerciseIntent(index, context)
-//                        }) {
-//                            Text(text = "Choose")
-//                        }
                     }
                     if (photoId != 0) {
                         Image(
                             painter = painterResource(id = photoId),
                             contentDescription = "${exercise.name} image",
-                            colorFilter = ColorFilter.tint(colorResource(id = R.color.images))
+                            colorFilter = ColorFilter.tint(colorResource(id = R.color.images)),
+                            modifier = Modifier
+                                .padding(8.dp)
+                                .size(100.dp)
                         )
                     } else {
                         Text(text = "Image not found")
@@ -448,7 +461,6 @@ fun HourPicker(
                     state = timePickerState,
                 )
                 Button(onClick = {
-                    // Cancel the previous alarm
                     val previousAlarmItem = AlarmItem(
                         LocalDateTime.of(
                             currentTime.get(Calendar.YEAR),
@@ -474,8 +486,10 @@ fun HourPicker(
                     )
                     alarmScheduler.scheduleAlarm(newAlarmItem)
                     onConfirm()
-                }) {
-                    Text("Confirm")
+                }
+                , colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primaryContainer)) {
+                    Text("Confirm"
+                    , fontWeight = FontWeight.Bold)
                 }
             }
         }
@@ -496,6 +510,7 @@ fun HideStatusBar() {
     systemUiController.isNavigationBarVisible = false
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChangeNickDialog(onDismissRequest: () -> Unit) {
     val newNick = remember { mutableStateOf("") }
@@ -519,19 +534,44 @@ fun ChangeNickDialog(onDismissRequest: () -> Unit) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 8.dp)
+                    , colors = TextFieldDefaults.textFieldColors(
+                        disabledTextColor = MaterialTheme.colorScheme.inversePrimary,
+                        cursorColor = MaterialTheme.colorScheme.inversePrimary,
+                        errorCursorColor = MaterialTheme.colorScheme.inversePrimary,
+                        focusedIndicatorColor = MaterialTheme.colorScheme.inversePrimary,
+                        unfocusedIndicatorColor = MaterialTheme.colorScheme.inversePrimary,
+                        disabledIndicatorColor = MaterialTheme.colorScheme.inversePrimary,
+                        errorIndicatorColor = MaterialTheme.colorScheme.inversePrimary,
+                        disabledLeadingIconColor = MaterialTheme.colorScheme.inversePrimary,
+                        errorLeadingIconColor = MaterialTheme.colorScheme.inversePrimary,
+                        disabledTrailingIconColor = MaterialTheme.colorScheme.inversePrimary,
+                        errorTrailingIconColor = MaterialTheme.colorScheme.inversePrimary,
+                        focusedLabelColor = MaterialTheme.colorScheme.inversePrimary,
+                        unfocusedLabelColor = MaterialTheme.colorScheme.inversePrimary,
+                        disabledLabelColor = MaterialTheme.colorScheme.inversePrimary,
+                        errorLabelColor = MaterialTheme.colorScheme.inversePrimary,
+                        disabledPlaceholderColor =MaterialTheme.colorScheme.inversePrimary
+                    )
                 )
                 Row(
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Button(onClick = {
-                        UserManager.changeUserNick(context, newNick.value)
-                        onDismissRequest()
-                    }) {
-                        Text(text = "Save")
+                    Button(
+                        onClick = {
+                            UserManager.changeUserNick(context, newNick.value)
+                            onDismissRequest()
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary),
+                    ) {
+                        Text(text = "Save",
+                            fontWeight = FontWeight.Bold)
                     }
-                    Button(onClick = { onDismissRequest() }) {
-                        Text(text = "Cancel")
+                    Button(onClick = { onDismissRequest() },
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                    ) {
+                        Text(text = "Cancel",
+                            fontWeight = FontWeight.Bold)
                     }
                 }
             }

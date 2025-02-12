@@ -8,6 +8,7 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -25,10 +26,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -39,11 +42,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.Color.Companion.Green
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -132,6 +139,7 @@ fun MainView(name: String, modifier: Modifier = Modifier) {
     Box(
         modifier = Modifier
             .fillMaxSize()
+            .padding(0.dp, 24.dp, 0.dp, 0.dp)
             .pointerInput(Unit) {
                 detectHorizontalDragGestures(
                     onHorizontalDrag = { change, dragAmount ->
@@ -301,7 +309,9 @@ fun AddExericeToDay(
                             modifier = Modifier
                                 .align(Alignment.CenterVertically)
                         ) {
-                            Text(text = exercise.name)
+                            Text(
+                                text = exercise.name, fontWeight = FontWeight.Bold
+                            )
                             Text(text = exercise.categoryString)
                         }
                         Spacer(modifier = Modifier.weight(1f))
@@ -310,7 +320,8 @@ fun AddExericeToDay(
                             contentDescription = "Exercise photo",
                             modifier = Modifier
                                 .size(50.dp)
-                                .align(Alignment.CenterVertically)
+                                .align(Alignment.CenterVertically),
+                            tint = colorResource(id = R.color.images),
                         )
                     }
                 }
@@ -353,6 +364,7 @@ fun ExericeCard(
                 val exerciseIndex = ExerciseManager.exercises.indexOf(exercise)
                 LaunchExerciseIntent(exerciseIndex, context)
             },
+        border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline),
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -362,7 +374,7 @@ fun ExericeCard(
                 painter = painterResource(id = exercise.getPhotoResourceId(context)),
                 contentDescription = "Exercise photo",
                 tint = colorResource(id = R.color.images),
-                        modifier = Modifier.padding(8.dp)
+                modifier = Modifier.padding(8.dp)
             )
             Column(
                 modifier = Modifier.weight(1f)
@@ -409,7 +421,13 @@ fun RemoveExerciseCard(exercise: ExerciseClass) {
                     .padding(8.dp),
                 verticalArrangement = Arrangement.Center
             ) {
-                Text(text = "Do you want to remove ${exercise.name} from the training plan?")
+                Text(text = buildAnnotatedString {
+                    append("Do you want to remove ")
+                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                        append(exercise.name)
+                    }
+                    append(" from the training plan?")
+                })
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
@@ -422,14 +440,16 @@ fun RemoveExerciseCard(exercise: ExerciseClass) {
                                 getStringDay(currentDayIndex.value),
                                 exercise.name
                             )
-                        }
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary)
                     ) {
                         Text(text = "Yes")
                     }
                     Button(
                         onClick = {
                             showRemoveDialog.value = false
-                        }
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
                     ) {
                         Text(text = "No")
                     }
@@ -456,7 +476,8 @@ fun WarmUpButton() {
                 var url = "warmup"
                 val description = ApiManager.getWarpUp(url)
                 Log.d("WarmUp", description)
-            }
+            },
+        border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline),
     ) {
         Column(
             modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally
@@ -464,7 +485,7 @@ fun WarmUpButton() {
             Text(
                 text = "Warm Up !",
                 fontSize = 24.sp,
-                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(8.dp)
             )
         }

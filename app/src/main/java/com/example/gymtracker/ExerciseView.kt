@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -23,6 +24,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -32,15 +34,15 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -159,7 +161,8 @@ class ExerciseView : ComponentActivity() {
         val showDescDialog = remember { mutableStateOf(false) }
         val showDeleteDialog = remember { mutableStateOf(false) }
         val clickedMeasurement = remember { mutableStateOf(Measurement(0, 0, 0.0f, "")) }
-        val measurementsList = remember { mutableStateOf(exercise.measurementsList.toMutableList()) }
+        val measurementsList =
+            remember { mutableStateOf(exercise.measurementsList.toMutableList()) }
         val sortedMeasurementsList = remember(measurementsList.value) {
             measurementsList.value.sortedByDescending { it.date.time }
         }
@@ -177,8 +180,10 @@ class ExerciseView : ComponentActivity() {
                 Card(
                     modifier = Modifier
                         .padding(8.dp)
-                        .fillMaxWidth()
-                ) {
+                        .fillMaxWidth(),
+                    border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline),
+
+                    ) {
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -191,6 +196,7 @@ class ExerciseView : ComponentActivity() {
                                     LocalContext.current
                                 )
                             ),
+                            colorFilter = ColorFilter.tint(colorResource(id = R.color.images)),
                             contentDescription = "Exercise Image"
                         )
                         Text(
@@ -204,8 +210,10 @@ class ExerciseView : ComponentActivity() {
                     modifier = Modifier
                         .padding(8.dp)
                         .fillMaxWidth()
-                        .height(250.dp)
-                ) {
+                        .height(250.dp),
+                    border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline),
+
+                    ) {
                     if (measurementsList.value.isEmpty()) {
                         Box(
                             modifier = Modifier
@@ -223,7 +231,7 @@ class ExerciseView : ComponentActivity() {
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .padding(8.dp)
-                                        .background(MaterialTheme.colorScheme.surface)
+                                        .background(MaterialTheme.colorScheme.primaryContainer)
                                 ) {
                                     Text(
                                         text = "Date",
@@ -280,8 +288,10 @@ class ExerciseView : ComponentActivity() {
                     modifier = Modifier
                         .padding(8.dp)
                         .fillMaxWidth()
-                        .height(200.dp)
-                ) {
+                        .height(200.dp),
+                    border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline),
+
+                    ) {
                     LazyColumn {
                         if (weeklyProgressList.isEmpty()) {
                             item {
@@ -299,7 +309,7 @@ class ExerciseView : ComponentActivity() {
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .padding(8.dp)
-                                        .background(MaterialTheme.colorScheme.surface)
+                                        .background(MaterialTheme.colorScheme.primaryContainer)
                                 ) {
                                     Text(
                                         text = "Week",
@@ -347,7 +357,11 @@ class ExerciseView : ComponentActivity() {
                                         modifier = Modifier.weight(weightDiffSize)
                                     ) {
                                         Icon(
-                                            painter = painterResource(id = GetRDrawable(avgDifference)),
+                                            painter = painterResource(
+                                                id = GetRDrawable(
+                                                    avgDifference
+                                                )
+                                            ),
                                             contentDescription = "Weight Difference",
                                             modifier = Modifier.size(22.dp),
                                             tint = tint
@@ -427,7 +441,9 @@ class ExerciseView : ComponentActivity() {
         val scope = rememberCoroutineScope()
 
         Dialog(onDismissRequest = { onDismissRequest() }) {
-            Card {
+            Card(
+                border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline),
+            ) {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
@@ -452,38 +468,47 @@ class ExerciseView : ComponentActivity() {
                     }
                     Row(
                         verticalAlignment = Alignment.CenterVertically
-                    ){
+                    ) {
                         Text(
-                            text="weight on both sides"
+                            text = "weight on both sides"
                         )
                         RadioButton(
                             selected = isDoubleWeight.value,
                             onClick = { isDoubleWeight.value = !isDoubleWeight.value }
                         )
                     }
-                    Button(onClick = {
-                        val repsInt = reps.value.toIntOrNull()
-                        val weightFloat = weight.value.toFloatOrNull()
+                    Button(
+                        onClick = {
+                            val repsInt = reps.value.toIntOrNull()
+                            val weightFloat = weight.value.toFloatOrNull()
 
-                        if (repsInt == null || weightFloat == null) {
-                            ToastManager(context, "Reps must be an integer and weight must be a number")
-                            return@Button
-                        }
-                        if (repsInt <= 0 || weightFloat <= 0.0f) {
-                            ToastManager(context, "Reps or weight cannot be less than or equal to 0")
-                            return@Button
-                        }
+                            if (repsInt == null || weightFloat == null) {
+                                ToastManager(
+                                    context,
+                                    "Reps must be an integer and weight must be a number"
+                                )
+                                return@Button
+                            }
+                            if (repsInt <= 0 || weightFloat <= 0.0f) {
+                                ToastManager(
+                                    context,
+                                    "Reps or weight cannot be less than or equal to 0"
+                                )
+                                return@Button
+                            }
 
-                        scope.launch {
-                            exerciseView.addMeasurementDatabase(
-                                reps.value.toInt(),
-                                weight.value.toFloat() * if(isDoubleWeight.value) 2 else 1,
-                                exercise.name,
-                                measurementsList
-                            )
-                            onDismissRequest()
-                        }
-                    }) {
+                            scope.launch {
+                                exerciseView.addMeasurementDatabase(
+                                    reps.value.toInt(),
+                                    weight.value.toFloat() * if (isDoubleWeight.value) 2 else 1,
+                                    exercise.name,
+                                    measurementsList
+                                )
+                                onDismissRequest()
+                            }
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary)
+                    ) {
                         Text(text = "Add measurement")
                     }
                 }
@@ -495,9 +520,12 @@ class ExerciseView : ComponentActivity() {
     fun ShowExerciseInfo(onDismissRequest: () -> Unit) {
         Dialog(onDismissRequest = { onDismissRequest() }) {
             Card(
-                modifier = Modifier.height(200.dp)
-                    .width(400.dp)
-            ) {
+                modifier = Modifier
+                    .height(200.dp)
+                    .width(400.dp),
+                border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline),
+
+                ) {
                 Text(
                     modifier = Modifier.padding(16.dp),
                     text = exercise.exerciseDecs
@@ -518,8 +546,10 @@ class ExerciseView : ComponentActivity() {
             Card(
                 modifier = Modifier
                     .width(300.dp)
-                    .height(180.dp)
-            ) {
+                    .height(200.dp),
+                border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline),
+
+                ) {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
@@ -540,23 +570,27 @@ class ExerciseView : ComponentActivity() {
                                 )
                             }
                             onDismissRequest()
-                        }
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
                     ) {
                         Text(text = "Delete")
                     }
                 }
             }
         }
-    }}
-fun GetTint(value: Float): Color{
-    if(value == 0.0f) return Color.Gray
+    }
+}
 
-    if(value > 0) return Color.Green
+fun GetTint(value: Float): Color {
+    if (value == 0.0f) return Color.Gray
+
+    if (value > 0) return Color.Green
     return Color.Red
 }
-fun GetRDrawable(value: Float): Int{
-    if(value == 0.0f) return R.drawable.none
 
-    if(value > 0) return R.drawable.up
+fun GetRDrawable(value: Float): Int {
+    if (value == 0.0f) return R.drawable.none
+
+    if (value > 0) return R.drawable.up
     return R.drawable.down
 }

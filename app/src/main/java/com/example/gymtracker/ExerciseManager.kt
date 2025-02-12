@@ -60,7 +60,9 @@ object ExerciseManager {
             ExerciseClass("Cable Grip", Categories.BACK),
             ExerciseClass("Lat Pulldown", Categories.BACK),
             ExerciseClass("Machine Crunch", Categories.ABS),
-            ExerciseClass("Leg Raise" , Categories.ABS),
+            //ExerciseClass("Leg Raise" , Categories.ABS),
+            ExerciseClass("Leg Press" , Categories.LEGS),
+            ExerciseClass("Leg Curl" , Categories.LEGS),
         )
         return exerciseList
     }
