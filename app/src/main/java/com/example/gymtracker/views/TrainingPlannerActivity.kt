@@ -49,18 +49,24 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.toLowerCase
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.example.gymtracker.ApiManager
+import com.example.gymtracker.ApiManager.getWarpUp
 import com.example.gymtracker.Categories
 import com.example.gymtracker.ExerciseClass
 import com.example.gymtracker.ExerciseManager
 import com.example.gymtracker.R
 import com.example.gymtracker.TrainingManager
 import com.example.gymtracker.ui.theme.GymTrackerTheme
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.util.Calendar
+import java.util.Locale
 
 class TrainingPlannerActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -82,7 +88,23 @@ class TrainingPlannerActivity : ComponentActivity() {
 var showAddDialog = mutableStateOf(false)
 var showRemoveDialog = mutableStateOf(false)
 var selectedToRemove = mutableStateOf(ExerciseClass("", Categories.CHEST))
+var showWarmUpDialog = mutableStateOf(false)
 
+var warmUpList = mutableStateOf(mutableListOf<String>())
+
+
+fun loadWarmUp(context: Context) {
+    CoroutineScope(Dispatchers.Main).launch {
+        warmUpList.value.clear()
+        for (day in TrainingManager.daysOfWeek) {
+            val exercises = loadExercisesForDay(context, day.day)
+            val uniqueCategories = exercises.map { it.categoryString }.toSet()
+            val categories = uniqueCategories.joinToString("-").lowercase(Locale.getDefault())
+            val warmUp = ApiManager.getWarpUp(categories)
+            warmUpList.value.add(warmUp)
+        }
+    }
+}
 fun loadExercisesForDay(context: Context, day: String): MutableList<ExerciseClass> {
     val exercises = mutableListOf<ExerciseClass>()
     val planTrainings = TrainingManager.getTrainingPlan(context, day)
@@ -136,6 +158,7 @@ fun MainView(name: String, modifier: Modifier = Modifier) {
         mutableStateOf(adjustedDayIndex)
     }
 
+    loadWarmUp(context)
     showAddDialog = remember { mutableStateOf(false) }
     exercisesView.value = loadExercisesForDay(
         context,
@@ -232,6 +255,12 @@ fun MainView(name: String, modifier: Modifier = Modifier) {
 
             if (showRemoveDialog.value) {
                 RemoveExerciseCard(selectedToRemove.value)
+            }
+            if(showWarmUpDialog.value){
+                WarmUpCard(
+                    onDismissRequest = { showWarmUpDialog.value = false },
+                    warmUpString = warmUpList.value[currentDayIndex.value]
+                )
             }
         }
 
@@ -478,9 +507,7 @@ fun WarmUpButton() {
             .fillMaxWidth()
             .height(50.dp)
             .clickable {
-                var url = "warmup"
-                val description = ApiManager.getWarpUp(url)
-                Log.d("WarmUp", description)
+                showWarmUpDialog.value = true
             },
         border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline),
     ) {
@@ -492,6 +519,25 @@ fun WarmUpButton() {
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(8.dp)
+            )
+        }
+    }
+}
+
+@Composable
+fun WarmUpCard(onDismissRequest: () -> Unit, warmUpString: String
+){
+    Dialog(
+        onDismissRequest = { onDismissRequest() }
+    ) {
+        Card (
+            modifier = Modifier
+                .fillMaxWidth(),
+            border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline),
+            ){
+            Text(
+                modifier = Modifier.padding(8.dp),
+                text = warmUpString
             )
         }
     }

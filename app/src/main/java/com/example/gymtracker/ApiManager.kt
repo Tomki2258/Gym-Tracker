@@ -1,6 +1,8 @@
 package com.example.gymtracker
 
 import android.util.Log
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.IOException
@@ -30,21 +32,28 @@ object ApiManager {
             "Exception: ${exc.message}"
         }
     }
-    fun getWarpUp(url: String): String {
-        val client = OkHttpClient()
-        val request = Request.Builder()
-            .url(BASE_URL)
-            .build()
-        Log.d("ApiManager", BASE_URL+url)
-        return try {
-            client.newCall(request).execute().use { response ->
-                if (!response.isSuccessful) {
-                    throw IOException("error: ${response.code()}")
+
+    suspend fun getWarpUp(url: String): String {
+        return withContext(Dispatchers.IO) {
+            val client = OkHttpClient()
+            val buildURL = BASE_URL +"warmup/"+ url
+            val request = Request.Builder()
+                .url(buildURL)
+                .build()
+            Log.d("ApiManager", "Request URL: ${buildURL}")
+            try {
+                client.newCall(request).execute().use { response ->
+                    if (!response.isSuccessful) {
+                        throw IOException("Error: ${response.code()}")
+                    }
+                    val responseBody = response.body()?.string().orEmpty()
+                    Log.d("ApiManager", "Response Body: $responseBody")
+                    responseBody
                 }
-                response.body()?.string().orEmpty()
+            } catch (exc: Exception) {
+                Log.e("ApiManager", "Exception: ${exc.message}", exc)
+                "Exception: ${exc.message}"
             }
-        } catch (exc: Exception) {
-            "Exception: ${exc.message}"
         }
     }
 }
