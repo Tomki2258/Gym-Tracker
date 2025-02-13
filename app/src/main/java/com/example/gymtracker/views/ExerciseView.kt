@@ -1,5 +1,5 @@
 // ExerciseView.kt
-package com.example.gymtracker
+package com.example.gymtracker.views
 
 import WeeklyProgress
 import android.os.Bundle
@@ -26,12 +26,14 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
@@ -50,6 +52,12 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.ViewModelProvider
 import androidx.room.Room
+import com.example.gymtracker.Categories
+import com.example.gymtracker.ExerciseClass
+import com.example.gymtracker.ExerciseManager
+import com.example.gymtracker.Measurement
+import com.example.gymtracker.R
+import com.example.gymtracker.ToastManager
 import com.example.gymtracker.roomdb.MeasurementDatabase
 import com.example.gymtracker.roomdb.MeasurementEvent
 import com.example.gymtracker.roomdb.MeasurementViewModel
@@ -428,6 +436,7 @@ class ExerciseView : ComponentActivity() {
         return "%.1f".format(numInDouble)
     }
 
+    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun AddMeasurementDialog(
         onDismissRequest: () -> Unit,
@@ -451,10 +460,28 @@ class ExerciseView : ComponentActivity() {
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         TextField(
-                            modifier = Modifier.width(75.dp),
                             value = reps.value.toString(),
                             onValueChange = { reps.value = it },
-                            label = { Text("Reps") }
+                            label = { Text("Reps") },
+                            modifier = Modifier.width(75.dp),
+                            colors = TextFieldDefaults.textFieldColors(
+                                disabledTextColor = MaterialTheme.colorScheme.inversePrimary,
+                                cursorColor = MaterialTheme.colorScheme.inversePrimary,
+                                errorCursorColor = MaterialTheme.colorScheme.inversePrimary,
+                                focusedIndicatorColor = MaterialTheme.colorScheme.inversePrimary,
+                                unfocusedIndicatorColor = MaterialTheme.colorScheme.inversePrimary,
+                                disabledIndicatorColor = MaterialTheme.colorScheme.inversePrimary,
+                                errorIndicatorColor = MaterialTheme.colorScheme.inversePrimary,
+                                disabledLeadingIconColor = MaterialTheme.colorScheme.inversePrimary,
+                                errorLeadingIconColor = MaterialTheme.colorScheme.inversePrimary,
+                                disabledTrailingIconColor = MaterialTheme.colorScheme.inversePrimary,
+                                errorTrailingIconColor = MaterialTheme.colorScheme.inversePrimary,
+                                focusedLabelColor = MaterialTheme.colorScheme.inversePrimary,
+                                unfocusedLabelColor = MaterialTheme.colorScheme.inversePrimary,
+                                disabledLabelColor = MaterialTheme.colorScheme.inversePrimary,
+                                errorLabelColor = MaterialTheme.colorScheme.inversePrimary,
+                                disabledPlaceholderColor =MaterialTheme.colorScheme.inversePrimary
+                            )
                         )
                         Text(
                             text = " x ",
@@ -463,7 +490,25 @@ class ExerciseView : ComponentActivity() {
                         TextField(
                             value = weight.value,
                             onValueChange = { weight.value = it },
-                            label = { Text("Weight") }
+                            label = { Text("Weight") },
+                                    colors = TextFieldDefaults.textFieldColors(
+                                    disabledTextColor = MaterialTheme.colorScheme.inversePrimary,
+                            cursorColor = MaterialTheme.colorScheme.inversePrimary,
+                            errorCursorColor = MaterialTheme.colorScheme.inversePrimary,
+                            focusedIndicatorColor = MaterialTheme.colorScheme.inversePrimary,
+                            unfocusedIndicatorColor = MaterialTheme.colorScheme.inversePrimary,
+                            disabledIndicatorColor = MaterialTheme.colorScheme.inversePrimary,
+                            errorIndicatorColor = MaterialTheme.colorScheme.inversePrimary,
+                            disabledLeadingIconColor = MaterialTheme.colorScheme.inversePrimary,
+                            errorLeadingIconColor = MaterialTheme.colorScheme.inversePrimary,
+                            disabledTrailingIconColor = MaterialTheme.colorScheme.inversePrimary,
+                            errorTrailingIconColor = MaterialTheme.colorScheme.inversePrimary,
+                            focusedLabelColor = MaterialTheme.colorScheme.inversePrimary,
+                            unfocusedLabelColor = MaterialTheme.colorScheme.inversePrimary,
+                            disabledLabelColor = MaterialTheme.colorScheme.inversePrimary,
+                            errorLabelColor = MaterialTheme.colorScheme.inversePrimary,
+                            disabledPlaceholderColor =MaterialTheme.colorScheme.inversePrimary
+                        )
                         )
                     }
                     Row(

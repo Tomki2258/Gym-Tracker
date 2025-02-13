@@ -1,5 +1,5 @@
 // MainActivity.kt
-package com.example.gymtracker
+package com.example.gymtracker.views
 
 
 import AndroidAlarmScheduler
@@ -51,8 +51,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Color.Companion.Green
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
@@ -64,6 +62,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.room.Room
+import com.example.gymtracker.AlarmItem
+import com.example.gymtracker.ExerciseClass
+import com.example.gymtracker.ExerciseManager
+import com.example.gymtracker.NotifycationsService
+import com.example.gymtracker.R
+import com.example.gymtracker.UserManager
 import com.example.gymtracker.roomdb.MeasurementDatabase
 import com.example.gymtracker.roomdb.MeasurementViewModel
 import com.example.gymtracker.ui.theme.GymTrackerTheme

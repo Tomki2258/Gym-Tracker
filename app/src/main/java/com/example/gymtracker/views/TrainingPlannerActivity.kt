@@ -1,5 +1,5 @@
 // app/src/main/java/com/example/gymtracker/TrainingPlannerActivity.kt
-package com.example.gymtracker
+package com.example.gymtracker.views
 
 import android.content.Context
 import android.content.Intent
@@ -42,7 +42,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Color.Companion.Green
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
@@ -54,6 +53,12 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import com.example.gymtracker.ApiManager
+import com.example.gymtracker.Categories
+import com.example.gymtracker.ExerciseClass
+import com.example.gymtracker.ExerciseManager
+import com.example.gymtracker.R
+import com.example.gymtracker.TrainingManager
 import com.example.gymtracker.ui.theme.GymTrackerTheme
 import java.util.Calendar
 

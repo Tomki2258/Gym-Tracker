@@ -21,22 +21,22 @@
         android:theme="@style/Theme.GymTracker"
         tools:targetApi="31">
         <activity
-            android:name=".TrainingPlannerActivity"
+            android:name=".views.TrainingPlannerActivity"
             android:exported="false"
             android:label="@string/title_activity_training_planner"
             android:theme="@style/Theme.GymTracker" />
         <activity
-            android:name=".UserActivity"
+            android:name=".views.UserActivity"
             android:exported="false"
             android:label="@string/title_activity_user"
             android:theme="@style/Theme.GymTracker" />
         <activity
-            android:name=".ExerciseView"
+            android:name=".views.ExerciseView"
             android:exported="false"
             android:label="@string/title_activity_exercise_view"
             android:theme="@style/Theme.GymTracker" />
         <activity
-            android:name=".MainActivity"
+            android:name=".views.MainActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.GymTracker">

@@ -10,9 +10,8 @@ class NotifycationsService(
     private val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
     fun showNotification() {
-        // You can also create INTENT to call it on notification click
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setSmallIcon(R.drawable.meds)
             .setContentTitle("Gym Tracker")
             .setContentText("Don't forget your supplements!")
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)

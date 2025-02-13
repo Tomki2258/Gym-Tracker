@@ -6,7 +6,7 @@ import okhttp3.Request
 import java.io.IOException
 
 object ApiManager {
-    const val BASE_URL = "http://83.6.8.137:8080/";
+    const val BASE_URL = "http://192.168.1.75:8080/";
     init {
 //        Thread {
 //            val url = "chestfly"
@@ -33,8 +33,9 @@ object ApiManager {
     fun getWarpUp(url: String): String {
         val client = OkHttpClient()
         val request = Request.Builder()
-            .url(BASE_URL+url)
+            .url(BASE_URL)
             .build()
+        Log.d("ApiManager", BASE_URL+url)
         return try {
             client.newCall(request).execute().use { response ->
                 if (!response.isSuccessful) {

@@ -28,7 +28,7 @@ class AndroidAlarmScheduler(
         alarmManager.setRepeating(
             AlarmManager.RTC_WAKEUP,
             triggerTime,
-            AlarmManager.INTERVAL_DAY, // dla testu można ustawić co 1000 aby mieć co minute
+            1000, // AlarmManager.INTERVAL_DAY dla testu można ustawić co 1000 aby mieć co minute
             pendingIntent
         )
     }
