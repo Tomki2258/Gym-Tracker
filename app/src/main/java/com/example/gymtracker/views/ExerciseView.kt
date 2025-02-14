@@ -31,6 +31,7 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -190,8 +191,7 @@ class ExerciseView : ComponentActivity() {
                         .padding(8.dp)
                         .fillMaxWidth(),
                     border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline),
-
-                    ) {
+                ) {
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -238,7 +238,7 @@ class ExerciseView : ComponentActivity() {
                                 Row(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(8.dp)
+                                        .padding(8.dp, 0.dp, 8.dp, 8.dp)
                                         .background(MaterialTheme.colorScheme.primaryContainer)
                                 ) {
                                     Text(
@@ -289,12 +289,12 @@ class ExerciseView : ComponentActivity() {
                 }
                 val weekSize = 1.5f
                 val yearSize = 0.5f
-                val avgWeightSize = 1f
+                val avgWeightSize = 0.65f
                 val weightDiffSize = 1f
 
                 Card(
                     modifier = Modifier
-                        .padding(8.dp)
+                        .padding(8.dp, 0.dp, 8.dp, 8.dp)
                         .fillMaxWidth()
                         .height(200.dp),
                     border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline),
@@ -330,7 +330,7 @@ class ExerciseView : ComponentActivity() {
                                         fontWeight = FontWeight.Bold
                                     )
                                     Text(
-                                        text = "AVG Weight",
+                                        text = "AVG",
                                         modifier = Modifier.weight(avgWeightSize),
                                         fontWeight = FontWeight.Bold
                                     )
@@ -480,7 +480,7 @@ class ExerciseView : ComponentActivity() {
                                 unfocusedLabelColor = MaterialTheme.colorScheme.inversePrimary,
                                 disabledLabelColor = MaterialTheme.colorScheme.inversePrimary,
                                 errorLabelColor = MaterialTheme.colorScheme.inversePrimary,
-                                disabledPlaceholderColor =MaterialTheme.colorScheme.inversePrimary
+                                disabledPlaceholderColor = MaterialTheme.colorScheme.inversePrimary
                             )
                         )
                         Text(
@@ -491,24 +491,24 @@ class ExerciseView : ComponentActivity() {
                             value = weight.value,
                             onValueChange = { weight.value = it },
                             label = { Text("Weight") },
-                                    colors = TextFieldDefaults.textFieldColors(
-                                    disabledTextColor = MaterialTheme.colorScheme.inversePrimary,
-                            cursorColor = MaterialTheme.colorScheme.inversePrimary,
-                            errorCursorColor = MaterialTheme.colorScheme.inversePrimary,
-                            focusedIndicatorColor = MaterialTheme.colorScheme.inversePrimary,
-                            unfocusedIndicatorColor = MaterialTheme.colorScheme.inversePrimary,
-                            disabledIndicatorColor = MaterialTheme.colorScheme.inversePrimary,
-                            errorIndicatorColor = MaterialTheme.colorScheme.inversePrimary,
-                            disabledLeadingIconColor = MaterialTheme.colorScheme.inversePrimary,
-                            errorLeadingIconColor = MaterialTheme.colorScheme.inversePrimary,
-                            disabledTrailingIconColor = MaterialTheme.colorScheme.inversePrimary,
-                            errorTrailingIconColor = MaterialTheme.colorScheme.inversePrimary,
-                            focusedLabelColor = MaterialTheme.colorScheme.inversePrimary,
-                            unfocusedLabelColor = MaterialTheme.colorScheme.inversePrimary,
-                            disabledLabelColor = MaterialTheme.colorScheme.inversePrimary,
-                            errorLabelColor = MaterialTheme.colorScheme.inversePrimary,
-                            disabledPlaceholderColor =MaterialTheme.colorScheme.inversePrimary
-                        )
+                            colors = TextFieldDefaults.textFieldColors(
+                                disabledTextColor = MaterialTheme.colorScheme.inversePrimary,
+                                cursorColor = MaterialTheme.colorScheme.inversePrimary,
+                                errorCursorColor = MaterialTheme.colorScheme.inversePrimary,
+                                focusedIndicatorColor = MaterialTheme.colorScheme.inversePrimary,
+                                unfocusedIndicatorColor = MaterialTheme.colorScheme.inversePrimary,
+                                disabledIndicatorColor = MaterialTheme.colorScheme.inversePrimary,
+                                errorIndicatorColor = MaterialTheme.colorScheme.inversePrimary,
+                                disabledLeadingIconColor = MaterialTheme.colorScheme.inversePrimary,
+                                errorLeadingIconColor = MaterialTheme.colorScheme.inversePrimary,
+                                disabledTrailingIconColor = MaterialTheme.colorScheme.inversePrimary,
+                                errorTrailingIconColor = MaterialTheme.colorScheme.inversePrimary,
+                                focusedLabelColor = MaterialTheme.colorScheme.inversePrimary,
+                                unfocusedLabelColor = MaterialTheme.colorScheme.inversePrimary,
+                                disabledLabelColor = MaterialTheme.colorScheme.inversePrimary,
+                                errorLabelColor = MaterialTheme.colorScheme.inversePrimary,
+                                disabledPlaceholderColor = MaterialTheme.colorScheme.inversePrimary
+                            )
                         )
                     }
                     Row(
@@ -519,7 +519,11 @@ class ExerciseView : ComponentActivity() {
                         )
                         RadioButton(
                             selected = isDoubleWeight.value,
-                            onClick = { isDoubleWeight.value = !isDoubleWeight.value }
+                            onClick = { isDoubleWeight.value = !isDoubleWeight.value },
+                            colors = RadioButtonDefaults.colors(
+                                selectedColor = MaterialTheme.colorScheme.inversePrimary,
+                                unselectedColor = MaterialTheme.colorScheme.inversePrimary
+                            )
                         )
                     }
                     Button(

@@ -51,6 +51,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
@@ -152,7 +153,7 @@ fun MainView(modifier: Modifier = Modifier, measurementViewModel: MeasurementVie
     val showHourDialog = remember { mutableStateOf(false) }
     var totalDrag by remember { mutableStateOf(0f) }
     alarmScheduler = AndroidAlarmScheduler(context)
-    Log.d("Color", MaterialTheme.colorScheme.background.toString())
+    //Log.d("Color", MaterialTheme.colorScheme.background.toString())
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -491,7 +492,7 @@ fun HourPicker(
                     alarmScheduler.scheduleAlarm(newAlarmItem)
                     onConfirm()
                 }
-                , colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primaryContainer)) {
+                , colors = ButtonDefaults.buttonColors(containerColor = Color.Green)) {
                     Text("Confirm"
                     , fontWeight = FontWeight.Bold)
                 }
@@ -509,7 +510,6 @@ fun LaunchTrainingPlanIntent(context: Context) {
 fun HideStatusBar() {
     val systemUiController = rememberSystemUiController()
 
-    // Hide the status bar
     systemUiController.isStatusBarVisible = false
     systemUiController.isNavigationBarVisible = false
 }
