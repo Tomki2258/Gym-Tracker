@@ -9,5 +9,6 @@ enum class Categories {
     TRICEPS,
     ABS,
     GLUTES,
-    CALVES
+    CALVES,
+    OTHER
 }

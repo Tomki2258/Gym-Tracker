@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -34,6 +35,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -48,7 +50,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
@@ -75,10 +76,12 @@ import com.example.gymtracker.ui.theme.GymTrackerTheme
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import java.time.LocalDateTime
 import java.util.Calendar
+import androidx.compose.ui.Alignment
 
 
 private lateinit var service: NotifycationsService
 private lateinit var alarmScheduler: AndroidAlarmScheduler
+private lateinit var mainActivityViewModel: MainActivityViewModel
 
 class MainActivity : ComponentActivity() {
     private val db by lazy {
@@ -145,14 +148,16 @@ fun LoadCategories(exercises: List<ExerciseClass>): List<String> {
 @Composable
 fun MainView(modifier: Modifier = Modifier, measurementViewModel: MeasurementViewModel) {
     //HideStatusBar()
-
+    mainActivityViewModel = MainActivityViewModel()
+    mainActivityViewModel.context = LocalContext.current
     val categories = LoadCategories(ExerciseManager.exercises)
     var currentCategory by remember { mutableStateOf(categories.first()) }
-    val context = LocalContext.current
     val showNickameDialog = remember { mutableStateOf(false) }
     val showHourDialog = remember { mutableStateOf(false) }
     var totalDrag by remember { mutableStateOf(0f) }
-    alarmScheduler = AndroidAlarmScheduler(context)
+    alarmScheduler = AndroidAlarmScheduler(
+        mainActivityViewModel.context
+    )
     //Log.d("Color", MaterialTheme.colorScheme.background.toString())
     Box(
         modifier = Modifier
@@ -292,7 +297,9 @@ fun MainView(modifier: Modifier = Modifier, measurementViewModel: MeasurementVie
                 )
             }
             IconButton(
-                onClick = { LaunchTrainingPlanIntent(context) },
+                onClick = { LaunchTrainingPlanIntent(
+                    mainActivityViewModel.context
+                ) },
                 modifier = Modifier.weight(1f)
             ) {
                 Icon(
@@ -353,7 +360,34 @@ fun WelcomeCard(userName: String) {
         }
     }
 }
-
+@Composable
+fun AddCustomExercisePanel(){
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+            .clickable {
+                val intent = Intent(mainActivityViewModel.context, AddCustomExerciseView::class.java)
+                mainActivityViewModel.context.startActivity(intent)
+            },
+        contentAlignment = Alignment.Center
+    ) {
+        Card(
+            modifier = Modifier
+                .width(350.dp),
+            border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline),
+            ) {
+            Column(
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Text(
+                    text = "Click to add exercise",
+                    fontSize = 24.sp
+                )
+            }
+        }
+    }
+}
 @Composable
 fun ExerciseList(exercises: List<ExerciseClass>, currentCategory: String) {
     val userName = UserManager.getUserName()
@@ -369,6 +403,11 @@ fun ExerciseList(exercises: List<ExerciseClass>, currentCategory: String) {
             items(exercises) { exercise ->
                 if (currentCategory == "All" || exercise.category.toString() == currentCategory) {
                     ExerciseCard(exercise, exercises.indexOf(exercise))
+                }
+            }
+            if(currentCategory == "All") {
+                item {
+                    AddCustomExercisePanel()
                 }
             }
         }
