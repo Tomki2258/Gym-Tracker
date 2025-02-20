@@ -2,6 +2,9 @@
 package com.example.gymtracker
 
 import android.content.Context
+import android.util.Log
+import androidx.room.Entity
+import com.example.gymtracker.views.exercise
 import java.io.Serializable
 
 class ExerciseClass(
@@ -9,7 +12,8 @@ class ExerciseClass(
     val category: Categories,
     val photoString: String = name.replace(" ", "_").lowercase(),
     var measurementsList: MutableList<Measurement> = mutableListOf<Measurement>(),
-    var bestMeasurement: Measurement? = null
+    var bestMeasurement: Measurement? = null,
+    val exerciseDecsArg: String = ""
 ) : Serializable {
     var categoryString = ""
     var exerciseDecs = ""
@@ -18,6 +22,12 @@ class ExerciseClass(
         categoryString = category.toString().lowercase()
         categoryString = categoryString.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
         setBestMeasurement()
+        if(exerciseDecsArg != null){
+            exerciseDecs = exerciseDecsArg
+        }
+        else{
+            //read from file
+        }
     }
 
     fun getPhotoResourceId(context: Context): Int {
@@ -34,4 +44,13 @@ class ExerciseClass(
     fun setBestMeasurement() {
         bestMeasurement = measurementsList.maxByOrNull { it.reps * it.weight }
     }
+
+    fun getExerciseLogInfo(){
+        Log.d("Exercise Log Info", "Name: ${name}\nCattegory: ${category}\nDecs(optional): ${exerciseDecs}")
+    }
+
+    fun doCustomExercise(){
+        //saving custom exercises made by users
+    }
+
 }

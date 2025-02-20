@@ -400,14 +400,14 @@ fun ExerciseList(exercises: List<ExerciseClass>, currentCategory: String) {
             item {
                 WelcomeCard(userName)
             }
-            items(exercises) { exercise ->
-                if (currentCategory == "All" || exercise.category.toString() == currentCategory) {
-                    ExerciseCard(exercise, exercises.indexOf(exercise))
-                }
-            }
             if(currentCategory == "All") {
                 item {
                     AddCustomExercisePanel()
+                }
+            }
+            items(exercises) { exercise ->
+                if (currentCategory == "All" || exercise.category.toString() == currentCategory) {
+                    ExerciseCard(exercise, exercises.indexOf(exercise))
                 }
             }
         }

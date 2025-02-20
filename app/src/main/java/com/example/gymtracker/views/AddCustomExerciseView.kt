@@ -86,6 +86,7 @@ fun MainView(exerciseViewModel: AddCustomExerciseViewModel) {
                         text = { Text(category.name) },
                         onClick = {
                             selectedCategory = category
+                            exerciseViewModel.updateCattegory(category)
                             expanded = false
                         }
                     )
