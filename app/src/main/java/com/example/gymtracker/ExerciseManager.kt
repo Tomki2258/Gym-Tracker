@@ -2,30 +2,47 @@
 package com.example.gymtracker
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import androidx.room.Room
+import com.example.gymtracker.roomdb.ExercisesDatabase
 import com.example.gymtracker.roomdb.MeasurementDatabase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.forEach
 import kotlinx.coroutines.launch
 
 object ExerciseManager {
     private const val PREFS_NAME = "exercise_prefs"
     private const val KEY_EXERCISES = "exercises"
     var exercises by mutableStateOf(listOf<ExerciseClass>())
+    private var exerciseDatabase: ExercisesDatabase? = null
 
     fun initialize(context: Context) {
-        //val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        //val exercisesJson = prefs.getString(KEY_EXERCISES, "[]")
-        exercises = LoadExercises()
-        // Load measurements from the database
+        exerciseDatabase = getDatabase(context)
+        CoroutineScope(Dispatchers.IO).launch {
+            val customExercises = loadCustomExercises()
+            val defaultExercises = LoadExercises()
+            exercises = customExercises + defaultExercises
+        }
+
         val db = MeasurementDatabase.getInstance(context)
         loadMeasurementsFromDatabase(db)
-        Thread{
+        Thread {
             LoadDescriptions()
         }.start()
+    }
+
+    fun getDatabase(context: Context): ExercisesDatabase {
+        return Room.databaseBuilder(
+            context.applicationContext,
+            ExercisesDatabase::class.java,
+            "exercises_database"
+        ).fallbackToDestructiveMigration()
+            .build()
     }
 
     private fun loadMeasurementsFromDatabase(db: MeasurementDatabase) {
@@ -38,7 +55,18 @@ object ExerciseManager {
             }
         }
     }
-    fun LoadDescriptions(){
+    suspend fun loadCustomExercises(): List<ExerciseClass> {
+        val loadedExercises = mutableListOf<ExerciseClass>()
+        val customExercises = exerciseDatabase?.exerciseDao()?.getAllExercises()?.first()
+        customExercises?.forEach { ex ->
+            loadedExercises.add(
+                ExerciseClass(ex.name, ex.category, ex.description, isCustom = true)
+            )
+            Log.d(ex.name, ex.description)
+        }
+        return loadedExercises
+    }
+    fun LoadDescriptions() {
         exercises.forEach { exercise ->
             Thread {
                 val url = exercise.name.replace(" ", "").lowercase()
@@ -47,8 +75,9 @@ object ExerciseManager {
             }.start()
         }
     }
+
     fun LoadExercises(): List<ExerciseClass> {
-        val exerciseList = listOf(
+        return listOf(
             ExerciseClass("Chest fly", Categories.CHEST),
             ExerciseClass("Bench press", Categories.CHEST),
             ExerciseClass("Dumbbell Chest Press", Categories.CHEST),
@@ -60,11 +89,9 @@ object ExerciseManager {
             ExerciseClass("Cable Grip", Categories.BACK),
             ExerciseClass("Lat Pulldown", Categories.BACK),
             ExerciseClass("Machine Crunch", Categories.ABS),
-            //ExerciseClass("Leg Raise" , Categories.ABS),
-            ExerciseClass("Leg Press" , Categories.LEGS),
-            ExerciseClass("Leg Curl" , Categories.LEGS),
+            ExerciseClass("Leg Press", Categories.LEGS),
+            ExerciseClass("Leg Curl", Categories.LEGS)
         )
-        return exerciseList
     }
 
     fun GetExerciseMeasurements(exercise: ExerciseClass): List<Measurement> {

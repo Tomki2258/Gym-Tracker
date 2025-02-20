@@ -17,5 +17,5 @@ interface ExercisesDao {
     suspend fun deleteExercise(exericseEntity: ExericseEntity)
 
     @Query("SELECT * FROM exercises")
-    fun getAllExercises(exericseEntity: ExericseEntity) :Flow<List<ExericseEntity>>
+    fun getAllExercises() :Flow<List<ExericseEntity>>
 }

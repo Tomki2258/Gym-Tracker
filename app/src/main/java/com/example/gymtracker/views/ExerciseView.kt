@@ -67,6 +67,7 @@ import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlin.math.log
 
 var exercise = ExerciseClass("Default Name", Categories.CALVES)
 
@@ -166,6 +167,7 @@ class ExerciseView : ComponentActivity() {
         ),
         exerciseView: ExerciseView
     ) {
+        Log.d(exercise.name, exercise.isCustom.toString())
         val showDialog = remember { mutableStateOf(false) }
         val showDescDialog = remember { mutableStateOf(false) }
         val showDeleteDialog = remember { mutableStateOf(false) }

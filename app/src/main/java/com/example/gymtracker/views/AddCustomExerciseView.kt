@@ -52,18 +52,23 @@ fun MainView(exerciseViewModel: AddCustomExerciseViewModel) {
 
     var selectedCategory by remember { mutableStateOf(Categories.OTHER) }
     var expanded by remember { mutableStateOf(false) }
-
-    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+    Column(modifier = Modifier
+        .fillMaxSize()
+        .padding(16.dp)) {
         TextField(
             value = name,
             onValueChange = { exerciseViewModel.updateName(it) },
             label = { Text("Exercise Name") },
-            modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp)
         )
         ExposedDropdownMenuBox(
             expanded = expanded,
             onExpandedChange = { expanded = !expanded },
-            modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp)
         ) {
             TextField(
                 readOnly = true,
@@ -81,7 +86,7 @@ fun MainView(exerciseViewModel: AddCustomExerciseViewModel) {
                 expanded = expanded,
                 onDismissRequest = { expanded = false }
             ) {
-                Categories.values().forEach { category ->
+                Categories.entries.forEach { category ->
                     DropdownMenuItem(
                         text = { Text(category.name) },
                         onClick = {
@@ -97,15 +102,17 @@ fun MainView(exerciseViewModel: AddCustomExerciseViewModel) {
             value = description,
             onValueChange = { exerciseViewModel.updateDescription(it) },
             label = { Text("Exercise Description (optional)") },
-            modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp)
         )
         Button(
             onClick = {
-                if(exerciseViewModel.checkForAdd()){
-                    Toast.makeText(exerciseViewModel.context,"SIGMA",Toast.LENGTH_SHORT).show()
-                }
-                else{
-                    Toast.makeText(exerciseViewModel.context,"NIE SIGMA",Toast.LENGTH_SHORT).show()
+                if (exerciseViewModel.checkForAdd()) {
+                    Toast.makeText(exerciseViewModel.context, "SIGMA", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(exerciseViewModel.context, "NIE SIGMA", Toast.LENGTH_SHORT)
+                        .show()
                 }
             }
         ) {

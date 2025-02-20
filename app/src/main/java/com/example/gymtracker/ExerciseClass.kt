@@ -13,7 +13,8 @@ class ExerciseClass(
     val photoString: String = name.replace(" ", "_").lowercase(),
     var measurementsList: MutableList<Measurement> = mutableListOf<Measurement>(),
     var bestMeasurement: Measurement? = null,
-    val exerciseDecsArg: String = ""
+    val exerciseDecsArg: String = "",
+    val isCustom: Boolean = false
 ) : Serializable {
     var categoryString = ""
     var exerciseDecs = ""

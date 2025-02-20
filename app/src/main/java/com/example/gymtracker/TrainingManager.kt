@@ -10,7 +10,7 @@ import com.example.gymtracker.roomdb.TrainingPlan
 import kotlinx.coroutines.runBlocking
 
 object TrainingManager {
-    private var db: TrainingplanDatabase? = null
+    var db: TrainingplanDatabase? = null
 
     val daysOfWeek = listOf(
         DayTrainingPlan("Monday"),
