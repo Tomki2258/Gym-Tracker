@@ -12,7 +12,6 @@ import com.example.gymtracker.roomdb.MeasurementDatabase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.forEach
 import kotlinx.coroutines.launch
 
 object ExerciseManager {
@@ -27,6 +26,7 @@ object ExerciseManager {
             val customExercises = loadCustomExercises()
             val defaultExercises = LoadExercises()
             exercises = customExercises + defaultExercises
+            //exercises = defaultExercises
         }
 
         val db = MeasurementDatabase.getInstance(context)
@@ -60,7 +60,7 @@ object ExerciseManager {
         val customExercises = exerciseDatabase?.exerciseDao()?.getAllExercises()?.first()
         customExercises?.forEach { ex ->
             loadedExercises.add(
-                ExerciseClass(ex.name, ex.category, ex.description, isCustom = true)
+                ExerciseClass(ex.name, ex.category, ex.description, isCustom = true, exericseEntity = ex)
             )
             Log.d(ex.name, ex.description)
         }
@@ -75,22 +75,33 @@ object ExerciseManager {
             }.start()
         }
     }
+    fun DeleteExercise(exericseEntity: ExericseEntity){
+        CoroutineScope(Dispatchers.IO).launch {
+            exerciseDatabase?.exerciseDao()?.deleteExercise(exericseEntity)
 
+            val value = exercises.indexOf(exercises.find { it.name.equals(exericseEntity.name) })
+            if (value != -1) {
+                exercises = exercises.toMutableList().apply {
+                    removeAt(value)
+                }
+            }
+        }
+    }
     fun LoadExercises(): List<ExerciseClass> {
         return listOf(
-            ExerciseClass("Chest fly", Categories.CHEST),
-            ExerciseClass("Bench press", Categories.CHEST),
-            ExerciseClass("Dumbbell Chest Press", Categories.CHEST),
-            ExerciseClass("Pec Deck", Categories.CHEST),
-            ExerciseClass("Reverse Machine Fly", Categories.SHOULDERS),
-            ExerciseClass("Shoulder Press", Categories.SHOULDERS),
-            ExerciseClass("Barbell Curl", Categories.BICEPS),
-            ExerciseClass("Tricep Pushdown", Categories.TRICEPS),
-            ExerciseClass("Cable Grip", Categories.BACK),
-            ExerciseClass("Lat Pulldown", Categories.BACK),
-            ExerciseClass("Machine Crunch", Categories.ABS),
-            ExerciseClass("Leg Press", Categories.LEGS),
-            ExerciseClass("Leg Curl", Categories.LEGS)
+            ExerciseClass("Chest fly", Categories.CHEST, exericseEntity = null),
+            ExerciseClass("Bench press", Categories.CHEST, exericseEntity = null),
+            ExerciseClass("Dumbbell Chest Press", Categories.CHEST, exericseEntity = null),
+            ExerciseClass("Pec Deck", Categories.CHEST, exericseEntity = null),
+            ExerciseClass("Reverse Machine Fly", Categories.SHOULDERS, exericseEntity = null),
+            ExerciseClass("Shoulder Press", Categories.SHOULDERS, exericseEntity = null),
+            ExerciseClass("Barbell Curl", Categories.BICEPS, exericseEntity = null),
+            ExerciseClass("Tricep Pushdown", Categories.TRICEPS, exericseEntity = null),
+            ExerciseClass("Cable Grip", Categories.BACK, exericseEntity = null),
+            ExerciseClass("Lat Pulldown", Categories.BACK, exericseEntity = null),
+            ExerciseClass("Machine Crunch", Categories.ABS, exericseEntity = null),
+            ExerciseClass("Leg Press", Categories.LEGS, exericseEntity = null),
+            ExerciseClass("Leg Curl", Categories.LEGS, exericseEntity = null)
         )
     }
 
@@ -105,6 +116,6 @@ object ExerciseManager {
                 return exerciseIt
             }
         }
-        return ExerciseClass("Not found", Categories.CHEST)
+        return ExerciseClass("Not found", Categories.CHEST, exericseEntity = null)
     }
 }

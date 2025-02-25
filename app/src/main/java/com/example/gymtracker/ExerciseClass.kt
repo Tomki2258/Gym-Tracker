@@ -3,8 +3,6 @@ package com.example.gymtracker
 
 import android.content.Context
 import android.util.Log
-import androidx.room.Entity
-import com.example.gymtracker.views.exercise
 import java.io.Serializable
 
 class ExerciseClass(
@@ -14,6 +12,7 @@ class ExerciseClass(
     var measurementsList: MutableList<Measurement> = mutableListOf<Measurement>(),
     var bestMeasurement: Measurement? = null,
     val exerciseDecsArg: String = "",
+    val exericseEntity: ExericseEntity?,
     val isCustom: Boolean = false
 ) : Serializable {
     var categoryString = ""

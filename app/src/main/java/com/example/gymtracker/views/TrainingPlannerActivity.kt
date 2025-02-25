@@ -49,13 +49,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.toLowerCase
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.example.gymtracker.ApiManager
-import com.example.gymtracker.ApiManager.getWarpUp
 import com.example.gymtracker.Categories
 import com.example.gymtracker.ExerciseClass
 import com.example.gymtracker.ExerciseManager
@@ -87,7 +85,7 @@ class TrainingPlannerActivity : ComponentActivity() {
 
 var showAddDialog = mutableStateOf(false)
 var showRemoveDialog = mutableStateOf(false)
-var selectedToRemove = mutableStateOf(ExerciseClass("", Categories.CHEST))
+var selectedToRemove = mutableStateOf(ExerciseClass("", Categories.CHEST, exericseEntity = null))
 var showWarmUpDialog = mutableStateOf(false)
 
 var warmUpList = mutableStateOf(mutableListOf<String>())

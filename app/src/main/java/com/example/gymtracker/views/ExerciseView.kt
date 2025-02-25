@@ -2,8 +2,8 @@
 package com.example.gymtracker.views
 
 import WeeklyProgress
+import android.app.Activity
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.BorderStroke
@@ -67,9 +67,8 @@ import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import kotlin.math.log
 
-var exercise = ExerciseClass("Default Name", Categories.CALVES)
+var exercise = ExerciseClass("Default Name", Categories.CALVES, exericseEntity = null)
 
 class ExerciseView : ComponentActivity() {
     private lateinit var measurementViewModel: MeasurementViewModel
@@ -163,11 +162,11 @@ class ExerciseView : ComponentActivity() {
         exerciseClass: ExerciseClass = ExerciseClass(
             "Default Name",
             Categories.CALVES,
-            "no_desc.txt"
+            "no_desc.txt",
+            exericseEntity = null
         ),
         exerciseView: ExerciseView
     ) {
-        Log.d(exercise.name, exercise.isCustom.toString())
         val showDialog = remember { mutableStateOf(false) }
         val showDescDialog = remember { mutableStateOf(false) }
         val showDeleteDialog = remember { mutableStateOf(false) }
@@ -180,8 +179,7 @@ class ExerciseView : ComponentActivity() {
         val weeklyProgressList = remember(measurementsList.value) {
             createWeeklyProgressList(measurementsList.value).sortedByDescending { it.firstDate }
         }
-
-        Log.d("Best Measurement", exercise.bestMeasurement?.weight.toString())
+        //Log.d("Best Measurement", exercise.bestMeasurement?.weight.toString())
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -575,12 +573,27 @@ class ExerciseView : ComponentActivity() {
                     .height(200.dp)
                     .width(400.dp),
                 border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline),
-
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                Text(
-                    modifier = Modifier.padding(16.dp),
-                    text = exercise.exerciseDecs
-                )
+                    Text(
+                        modifier = Modifier.padding(16.dp),
+                        text = exercise.exerciseDecs
+                    )
+                    if (exercise.isCustom) {
+                        Button(
+                            onClick = {
+                                finish()
+                                exercise.exericseEntity?.let { ExerciseManager.DeleteExercise(it) }
+                                onDismissRequest()
+                            },
+                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
+                        ) {
+                            Text(text = "Delete Exercise")
+                        }
+                    }
+                }
             }
         }
     }

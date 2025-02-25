@@ -36,7 +36,8 @@ class AddCustomExerciseView : ComponentActivity() {
         setContent {
             GymTrackerTheme {
                 MainView(
-                    exerciseViewModel
+                    exerciseViewModel,
+                    this
                 )
             }
         }
@@ -46,7 +47,7 @@ class AddCustomExerciseView : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainView(exerciseViewModel: AddCustomExerciseViewModel) {
+fun MainView(exerciseViewModel: AddCustomExerciseViewModel,activity: ComponentActivity) {
     val name by exerciseViewModel.nameState.collectAsState()
     val description by exerciseViewModel.descriptionState.collectAsState()
 
@@ -110,6 +111,7 @@ fun MainView(exerciseViewModel: AddCustomExerciseViewModel) {
             onClick = {
                 if (exerciseViewModel.checkForAdd()) {
                     Toast.makeText(exerciseViewModel.context, "SIGMA", Toast.LENGTH_SHORT).show()
+                    activity.finish()
                 } else {
                     Toast.makeText(exerciseViewModel.context, "NIE SIGMA", Toast.LENGTH_SHORT)
                         .show()
