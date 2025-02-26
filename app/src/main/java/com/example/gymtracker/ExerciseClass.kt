@@ -28,6 +28,10 @@ class ExerciseClass(
         else{
             //read from file
         }
+        Log.d("READING MEASUREMENTS","")
+        for(measurement in measurementsList){
+            Log.d(measurement.exerciseName,measurement.reps.toString())
+        }
     }
 
     fun getPhotoResourceId(context: Context): Int {

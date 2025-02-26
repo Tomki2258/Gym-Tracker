@@ -27,13 +27,13 @@ object ExerciseManager {
             val defaultExercises = LoadExercises()
             exercises = customExercises + defaultExercises
             //exercises = defaultExercises
-        }
 
-        val db = MeasurementDatabase.getInstance(context)
-        loadMeasurementsFromDatabase(db)
-        Thread {
-            LoadDescriptions()
-        }.start()
+            val db = MeasurementDatabase.getInstance(context)
+            loadMeasurementsFromDatabase(db)
+            Thread {
+                LoadDescriptions()
+            }.start()
+        }
     }
 
     fun getDatabase(context: Context): ExercisesDatabase {

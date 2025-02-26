@@ -70,6 +70,7 @@ dependencies {
 
 }
 dependencies {
+    implementation(libs.androidx.media3.common.ktx)
     implementation(libs.androidx.espresso.core)
     val room_version = "2.6.1"
 

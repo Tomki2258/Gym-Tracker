@@ -52,6 +52,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.ViewModelProvider
+import androidx.media3.common.util.Log
 import androidx.room.Room
 import com.example.gymtracker.Categories
 import com.example.gymtracker.ExerciseClass
@@ -72,6 +73,7 @@ var exercise = ExerciseClass("Default Name", Categories.CALVES, exericseEntity =
 
 class ExerciseView : ComponentActivity() {
     private lateinit var measurementViewModel: MeasurementViewModel
+    private lateinit var exerciseViewModel: ExerciseViewModel
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val db = Room.databaseBuilder(
@@ -85,6 +87,7 @@ class ExerciseView : ComponentActivity() {
             this,
             MeasurementViewModel.Factory(dao)
         ).get(MeasurementViewModel::class.java)
+        exerciseViewModel = ExerciseViewModel()
         setContent {
             GymTrackerTheme {
                 val index = intent.getIntExtra("EXERCISE_INDEX", 0)
@@ -92,7 +95,8 @@ class ExerciseView : ComponentActivity() {
                 exercise = exerciseClass
                 ExerciseIntent(
                     exerciseClass = exerciseClass,
-                    exerciseView = this
+                    exerciseView = this,
+                    exerciseViewModel
                 )
             }
         }
@@ -132,11 +136,6 @@ class ExerciseView : ComponentActivity() {
         measurementsList.value = exercise.measurementsList.toMutableList()
     }
 
-    fun formatStringDate(date: Long): String {
-        val sdf = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
-        return sdf.format(Date(date))
-    }
-
     fun createWeeklyProgressList(measurements: List<Measurement>): MutableList<WeeklyProgress> {
         val weeklyProgressMap = measurements.groupBy { it.weekOfTheYear }
         val sortedMap = weeklyProgressMap.entries.sortedBy { it.value.first().date }
@@ -165,7 +164,8 @@ class ExerciseView : ComponentActivity() {
             "no_desc.txt",
             exericseEntity = null
         ),
-        exerciseView: ExerciseView
+        exerciseView: ExerciseView,
+        exerciseViewModel: ExerciseViewModel
     ) {
         val showDialog = remember { mutableStateOf(false) }
         val showDescDialog = remember { mutableStateOf(false) }
@@ -176,6 +176,7 @@ class ExerciseView : ComponentActivity() {
         val sortedMeasurementsList = remember(measurementsList.value) {
             measurementsList.value.sortedByDescending { it.date.time }
         }
+
         val weeklyProgressList = remember(measurementsList.value) {
             createWeeklyProgressList(measurementsList.value).sortedByDescending { it.firstDate }
         }
@@ -271,7 +272,7 @@ class ExerciseView : ComponentActivity() {
                                         .padding(8.dp)
                                 ) {
                                     Text(
-                                        text = formatStringDate(measurement.date.time),
+                                        text = exerciseViewModel.formatStringDate(measurement.date.time),
                                         modifier = Modifier.weight(1f)
                                     )
                                     Text(
