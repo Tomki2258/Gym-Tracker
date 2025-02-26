@@ -3,6 +3,7 @@ package com.example.gymtracker.views
 
 import WeeklyProgress
 import android.app.Activity
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -87,7 +88,7 @@ class ExerciseView : ComponentActivity() {
             this,
             MeasurementViewModel.Factory(dao)
         ).get(MeasurementViewModel::class.java)
-        exerciseViewModel = ExerciseViewModel()
+        exerciseViewModel = ExerciseViewModel(measurementViewModel)
         setContent {
             GymTrackerTheme {
                 val index = intent.getIntExtra("EXERCISE_INDEX", 0)
@@ -100,59 +101,6 @@ class ExerciseView : ComponentActivity() {
                 )
             }
         }
-    }
-
-
-    fun addMeasurementDatabase(
-        reps: Int,
-        weight: Float,
-        exerciseName: String,
-        measurementsList: MutableState<MutableList<Measurement>>
-    ) {
-        val measurement = Measurement(
-            reps = reps,
-            weight = weight,
-            exerciseName = exerciseName
-        )
-        if (reps == 0 || weight.toDouble() == 0.0) {
-            ToastManager(this, "Reps or weight cannot be 0")
-            return
-        }
-        exercise.measurementsList.add(measurement)
-        val event = MeasurementEvent.InsertMeasurement(measurement)
-        measurementViewModel.onEvent(event)
-        measurementsList.value = exercise.measurementsList.toMutableList()
-        exercise.setBestMeasurement()
-    }
-
-    fun deleteMeasurementDatabase(
-        measurement: Measurement,
-        measurementsList: MutableState<MutableList<Measurement>>
-    ) {
-        val event = MeasurementEvent.DeleteMeasurement(measurement)
-        measurementViewModel.onEvent(event)
-        exercise.measurementsList.remove(measurement)
-        exercise.setBestMeasurement()
-        measurementsList.value = exercise.measurementsList.toMutableList()
-    }
-
-    fun createWeeklyProgressList(measurements: List<Measurement>): MutableList<WeeklyProgress> {
-        val weeklyProgressMap = measurements.groupBy { it.weekOfTheYear }
-        val sortedMap = weeklyProgressMap.entries.sortedBy { it.value.first().date }
-
-        val weeklyProgressList = mutableListOf<WeeklyProgress>()
-
-        var lastWeek: WeeklyProgress? = null
-        for ((weekNumber, weekMeasurements) in sortedMap) {
-            val weeklyProgress = WeeklyProgress(weekMeasurements, weekNumber, lastWeek)
-            weeklyProgressList.add(weeklyProgress)
-            lastWeek = weeklyProgress
-        }
-        //weeklyProgressList.sortBy { it.firstDate }
-//        for (weeklyProgress in weeklyProgressList) {
-//            Log.d("Weekly Progress", "Week ${weeklyProgress.weekNumber} with value ${weeklyProgress.avgWeight}")
-//        }
-        return weeklyProgressList
     }
 
     @OptIn(ExperimentalFoundationApi::class)
@@ -178,7 +126,7 @@ class ExerciseView : ComponentActivity() {
         }
 
         val weeklyProgressList = remember(measurementsList.value) {
-            createWeeklyProgressList(measurementsList.value).sortedByDescending { it.firstDate }
+            exerciseViewModel.createWeeklyProgressList(measurementsList.value).sortedByDescending { it.firstDate }
         }
         //Log.d("Best Measurement", exercise.bestMeasurement?.weight.toString())
         Box(
@@ -288,10 +236,6 @@ class ExerciseView : ComponentActivity() {
                         }
                     }
                 }
-                val weekSize = 1.5f
-                val yearSize = 0.5f
-                val avgWeightSize = 0.65f
-                val weightDiffSize = 1f
 
                 Card(
                     modifier = Modifier
@@ -322,22 +266,22 @@ class ExerciseView : ComponentActivity() {
                                 ) {
                                     Text(
                                         text = "Week",
-                                        modifier = Modifier.weight(weekSize),
+                                        modifier = Modifier.weight(exerciseViewModel.weekSize),
                                         fontWeight = FontWeight.Bold
                                     )
                                     Text(
                                         text = "Year",
-                                        modifier = Modifier.weight(yearSize),
+                                        modifier = Modifier.weight(exerciseViewModel.yearSize),
                                         fontWeight = FontWeight.Bold
                                     )
                                     Text(
                                         text = "AVG",
-                                        modifier = Modifier.weight(avgWeightSize),
+                                        modifier = Modifier.weight(exerciseViewModel.avgWeightSize),
                                         fontWeight = FontWeight.Bold
                                     )
                                     Text(
                                         text = "Weight Diff",
-                                        modifier = Modifier.weight(weightDiffSize),
+                                        modifier = Modifier.weight(exerciseViewModel.weightDiffSize),
                                         fontWeight = FontWeight.Bold
                                     )
                                 }
@@ -350,24 +294,24 @@ class ExerciseView : ComponentActivity() {
                                 ) {
                                     Text(
                                         text = "${weeklyProgress.weekNumber} (${weeklyProgress.weekRange})",
-                                        modifier = Modifier.weight(weekSize)
+                                        modifier = Modifier.weight(exerciseViewModel.weekSize)
                                     )
                                     Text(
                                         text = "${weeklyProgress.year}",
-                                        modifier = Modifier.weight(yearSize)
+                                        modifier = Modifier.weight(exerciseViewModel.yearSize)
                                     )
                                     val avgDifference = weeklyProgress.avgWeightDifference
                                     Text(
-                                        text = "${roundTheNumber(weeklyProgress.avgWeight)}",
-                                        modifier = Modifier.weight(avgWeightSize)
+                                        text = "${exerciseViewModel.roundTheNumber(weeklyProgress.avgWeight)}",
+                                        modifier = Modifier.weight(exerciseViewModel.avgWeightSize)
                                     )
-                                    val tint = GetTint(avgDifference)
+                                    val tint = exerciseViewModel.GetTint(avgDifference)
                                     Row(
-                                        modifier = Modifier.weight(weightDiffSize)
+                                        modifier = Modifier.weight(exerciseViewModel.weightDiffSize)
                                     ) {
                                         Icon(
                                             painter = painterResource(
-                                                id = GetRDrawable(
+                                                id = exerciseViewModel.GetRDrawable(
                                                     avgDifference
                                                 )
                                             ),
@@ -377,7 +321,7 @@ class ExerciseView : ComponentActivity() {
                                         )
 
                                         Text(
-                                            text = " ${roundTheNumber(avgDifference)}",
+                                            text = " ${exerciseViewModel.roundTheNumber(avgDifference)}",
                                         )
                                     }
                                 }
@@ -433,9 +377,6 @@ class ExerciseView : ComponentActivity() {
         }
     }
 
-    fun roundTheNumber(numInDouble: Float): String {
-        return "%.1f".format(numInDouble)
-    }
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
@@ -548,7 +489,7 @@ class ExerciseView : ComponentActivity() {
                             }
 
                             scope.launch {
-                                exerciseView.addMeasurementDatabase(
+                                exerciseView.exerciseViewModel.addMeasurementDatabase(
                                     reps.value.toInt(),
                                     weight.value.toFloat() * if (isDoubleWeight.value) 2 else 1,
                                     exercise.name,
@@ -629,7 +570,7 @@ class ExerciseView : ComponentActivity() {
                     Button(
                         onClick = {
                             scope.launch {
-                                exerciseView.deleteMeasurementDatabase(
+                                exerciseView.exerciseViewModel.deleteMeasurementDatabase(
                                     measurement,
                                     measurementsList
                                 )
@@ -644,18 +585,4 @@ class ExerciseView : ComponentActivity() {
             }
         }
     }
-}
-
-fun GetTint(value: Float): Color {
-    if (value == 0.0f) return Color.Gray
-
-    if (value > 0) return Color.Green
-    return Color.Red
-}
-
-fun GetRDrawable(value: Float): Int {
-    if (value == 0.0f) return R.drawable.none
-
-    if (value > 0) return R.drawable.up
-    return R.drawable.down
 }
