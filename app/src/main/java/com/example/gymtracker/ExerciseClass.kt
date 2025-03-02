@@ -22,12 +22,14 @@ class ExerciseClass(
         categoryString = category.toString().lowercase()
         categoryString = categoryString.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
         setBestMeasurement()
-        if(exerciseDecsArg != null){
-            exerciseDecs = exerciseDecsArg
+
+        if(isCustom){
+            exerciseDecs = "here is exercise description from CUSTOM exercise"
         }
         else{
-            //read from file
+            exerciseDecs = "here is exercise description from NON custom exercise"
         }
+
         Log.d("READING MEASUREMENTS","")
         for(measurement in measurementsList){
             Log.d(measurement.exerciseName,measurement.reps.toString())

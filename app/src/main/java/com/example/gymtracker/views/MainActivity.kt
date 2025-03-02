@@ -35,7 +35,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -158,6 +157,8 @@ fun MainView(modifier: Modifier = Modifier, measurementViewModel: MeasurementVie
     alarmScheduler = AndroidAlarmScheduler(
         mainActivityViewModel.context
     )
+
+    mainActivityViewModel.RequestNotificationPermission()
     //Log.d("Color", MaterialTheme.colorScheme.background.toString())
     Box(
         modifier = Modifier

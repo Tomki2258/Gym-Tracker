@@ -1,10 +1,16 @@
 package com.example.gymtracker.views
 
 import android.os.Bundle
+import android.util.Log
+import android.widget.Button
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -27,6 +33,12 @@ import androidx.compose.ui.unit.dp
 import com.example.gymtracker.Categories
 import com.example.gymtracker.views.ui.theme.GymTrackerTheme
 import androidx.compose.material3.*
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
+import coil.compose.rememberImagePainter
+import com.example.gymtracker.R
 
 class AddCustomExerciseView : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -47,12 +59,23 @@ class AddCustomExerciseView : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainView(exerciseViewModel: AddCustomExerciseViewModel,activity: ComponentActivity) {
+fun MainView(exerciseViewModel: AddCustomExerciseViewModel, activity: ComponentActivity) {
     val name by exerciseViewModel.nameState.collectAsState()
     val description by exerciseViewModel.descriptionState.collectAsState()
+    val photoUri by exerciseViewModel.photoUriState.collectAsState()
 
     var selectedCategory by remember { mutableStateOf(Categories.OTHER) }
     var expanded by remember { mutableStateOf(false) }
+
+    val pickMedia = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+        if (uri != null) {
+            Log.d("PhotoPicker", "Selected URI: $uri")
+            exerciseViewModel.updatePhoto(uri)
+        } else {
+            Log.d("PhotoPicker", "No media selected")
+        }
+    }
+
     Column(modifier = Modifier
         .fillMaxSize()
         .padding(16.dp)) {
@@ -64,6 +87,22 @@ fun MainView(exerciseViewModel: AddCustomExerciseViewModel,activity: ComponentAc
                 .fillMaxWidth()
                 .padding(bottom = 16.dp)
         )
+        photoUri?.let {
+            Image(
+                painter = rememberImagePainter(it),
+                contentDescription = "Exercise Image",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp)
+            )
+        }
+        Button(
+            onClick = {
+                pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+            }
+        ) {
+            Text("Add Photo")
+        }
         ExposedDropdownMenuBox(
             expanded = expanded,
             onExpandedChange = { expanded = !expanded },

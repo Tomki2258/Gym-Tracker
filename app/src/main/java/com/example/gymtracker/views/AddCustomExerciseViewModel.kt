@@ -1,24 +1,19 @@
 package com.example.gymtracker.views
 
 import android.content.Context
+import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.room.Room
 import com.example.gymtracker.Categories
-import com.example.gymtracker.ExerciseClass
 import com.example.gymtracker.ExerciseManager
 import com.example.gymtracker.ExericseEntity
-import com.example.gymtracker.TrainingManager.db
-import com.example.gymtracker.roomdb.ExercisesDatabase
-import com.example.gymtracker.roomdb.TrainingplanDatabase
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.forEach
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import coil.compose.rememberImagePainter
 
+// In your ViewModel
 class AddCustomExerciseViewModel(contextArg: Context) : ViewModel() {
     val context = contextArg
 
@@ -29,7 +24,8 @@ class AddCustomExerciseViewModel(contextArg: Context) : ViewModel() {
     val descriptionState = description.asStateFlow()
 
     private val exerciseCattegory = MutableStateFlow(Categories.OTHER)
-    val cattegoryState = MutableStateFlow(Categories.OTHER)
+    private var photoUri: MutableStateFlow<Uri?> = MutableStateFlow(null)
+
     fun updateName(name: String) {
         exerciseName.value = name
     }
@@ -42,6 +38,12 @@ class AddCustomExerciseViewModel(contextArg: Context) : ViewModel() {
         exerciseCattegory.value = cat
     }
 
+    fun updatePhoto(uri: Uri?) {
+        photoUri.value = uri
+    }
+
+    val photoUriState = photoUri.asStateFlow()
+
     fun checkForAdd(): Boolean {
         if (exerciseName.value == "") return false
         try {
@@ -51,14 +53,13 @@ class AddCustomExerciseViewModel(contextArg: Context) : ViewModel() {
                         0,
                         exerciseName.value,
                         exerciseCattegory.value,
-                        description.value)
+                        description.value
+                    )
                 )
                 ExerciseManager.initialize(context)
             }
-        }
-        catch (ex:Exception){
+        } catch (ex: Exception) {
             ex.message?.let { Log.e("ADDING EXERCISE FAILED", it) }
-
             return false
         }
         return true

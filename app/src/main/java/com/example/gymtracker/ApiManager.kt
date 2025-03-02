@@ -24,9 +24,9 @@ object ApiManager {
         return try {
             client.newCall(request).execute().use { response ->
                 if (!response.isSuccessful) {
-                    throw IOException("error: ${response.code()}")
+                    throw IOException("error: ${response.code}")
                 }
-                response.body()?.string().orEmpty()
+                response.body?.string().orEmpty()
             }
         } catch (exc: Exception) {
             "Exception: ${exc.message}"
@@ -44,9 +44,9 @@ object ApiManager {
             try {
                 client.newCall(request).execute().use { response ->
                     if (!response.isSuccessful) {
-                        throw IOException("Error: ${response.code()}")
+                        throw IOException("Error: ${response.code}")
                     }
-                    val responseBody = response.body()?.string().orEmpty()
+                    val responseBody = response.body?.string().orEmpty()
                     Log.d("ApiManager", "Response Body: $responseBody")
                     responseBody
                 }

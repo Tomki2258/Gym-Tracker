@@ -31,7 +31,7 @@ object ExerciseManager {
             val db = MeasurementDatabase.getInstance(context)
             loadMeasurementsFromDatabase(db)
             Thread {
-                LoadDescriptions()
+                //LoadDescriptions()
             }.start()
         }
     }
