@@ -8,5 +8,6 @@ data class ExericseEntity(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val name: String,
     val category: Categories,
-    val description: String
+    val description: String,
+    val photoString: String? = null
 )

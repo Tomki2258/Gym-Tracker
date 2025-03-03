@@ -28,17 +28,38 @@ class MainActivityViewModel : ViewModel() {
                 }
             )
         }
-
+        var hasReadPermission by remember {
+            mutableStateOf(
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    ContextCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.READ_EXTERNAL_STORAGE
+                    ) == PackageManager.PERMISSION_GRANTED
+                } else {
+                    true
+                }
+            )
+        }
         val permissionLauncher = rememberLauncherForActivityResult(
             contract = ActivityResultContracts.RequestPermission(),
             onResult = { isGranted ->
                 hasNotificationPermission = isGranted
             }
         )
-
+        val permissionLauncherRead = rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.RequestPermission(),
+            onResult = { isGranted ->
+                hasReadPermission = isGranted
+            }
+        )
         LaunchedEffect(Unit) {
             if (!hasNotificationPermission) {
                 permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
+        LaunchedEffect(Unit) {
+            if (!hasReadPermission) {
+                permissionLauncherRead.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
             }
         }
     }

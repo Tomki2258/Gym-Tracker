@@ -53,7 +53,8 @@ class AddCustomExerciseViewModel(contextArg: Context) : ViewModel() {
                         0,
                         exerciseName.value,
                         exerciseCattegory.value,
-                        description.value
+                        description.value,
+                        photoUri.value.toString()
                     )
                 )
                 ExerciseManager.initialize(context)
