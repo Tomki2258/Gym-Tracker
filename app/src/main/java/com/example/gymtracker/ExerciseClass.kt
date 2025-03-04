@@ -8,7 +8,7 @@ import java.io.Serializable
 class ExerciseClass(
     val name: String,
     val category: Categories,
-    var photoString: String = name.replace(" ", "_").lowercase(),
+    val photoString: String = name.replace(" ", "_").lowercase(),
     var measurementsList: MutableList<Measurement> = mutableListOf<Measurement>(),
     var bestMeasurement: Measurement? = null,
     val exerciseDecsArg: String = "",
@@ -22,8 +22,7 @@ class ExerciseClass(
         categoryString = category.toString().lowercase()
         categoryString = categoryString.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
         setBestMeasurement()
-        photoString = exericseEntity?.photoString.toString()
-        Log.d("ExerciseClass", "Photo string: $photoString")
+
         if(isCustom){
             exerciseDecs = "here is exercise description from CUSTOM exercise"
         }
