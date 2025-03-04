@@ -1,7 +1,11 @@
 package com.example.gymtracker.views
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.ImageDecoder
 import android.net.Uri
+import android.os.Build
+import android.provider.MediaStore
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -24,7 +28,7 @@ class AddCustomExerciseViewModel(contextArg: Context) : ViewModel() {
     val descriptionState = description.asStateFlow()
 
     private val exerciseCattegory = MutableStateFlow(Categories.OTHER)
-    private var photoUri: MutableStateFlow<Uri?> = MutableStateFlow(null)
+    private var photoUri: MutableStateFlow<Uri> = MutableStateFlow(Uri.EMPTY)
 
     fun updateName(name: String) {
         exerciseName.value = name
@@ -38,7 +42,7 @@ class AddCustomExerciseViewModel(contextArg: Context) : ViewModel() {
         exerciseCattegory.value = cat
     }
 
-    fun updatePhoto(uri: Uri?) {
+    fun updatePhoto(uri: Uri) {
         photoUri.value = uri
     }
 
@@ -47,6 +51,7 @@ class AddCustomExerciseViewModel(contextArg: Context) : ViewModel() {
     fun checkForAdd(): Boolean {
         if (exerciseName.value == "") return false
         try {
+            saveImage()
             viewModelScope.launch {
                 ExerciseManager.getDatabase(context).exerciseDao().insertExercise(
                     ExericseEntity(
@@ -63,5 +68,17 @@ class AddCustomExerciseViewModel(contextArg: Context) : ViewModel() {
             return false
         }
         return true
+    }
+    private fun saveImage() {
+        val fileName = "${exerciseName.value}.png"
+        val uri = photoUri.value
+        val bitmap = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            ImageDecoder.decodeBitmap(ImageDecoder.createSource(context.contentResolver, uri))
+        } else {
+            MediaStore.Images.Media.getBitmap(context.contentResolver, uri)
+        }
+        context.openFileOutput(fileName, Context.MODE_PRIVATE).use { outputStream ->
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
+        }
     }
 }

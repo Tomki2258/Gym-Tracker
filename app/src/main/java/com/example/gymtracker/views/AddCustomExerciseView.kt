@@ -87,15 +87,15 @@ fun MainView(exerciseViewModel: AddCustomExerciseViewModel, activity: ComponentA
                 .fillMaxWidth()
                 .padding(bottom = 16.dp)
         )
-        photoUri?.let {
-            Image(
-                painter = rememberImagePainter(it),
-                contentDescription = "Exercise Image",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp)
-            )
-        }
+//        photoUri?.let {
+//            Image(
+//                painter = rememberImagePainter(it),
+//                contentDescription = "Exercise Image",
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .padding(bottom = 16.dp)
+//            )
+//        }
         Button(
             onClick = {
                 pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
