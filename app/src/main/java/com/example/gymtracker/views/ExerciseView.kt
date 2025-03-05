@@ -11,6 +11,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,6 +25,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -43,6 +46,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
@@ -115,6 +119,7 @@ class ExerciseView : ComponentActivity() {
         exerciseView: ExerciseView,
         exerciseViewModel: ExerciseViewModel
     ) {
+        exerciseViewModel.context = LocalContext.current
         val showDialog = remember { mutableStateOf(false) }
         val showDescDialog = remember { mutableStateOf(false) }
         val showDeleteDialog = remember { mutableStateOf(false) }
@@ -147,15 +152,24 @@ class ExerciseView : ComponentActivity() {
                             .padding(8.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Image(
-                            painter = painterResource(
-                                id = exerciseClass.getPhotoResourceId(
-                                    LocalContext.current
-                                )
-                            ),
-                            colorFilter = ColorFilter.tint(colorResource(id = R.color.images)),
-                            contentDescription = "Exercise Image"
-                        )
+                        if(exercise.isCustom) {
+                            Image(
+                                bitmap = exercise.getImage(),
+                                //colorFilter = ColorFilter.tint(colorResource(id = R.color.images)),
+                                contentDescription = "Exercise Image",
+                                modifier = Modifier
+                                    .size(exerciseViewModel.imageUIsize)
+                                    .clip(RoundedCornerShape(percent = 10))
+                            )
+                        }
+                        else{
+                            Image(
+                                painter = painterResource(id = exercise.getPhotoResourceId(LocalContext.current)),
+                                colorFilter = ColorFilter.tint(colorResource(id = R.color.images)),
+                                contentDescription = "Exercise Image",
+                                modifier = Modifier.size(exerciseViewModel.imageUIsize),
+                            )
+                        }
                         Text(
                             text = "${exerciseClass.name} - ${exerciseClass.categoryString}",
                             fontWeight = FontWeight.Bold,
@@ -365,7 +379,7 @@ class ExerciseView : ComponentActivity() {
             )
         }
         if (showDescDialog.value) {
-            ShowExerciseInfo(onDismissRequest = { showDescDialog.value = false })
+            ShowExerciseInfo(onDismissRequest = { showDescDialog.value = false },exerciseViewModel)
         }
         if (showDeleteDialog.value) {
             ShowDeleteMeasurement(
@@ -508,7 +522,7 @@ class ExerciseView : ComponentActivity() {
     }
 
     @Composable
-    fun ShowExerciseInfo(onDismissRequest: () -> Unit) {
+    fun ShowExerciseInfo(onDismissRequest: () -> Unit,exerciseViewModel: ExerciseViewModel) {
         Dialog(onDismissRequest = { onDismissRequest() }) {
             Card(
                 modifier = Modifier
@@ -527,7 +541,10 @@ class ExerciseView : ComponentActivity() {
                         Button(
                             onClick = {
                                 finish()
-                                exercise.exericseEntity?.let { ExerciseManager.DeleteExercise(it) }
+                                exercise.removeImage(exerciseViewModel.context)
+                                exercise.exericseEntity?.let {
+                                    ExerciseManager.DeleteExercise(it)
+                                }
                                 onDismissRequest()
                             },
                             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),

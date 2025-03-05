@@ -2,6 +2,7 @@ package com.example.gymtracker.views
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
@@ -29,6 +30,7 @@ class AddCustomExerciseViewModel(contextArg: Context) : ViewModel() {
 
     private val exerciseCattegory = MutableStateFlow(Categories.OTHER)
     private var photoUri: MutableStateFlow<Uri> = MutableStateFlow(Uri.EMPTY)
+
 
     fun updateName(name: String) {
         exerciseName.value = name

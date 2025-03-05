@@ -9,6 +9,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import com.example.gymtracker.Measurement
 import com.example.gymtracker.R
@@ -27,7 +28,8 @@ class ExerciseViewModel(
     val yearSize = 0.5f
     val avgWeightSize = 0.65f
     val weightDiffSize = 1f
-
+    val imageUIsize = 225.dp
+    lateinit var context: Context
     fun formatStringDate(date: Long): String {
         val sdf = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
         return sdf.format(Date(date))

@@ -149,6 +149,10 @@ fun MainView(modifier: Modifier = Modifier, measurementViewModel: MeasurementVie
     //HideStatusBar()
     mainActivityViewModel = MainActivityViewModel()
     mainActivityViewModel.context = LocalContext.current
+
+    for (ex in ExerciseManager.exercises){
+        ex.loadImage(mainActivityViewModel.context)
+    }
     val categories = LoadCategories(ExerciseManager.exercises)
     var currentCategory by remember { mutableStateOf(categories.first()) }
     val showNickameDialog = remember { mutableStateOf(false) }
@@ -368,7 +372,8 @@ fun AddCustomExercisePanel(){
             .fillMaxWidth()
             .padding(8.dp)
             .clickable {
-                val intent = Intent(mainActivityViewModel.context, AddCustomExerciseView::class.java)
+                val intent =
+                    Intent(mainActivityViewModel.context, AddCustomExerciseView::class.java)
                 mainActivityViewModel.context.startActivity(intent)
             },
         contentAlignment = Alignment.Center
@@ -448,7 +453,17 @@ fun ExerciseCard(exercise: ExerciseClass, index: Int) {
                             text = "Category: ${exercise.categoryString}", fontSize = 16.sp
                         )
                     }
-                    if (photoId != 0) {
+                    if(exercise.isCustom) {
+                        Image(
+                            bitmap = exercise.getImage(),
+                            contentDescription = "${exercise.name} image",
+                            //colorFilter = ColorFilter.tint(colorResource(id = R.color.images)),
+                            modifier = Modifier
+                                .padding(8.dp)
+                                .size(100.dp)
+                        )
+                    }
+                    else{
                         Image(
                             painter = painterResource(id = photoId),
                             contentDescription = "${exercise.name} image",
@@ -457,8 +472,6 @@ fun ExerciseCard(exercise: ExerciseClass, index: Int) {
                                 .padding(8.dp)
                                 .size(100.dp)
                         )
-                    } else {
-                        Text(text = "Image not found")
                     }
                 }
             }

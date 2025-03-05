@@ -2,7 +2,13 @@
 package com.example.gymtracker
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.util.Log
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.platform.LocalContext
 import java.io.Serializable
 
 class ExerciseClass(
@@ -11,26 +17,31 @@ class ExerciseClass(
     val photoString: String = name.replace(" ", "_").lowercase(),
     var measurementsList: MutableList<Measurement> = mutableListOf<Measurement>(),
     var bestMeasurement: Measurement? = null,
-    val exerciseDecsArg: String = "",
     val exericseEntity: ExericseEntity?,
     val isCustom: Boolean = false
 ) : Serializable {
     var categoryString = ""
     var exerciseDecs = ""
-
+    private lateinit var exerciseBitMap:ImageBitmap
     init {
         categoryString = category.toString().lowercase()
         categoryString = categoryString.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
         setBestMeasurement()
 
         if(isCustom){
-            exerciseDecs = "here is exercise description from CUSTOM exercise"
+            val loadedDescription = exericseEntity?.description
+            if (loadedDescription != null) {
+                if(!loadedDescription.equals("")){
+                    exerciseDecs = loadedDescription
+                } else{
+                    exerciseDecs = "Description is empty"
+                }
+            }
         }
         else{
             exerciseDecs = "here is exercise description from NON custom exercise"
         }
 
-        Log.d("READING MEASUREMENTS","")
         for(measurement in measurementsList){
             Log.d(measurement.exerciseName,measurement.reps.toString())
         }
@@ -55,8 +66,17 @@ class ExerciseClass(
         Log.d("Exercise Log Info", "Name: ${name}\nCattegory: ${category}\nDecs(optional): ${exerciseDecs}")
     }
 
-    fun doCustomExercise(){
-        //saving custom exercises made by users
+    fun loadImage(context: Context) {
+        if(!isCustom) return
+        context.openFileInput("${name}.png").use { inputStream ->
+            val bitmap = BitmapFactory.decodeStream(inputStream)
+            exerciseBitMap = bitmap.asImageBitmap()
+        }
     }
-
+    fun removeImage(context: Context){
+        context.deleteFile("${name}.png")
+    }
+    fun getImage(): ImageBitmap {
+        return exerciseBitMap
+    }
 }
