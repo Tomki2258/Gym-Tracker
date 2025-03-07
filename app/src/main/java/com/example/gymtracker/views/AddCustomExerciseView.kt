@@ -1,5 +1,7 @@
 package com.example.gymtracker.views
 
+import android.annotation.SuppressLint
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
@@ -10,11 +12,13 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -33,12 +37,14 @@ import androidx.compose.ui.unit.dp
 import com.example.gymtracker.Categories
 import com.example.gymtracker.views.ui.theme.GymTrackerTheme
 import androidx.compose.material3.*
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import coil.compose.rememberImagePainter
 import com.example.gymtracker.R
+import java.net.URI
 
 class AddCustomExerciseView : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -57,6 +63,7 @@ class AddCustomExerciseView : ComponentActivity() {
 }
 
 
+@SuppressLint("StateFlowValueCalledInComposition")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainView(exerciseViewModel: AddCustomExerciseViewModel, activity: ComponentActivity) {
@@ -66,7 +73,7 @@ fun MainView(exerciseViewModel: AddCustomExerciseViewModel, activity: ComponentA
 
     var selectedCategory by remember { mutableStateOf(Categories.OTHER) }
     var expanded by remember { mutableStateOf(false) }
-
+    //Log.d("Photo URI",exerciseViewModel.photoUri.value.toString())
     val pickMedia = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
         if (uri != null) {
             Log.d("PhotoPicker", "Selected URI: $uri")
@@ -87,15 +94,23 @@ fun MainView(exerciseViewModel: AddCustomExerciseViewModel, activity: ComponentA
                 .fillMaxWidth()
                 .padding(bottom = 16.dp)
         )
-//        photoUri?.let {
-//            Image(
-//                painter = rememberImagePainter(it),
-//                contentDescription = "Exercise Image",
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .padding(bottom = 16.dp)
-//            )
-//        }
+        if(Uri.EMPTY.equals(photoUri)){
+            Card(
+                modifier = Modifier.size(200.dp),
+                border = BorderStroke(1.dp, Color.White),
+            ) {
+
+            }
+        }else{
+            Image(
+                painter = rememberImagePainter(photoUri),
+                contentDescription = "Exercise Image",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp)
+                    .size(200.dp)
+            )
+        }
         Button(
             onClick = {
                 pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))

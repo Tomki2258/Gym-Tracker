@@ -29,8 +29,9 @@ class AddCustomExerciseViewModel(contextArg: Context) : ViewModel() {
     val descriptionState = description.asStateFlow()
 
     private val exerciseCattegory = MutableStateFlow(Categories.OTHER)
-    private var photoUri: MutableStateFlow<Uri> = MutableStateFlow(Uri.EMPTY)
 
+    var photoUri: MutableStateFlow<Uri> = MutableStateFlow(Uri.EMPTY)
+    val photoState = photoUri.asStateFlow()
 
     fun updateName(name: String) {
         exerciseName.value = name
