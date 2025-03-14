@@ -14,11 +14,14 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -37,6 +40,8 @@ import androidx.compose.ui.unit.dp
 import com.example.gymtracker.Categories
 import com.example.gymtracker.views.ui.theme.GymTrackerTheme
 import androidx.compose.material3.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
@@ -85,7 +90,8 @@ fun MainView(exerciseViewModel: AddCustomExerciseViewModel, activity: ComponentA
 
     Column(modifier = Modifier
         .fillMaxSize()
-        .padding(16.dp)) {
+        .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally) {
         TextField(
             value = name,
             onValueChange = { exerciseViewModel.updateName(it) },
@@ -96,10 +102,16 @@ fun MainView(exerciseViewModel: AddCustomExerciseViewModel, activity: ComponentA
         )
         if(Uri.EMPTY.equals(photoUri)){
             Card(
-                modifier = Modifier.size(200.dp),
+                modifier = Modifier.size(200.dp)
+                    .padding(8.dp)
+                    .clickable {
+                        pickMedia.launch(
+                            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                    },
                 border = BorderStroke(1.dp, Color.White),
-            ) {
 
+            ) {
+                Text(text = "Click to add photo",)
             }
         }else{
             Image(
@@ -109,15 +121,20 @@ fun MainView(exerciseViewModel: AddCustomExerciseViewModel, activity: ComponentA
                     .fillMaxWidth()
                     .padding(bottom = 16.dp)
                     .size(200.dp)
+                    .clip(RoundedCornerShape(percent = 10))
+                    .clickable {
+                        pickMedia.launch(
+                            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                    },
             )
         }
-        Button(
-            onClick = {
-                pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-            }
-        ) {
-            Text("Add Photo")
-        }
+//        Button(
+//            onClick = {
+//                pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+//            }
+//        ) {
+//            Text("Add Photo")
+//        }
         ExposedDropdownMenuBox(
             expanded = expanded,
             onExpandedChange = { expanded = !expanded },
