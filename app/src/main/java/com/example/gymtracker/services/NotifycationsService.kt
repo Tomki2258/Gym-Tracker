@@ -1,8 +1,9 @@
-package com.example.gymtracker
+package com.example.gymtracker.services
 
 import android.app.NotificationManager
 import android.content.Context
 import androidx.core.app.NotificationCompat
+import com.example.gymtracker.R
 
 class NotifycationsService(
     private val context: Context

@@ -1,14 +1,11 @@
 // app/src/main/java/com/example/gymtracker/ExerciseClass.kt
-package com.example.gymtracker
+package com.example.gymtracker.data
 
 import android.content.Context
-import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Log
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.platform.LocalContext
 import java.io.Serializable
 
 class ExerciseClass(

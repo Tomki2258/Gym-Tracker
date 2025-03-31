@@ -1,4 +1,4 @@
-package com.example.gymtracker
+package com.example.gymtracker.other
 
 import androidx.room.TypeConverter
 import java.util.Date

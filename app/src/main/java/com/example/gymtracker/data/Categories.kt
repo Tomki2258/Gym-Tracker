@@ -1,6 +1,4 @@
-package com.example.gymtracker
-
-import kotlinx.coroutines.flow.MutableStateFlow
+package com.example.gymtracker.data
 
 enum class Categories {
     CHEST,

@@ -1,9 +1,12 @@
-package com.example.gymtracker
+package com.example.gymtracker.managers
 
 import android.content.Context
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import com.example.gymtracker.R
+import com.example.gymtracker.other.ToastManager
+import com.example.gymtracker.UserData
 
 object UserManager {
     private const val PREFS_NAME = "user_prefs"
@@ -24,7 +27,9 @@ object UserManager {
     )
     fun initialize(context: Context) {
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        val userName = prefs.getString(KEY_USER_NICK, context.getString(R.string.user_name)) ?: context.getString(R.string.user_name)
+        val userName = prefs.getString(KEY_USER_NICK, context.getString(R.string.user_name)) ?: context.getString(
+            R.string.user_name
+        )
         userData = UserData(userNick = userName)
         wellcomeMessage = setWellcomeMessage()
     }

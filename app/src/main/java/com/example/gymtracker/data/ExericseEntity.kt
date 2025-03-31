@@ -1,6 +1,5 @@
-package com.example.gymtracker
+package com.example.gymtracker.data
 
-import android.net.Uri
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 

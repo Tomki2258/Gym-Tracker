@@ -1,19 +1,13 @@
 package com.example.gymtracker.views
 
-import WeeklyProgress
+import com.example.gymtracker.data.WeeklyProgress
 import android.content.Context
-import android.util.Log
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.PickVisualMediaRequest
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
-import com.example.gymtracker.Measurement
+import com.example.gymtracker.data.Measurement
 import com.example.gymtracker.R
-import com.example.gymtracker.ToastManager
 import com.example.gymtracker.roomdb.MeasurementEvent
 import com.example.gymtracker.roomdb.MeasurementViewModel
 import java.text.SimpleDateFormat

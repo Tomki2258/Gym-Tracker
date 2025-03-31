@@ -1,6 +1,5 @@
-package com.example.gymtracker
+package com.example.gymtracker.data
 
-import android.util.Log
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import java.sql.Date

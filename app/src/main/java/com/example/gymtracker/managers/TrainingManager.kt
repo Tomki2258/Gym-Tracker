@@ -1,12 +1,12 @@
 // app/src/main/java/com/example/gymtracker/TrainingManager.kt
-package com.example.gymtracker
+package com.example.gymtracker.managers
 
 import DayTrainingPlan
 import android.content.Context
 import android.util.Log
 import androidx.room.Room
 import com.example.gymtracker.roomdb.TrainingplanDatabase
-import com.example.gymtracker.roomdb.TrainingPlan
+import com.example.gymtracker.data.TrainingPlan
 import kotlinx.coroutines.runBlocking
 
 object TrainingManager {

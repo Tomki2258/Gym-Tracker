@@ -1,5 +1,5 @@
 // app/src/main/java/com/example/gymtracker/roomdb/TrainingPlan.kt
-package com.example.gymtracker.roomdb
+package com.example.gymtracker.data
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

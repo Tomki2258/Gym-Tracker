@@ -1,4 +1,4 @@
-package com.example.gymtracker
+package com.example.gymtracker.other
 
 import android.content.Context
 import android.widget.Toast

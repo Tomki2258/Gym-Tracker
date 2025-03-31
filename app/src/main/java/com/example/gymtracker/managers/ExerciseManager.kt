@@ -1,5 +1,5 @@
 // ExerciseManager.kt
-package com.example.gymtracker
+package com.example.gymtracker.managers
 
 import android.content.Context
 import android.util.Log
@@ -7,6 +7,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.room.Room
+import com.example.gymtracker.data.Categories
+import com.example.gymtracker.data.ExerciseClass
+import com.example.gymtracker.data.ExericseEntity
+import com.example.gymtracker.data.Measurement
 import com.example.gymtracker.roomdb.ExercisesDatabase
 import com.example.gymtracker.roomdb.MeasurementDatabase
 import kotlinx.coroutines.CoroutineScope

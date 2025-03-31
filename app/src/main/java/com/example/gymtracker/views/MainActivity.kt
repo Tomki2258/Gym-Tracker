@@ -2,7 +2,7 @@
 package com.example.gymtracker.views
 
 
-import AndroidAlarmScheduler
+import com.example.gymtracker.services.AndroidAlarmScheduler
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -25,7 +25,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -65,11 +64,11 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.room.Room
 import com.example.gymtracker.AlarmItem
-import com.example.gymtracker.ExerciseClass
-import com.example.gymtracker.ExerciseManager
-import com.example.gymtracker.NotifycationsService
+import com.example.gymtracker.data.ExerciseClass
+import com.example.gymtracker.managers.ExerciseManager
+import com.example.gymtracker.services.NotifycationsService
 import com.example.gymtracker.R
-import com.example.gymtracker.UserManager
+import com.example.gymtracker.managers.UserManager
 import com.example.gymtracker.roomdb.MeasurementDatabase
 import com.example.gymtracker.roomdb.MeasurementViewModel
 import com.example.gymtracker.ui.theme.GymTrackerTheme

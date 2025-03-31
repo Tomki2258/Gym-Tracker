@@ -1,6 +1,6 @@
 package com.example.gymtracker.roomdb
 
-import com.example.gymtracker.Measurement
+import com.example.gymtracker.data.Measurement
 
 sealed interface MeasurementEvent {
     data class InsertMeasurement(val measurement: Measurement) : MeasurementEvent

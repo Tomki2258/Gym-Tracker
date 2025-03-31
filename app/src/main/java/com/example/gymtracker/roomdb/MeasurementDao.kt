@@ -5,7 +5,7 @@ import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
-import com.example.gymtracker.Measurement
+import com.example.gymtracker.data.Measurement
 import kotlinx.coroutines.flow.Flow
 
 @Dao

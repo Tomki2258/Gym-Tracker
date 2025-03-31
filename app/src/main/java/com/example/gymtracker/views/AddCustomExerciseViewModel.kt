@@ -2,7 +2,6 @@ package com.example.gymtracker.views
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
@@ -10,13 +9,12 @@ import android.provider.MediaStore
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.gymtracker.Categories
-import com.example.gymtracker.ExerciseManager
-import com.example.gymtracker.ExericseEntity
+import com.example.gymtracker.data.Categories
+import com.example.gymtracker.managers.ExerciseManager
+import com.example.gymtracker.data.ExericseEntity
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import coil.compose.rememberImagePainter
 
 // In your ViewModel
 class AddCustomExerciseViewModel(contextArg: Context) : ViewModel() {

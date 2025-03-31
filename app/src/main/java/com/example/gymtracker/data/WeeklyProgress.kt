@@ -1,5 +1,6 @@
+package com.example.gymtracker.data
+
 import android.util.Log
-import com.example.gymtracker.Measurement
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale

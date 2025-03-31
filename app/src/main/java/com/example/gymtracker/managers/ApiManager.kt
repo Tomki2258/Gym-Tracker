@@ -1,4 +1,4 @@
-package com.example.gymtracker
+package com.example.gymtracker.managers
 
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
@@ -19,7 +19,7 @@ object ApiManager {
     fun getExercise(url: String): String {
         val client = OkHttpClient()
         val request = Request.Builder()
-            .url(BASE_URL+url)
+            .url(BASE_URL +url)
             .build()
         return try {
             client.newCall(request).execute().use { response ->

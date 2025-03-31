@@ -1,9 +1,6 @@
 // ExerciseView.kt
 package com.example.gymtracker.views
 
-import WeeklyProgress
-import android.app.Activity
-import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -11,7 +8,6 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,7 +21,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -47,7 +42,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
@@ -57,22 +51,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.ViewModelProvider
-import androidx.media3.common.util.Log
 import androidx.room.Room
-import com.example.gymtracker.Categories
-import com.example.gymtracker.ExerciseClass
-import com.example.gymtracker.ExerciseManager
-import com.example.gymtracker.Measurement
+import com.example.gymtracker.data.Categories
+import com.example.gymtracker.data.ExerciseClass
+import com.example.gymtracker.managers.ExerciseManager
+import com.example.gymtracker.data.Measurement
 import com.example.gymtracker.R
-import com.example.gymtracker.ToastManager
+import com.example.gymtracker.other.ToastManager
 import com.example.gymtracker.roomdb.MeasurementDatabase
-import com.example.gymtracker.roomdb.MeasurementEvent
 import com.example.gymtracker.roomdb.MeasurementViewModel
 import com.example.gymtracker.ui.theme.GymTrackerTheme
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 var exercise = ExerciseClass("Default Name", Categories.CALVES, exericseEntity = null)
 
