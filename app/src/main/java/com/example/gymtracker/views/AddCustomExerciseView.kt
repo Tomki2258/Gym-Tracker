@@ -97,11 +97,11 @@ fun MainView(exerciseViewModel: AddCustomExerciseViewModel, activity: ComponentA
                     .clickable(){
 
                     }
-//                    .clickable() {
-//                        pickMedia.launch(
-//                            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-//                        )
-//                    }
+                    .clickable() {
+                        pickMedia.launch(
+                            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                        )
+                    }
             ) {
                 Box(
                     modifier = Modifier.fillMaxSize(),

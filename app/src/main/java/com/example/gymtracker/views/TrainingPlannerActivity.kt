@@ -9,6 +9,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -41,6 +42,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
@@ -103,6 +105,7 @@ fun loadWarmUp(context: Context) {
         }
     }
 }
+
 fun loadExercisesForDay(context: Context, day: String): MutableList<ExerciseClass> {
     val exercises = mutableListOf<ExerciseClass>()
     val planTrainings = TrainingManager.getTrainingPlan(context, day)
@@ -171,7 +174,7 @@ fun MainView(name: String, modifier: Modifier = Modifier) {
                     onHorizontalDrag = { change, dragAmount ->
                         change.consume()
                         totalDrag += dragAmount
-                        Log.d("PRZESUNIECIE: ", "amount: " + dragAmount + " total: " + totalDrag)
+                        //Log.d("PRZESUNIECIE: ", "amount: " + dragAmount + " total: " + totalDrag)
                     },
                     onDragEnd = {
                         if (totalDrag < -25) {
@@ -214,7 +217,9 @@ fun MainView(name: String, modifier: Modifier = Modifier) {
                 modifier = Modifier.padding(8.dp)
             )
             if (!exercisesView.value.isEmpty()) {
-                WarmUpButton()
+                //WarmUpButton()
+            } else {
+                EmptyCard()
             }
             LazyColumn {
                 items(exercisesView.value) { exercise ->
@@ -254,7 +259,7 @@ fun MainView(name: String, modifier: Modifier = Modifier) {
             if (showRemoveDialog.value) {
                 RemoveExerciseCard(selectedToRemove.value)
             }
-            if(showWarmUpDialog.value){
+            if (showWarmUpDialog.value) {
                 WarmUpCard(
                     onDismissRequest = { showWarmUpDialog.value = false },
                     warmUpString = warmUpList.value[currentDayIndex.value]
@@ -265,7 +270,12 @@ fun MainView(name: String, modifier: Modifier = Modifier) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(8.dp)
+                .padding(
+                    bottom = 36.dp,
+                    start = 8.dp,
+                    top = 8.dp,
+                    end = 8.dp
+                )
                 .align(Alignment.BottomCenter),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
@@ -347,14 +357,27 @@ fun AddExericeToDay(
                             Text(text = exercise.categoryString)
                         }
                         Spacer(modifier = Modifier.weight(1f))
-                        Icon(
-                            painter = painterResource(id = exercise.getPhotoResourceId(LocalContext.current)),
-                            contentDescription = "Exercise photo",
-                            modifier = Modifier
-                                .size(50.dp)
-                                .align(Alignment.CenterVertically),
-                            tint = colorResource(id = R.color.images),
-                        )
+                        if(exercise.isCustom) {
+                            Image(
+                                bitmap = exercise.getImage(),
+                                contentDescription = "${exercise.name} image",
+                                //colorFilter = ColorFilter.tint(colorResource(id = R.color.images)),
+                                modifier = Modifier
+                                    .padding(8.dp)
+                                    .size(50.dp)
+                                    //.size(100.dp)
+                                    .clip(RoundedCornerShape(percent = 10))
+                            )
+                        }
+                        else{
+                            Icon(
+                                painter = painterResource(id = exercise.getPhotoResourceId(LocalContext.current)),
+                                contentDescription = "Exercise photo",
+                                tint = colorResource(id = R.color.images),
+                                modifier = Modifier.padding(8.dp)
+                                    .size(50.dp)
+                            )
+                        }
                     }
                 }
             }
@@ -402,12 +425,24 @@ fun ExericeCard(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                painter = painterResource(id = exercise.getPhotoResourceId(context)),
-                contentDescription = "Exercise photo",
-                tint = colorResource(id = R.color.images),
-                modifier = Modifier.padding(8.dp)
-            )
+            if (exercise.isCustom) {
+                Image(
+                    bitmap = exercise.getImage(),
+                    contentDescription = "${exercise.name} image",
+                    //colorFilter = ColorFilter.tint(colorResource(id = R.color.images)),
+                    modifier = Modifier
+                        .padding(8.dp)
+                        //.size(100.dp)
+                        .clip(RoundedCornerShape(percent = 10))
+                )
+            } else {
+                Icon(
+                    painter = painterResource(id = exercise.getPhotoResourceId(context)),
+                    contentDescription = "Exercise photo",
+                    tint = colorResource(id = R.color.images),
+                    modifier = Modifier.padding(8.dp)
+                )
+            }
             Column(
                 modifier = Modifier.weight(1f)
             ) {
@@ -523,19 +558,42 @@ fun WarmUpButton() {
 }
 
 @Composable
-fun WarmUpCard(onDismissRequest: () -> Unit, warmUpString: String
-){
+fun WarmUpCard(
+    onDismissRequest: () -> Unit, warmUpString: String
+) {
     Dialog(
         onDismissRequest = { onDismissRequest() }
     ) {
-        Card (
+        Card(
             modifier = Modifier
                 .fillMaxWidth(),
             border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline),
-            ){
+        ) {
             Text(
                 modifier = Modifier.padding(8.dp),
                 text = warmUpString
+            )
+        }
+    }
+}
+
+@Composable
+fun EmptyCard() {
+    Card(
+        modifier = Modifier
+            .padding(8.dp)
+            .fillMaxWidth()
+            .height(50.dp),
+        border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline),
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "Click + to add exercise",
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(8.dp)
             )
         }
     }

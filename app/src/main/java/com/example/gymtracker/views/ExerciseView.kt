@@ -520,6 +520,7 @@ class ExerciseView : ComponentActivity() {
                 border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline),
             ) {
                 Column(
+                    modifier = Modifier.fillMaxWidth(),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
