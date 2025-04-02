@@ -43,6 +43,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -144,6 +145,7 @@ class ExerciseView : ComponentActivity() {
                         if(exercise.isCustom) {
                             Image(
                                 bitmap = exercise.getImage(),
+                                contentScale = ContentScale.Crop,
                                 //colorFilter = ColorFilter.tint(colorResource(id = R.color.images)),
                                 contentDescription = "Exercise Image",
                                 modifier = Modifier

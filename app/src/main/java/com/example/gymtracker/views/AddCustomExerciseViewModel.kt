@@ -50,6 +50,8 @@ class AddCustomExerciseViewModel(contextArg: Context) : ViewModel() {
     val photoUriState = photoUri.asStateFlow()
 
     fun checkForAdd(): Boolean {
+        val startTime = System.currentTimeMillis()
+
         if (exerciseName.value == "") return false
         try {
             saveImage()
@@ -68,10 +70,14 @@ class AddCustomExerciseViewModel(contextArg: Context) : ViewModel() {
             ex.message?.let { Log.e("ADDING EXERCISE FAILED", it) }
             return false
         }
+        val endTime = System.currentTimeMillis()
+        val duration = endTime - startTime
+        Log.d("Gyat","Gyat")
+        Log.d("Time elapsed:",duration.toString())
         return true
     }
     private fun saveImage() {
-        val fileName = "${exerciseName.value}.png"
+        val fileName = "${exerciseName.value}.JPEG"
         val uri = photoUri.value
         val bitmap = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             ImageDecoder.decodeBitmap(ImageDecoder.createSource(context.contentResolver, uri))
@@ -79,7 +85,7 @@ class AddCustomExerciseViewModel(contextArg: Context) : ViewModel() {
             MediaStore.Images.Media.getBitmap(context.contentResolver, uri)
         }
         context.openFileOutput(fileName, Context.MODE_PRIVATE).use { outputStream ->
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 75, outputStream)
         }
     }
 }

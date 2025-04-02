@@ -77,6 +77,7 @@ import java.time.LocalDateTime
 import java.util.Calendar
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 
 
 private lateinit var service: NotifycationsService
@@ -458,7 +459,8 @@ fun ExerciseCard(exercise: ExerciseClass, index: Int) {
                         Image(
                             bitmap = exercise.getImage(),
                             contentDescription = "${exercise.name} image",
-                            //colorFilter = ColorFilter.tint(colorResource(id = R.color.images)),
+                            contentScale = ContentScale.Crop,
+                                    //colorFilter = ColorFilter.tint(colorResource(id = R.color.images)),
                             modifier = Modifier
                                 .padding(8.dp)
                                 .size(100.dp)

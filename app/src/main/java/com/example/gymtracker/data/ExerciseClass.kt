@@ -65,13 +65,13 @@ class ExerciseClass(
 
     fun loadImage(context: Context) {
         if(!isCustom) return
-        context.openFileInput("${name}.png").use { inputStream ->
+        context.openFileInput("${name}.JPEG").use { inputStream ->
             val bitmap = BitmapFactory.decodeStream(inputStream)
             exerciseBitMap = bitmap.asImageBitmap()
         }
     }
     fun removeImage(context: Context){
-        context.deleteFile("${name}.png")
+        context.deleteFile("${name}.JPEG")
     }
     fun getImage(): ImageBitmap {
         return exerciseBitMap
