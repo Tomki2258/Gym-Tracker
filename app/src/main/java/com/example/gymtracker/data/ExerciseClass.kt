@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory
 import android.util.Log
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.core.graphics.scale
 import java.io.Serializable
 
 class ExerciseClass(
@@ -65,13 +66,25 @@ class ExerciseClass(
 
     fun loadImage(context: Context) {
         if(!isCustom) return
-        context.openFileInput("${name}.JPEG").use { inputStream ->
-            val bitmap = BitmapFactory.decodeStream(inputStream)
-            exerciseBitMap = bitmap.asImageBitmap()
+        val formats = listOf("WebP", "JPEG", "PNG", "JPG")
+
+        for (format in formats) {
+            try {
+                context.openFileInput("${name}.${format}").use { inputStream ->
+                    val bitmap = BitmapFactory.decodeStream(inputStream)
+                    //bitmap.scale(75,75,true)
+                    if (bitmap != null) {
+                        exerciseBitMap = bitmap.asImageBitmap()
+                        return
+                    }
+                }
+            } catch (e: Exception) {
+                continue
+            }
         }
     }
     fun removeImage(context: Context){
-        context.deleteFile("${name}.JPEG")
+        context.deleteFile("${name}.WebP")
     }
     fun getImage(): ImageBitmap {
         return exerciseBitMap

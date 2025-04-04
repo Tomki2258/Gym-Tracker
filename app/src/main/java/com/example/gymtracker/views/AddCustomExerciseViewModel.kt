@@ -77,15 +77,24 @@ class AddCustomExerciseViewModel(contextArg: Context) : ViewModel() {
         return true
     }
     private fun saveImage() {
-        val fileName = "${exerciseName.value}.JPEG"
+        val fileName = "${exerciseName.value}.WebP"
         val uri = photoUri.value
         val bitmap = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             ImageDecoder.decodeBitmap(ImageDecoder.createSource(context.contentResolver, uri))
         } else {
             MediaStore.Images.Media.getBitmap(context.contentResolver, uri)
         }
+
+        // Przeskalowanie bitmapy o 50%
+        val scaledBitmap = Bitmap.createScaledBitmap(bitmap, bitmap.width / 2, bitmap.height / 2, true)
+
         context.openFileOutput(fileName, Context.MODE_PRIVATE).use { outputStream ->
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 75, outputStream)
+            scaledBitmap.compress(Bitmap.CompressFormat.WEBP, 30, outputStream) // 80 oznacza jakość kompresji
+        }
+
+        // Zwolnienie pamięci
+        if (scaledBitmap != bitmap) {
+            scaledBitmap.recycle()
         }
     }
 }
