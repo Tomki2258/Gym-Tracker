@@ -435,7 +435,8 @@ fun ExericeCard(
                     //colorFilter = ColorFilter.tint(colorResource(id = R.color.images)),
                     modifier = Modifier
                         .padding(8.dp)
-                        //.size(100.dp)
+                        //.size(50.dp)
+                        .size(100.dp)
                         .clip(RoundedCornerShape(percent = 10))
                 )
             } else {

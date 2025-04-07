@@ -72,7 +72,7 @@ class AddCustomExerciseViewModel(contextArg: Context) : ViewModel() {
         }
         val endTime = System.currentTimeMillis()
         val duration = endTime - startTime
-        Log.d("Gyat","Gyat")
+        //Log.d("Gyat","Gyat")
         Log.d("Time elapsed:",duration.toString())
         return true
     }
