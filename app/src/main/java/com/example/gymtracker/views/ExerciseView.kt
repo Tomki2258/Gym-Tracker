@@ -411,6 +411,7 @@ class ExerciseView : ComponentActivity() {
                             onValueChange = { reps.value = it },
                             label = { Text("Reps") },
                             modifier = Modifier.width(75.dp),
+                            singleLine = true,
                             colors = TextFieldDefaults.textFieldColors(
                                 disabledTextColor = MaterialTheme.colorScheme.inversePrimary,
                                 cursorColor = MaterialTheme.colorScheme.inversePrimary,
@@ -438,6 +439,7 @@ class ExerciseView : ComponentActivity() {
                             value = weight.value,
                             onValueChange = { weight.value = it },
                             label = { Text("Weight") },
+                            singleLine = true,
                             colors = TextFieldDefaults.textFieldColors(
                                 disabledTextColor = MaterialTheme.colorScheme.inversePrimary,
                                 cursorColor = MaterialTheme.colorScheme.inversePrimary,

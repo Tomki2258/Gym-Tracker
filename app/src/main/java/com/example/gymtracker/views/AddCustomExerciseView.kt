@@ -95,7 +95,7 @@ fun MainView(exerciseViewModel: AddCustomExerciseViewModel, activity: ComponentA
                     .fillMaxWidth(0.75f)
                     .height(100.dp)
                     .padding(bottom = 16.dp)
-                    .clickable(){
+                    .clickable() {
 
                     }
                     .clickable() {
@@ -155,7 +155,8 @@ fun MainView(exerciseViewModel: AddCustomExerciseViewModel, activity: ComponentA
             label = { Text("Exercise Name") },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 16.dp)
+                .padding(bottom = 16.dp),
+            singleLine = true
 
         )
         ExposedDropdownMenuBox(
@@ -175,7 +176,8 @@ fun MainView(exerciseViewModel: AddCustomExerciseViewModel, activity: ComponentA
                 },
                 modifier = Modifier
                     .menuAnchor()
-                    .fillMaxWidth()
+                    .fillMaxWidth(),
+                singleLine = true
             )
             ExposedDropdownMenu(
                 expanded = expanded,
@@ -199,12 +201,14 @@ fun MainView(exerciseViewModel: AddCustomExerciseViewModel, activity: ComponentA
             label = { Text("Exercise Description (optional)") },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 16.dp)
+                .padding(bottom = 16.dp),
+            singleLine = true
         )
         Button(
             onClick = {
                 if (exerciseViewModel.checkForAdd()) {
-                    Toast.makeText(exerciseViewModel.context, "Exercise added", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(exerciseViewModel.context, "Exercise added", Toast.LENGTH_SHORT)
+                        .show()
                     activity.finish()
                 } else {
                     Toast.makeText(exerciseViewModel.context, "ERROR", Toast.LENGTH_SHORT)

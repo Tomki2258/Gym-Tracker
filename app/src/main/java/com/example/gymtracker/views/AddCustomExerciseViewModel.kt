@@ -15,6 +15,7 @@ import com.example.gymtracker.data.ExericseEntity
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import androidx.core.graphics.scale
 
 // In your ViewModel
 class AddCustomExerciseViewModel(contextArg: Context) : ViewModel() {
@@ -85,14 +86,12 @@ class AddCustomExerciseViewModel(contextArg: Context) : ViewModel() {
             MediaStore.Images.Media.getBitmap(context.contentResolver, uri)
         }
 
-        // Przeskalowanie bitmapy o 50%
-        val scaledBitmap = Bitmap.createScaledBitmap(bitmap, bitmap.width / 2, bitmap.height / 2, true)
+        val scaledBitmap = bitmap.scale(bitmap.width / 3, bitmap.height / 3)
 
         context.openFileOutput(fileName, Context.MODE_PRIVATE).use { outputStream ->
-            scaledBitmap.compress(Bitmap.CompressFormat.WEBP, 30, outputStream) // 80 oznacza jakość kompresji
+            scaledBitmap.compress(Bitmap.CompressFormat.WEBP, 30, outputStream)
         }
 
-        // Zwolnienie pamięci
         if (scaledBitmap != bitmap) {
             scaledBitmap.recycle()
         }

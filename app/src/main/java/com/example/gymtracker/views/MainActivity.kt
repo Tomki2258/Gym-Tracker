@@ -594,7 +594,8 @@ fun ChangeNickDialog(onDismissRequest: () -> Unit) {
                     label = { Text("New Nickname") },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 8.dp)
+                        .padding(bottom = 8.dp),
+                    singleLine = true
                     , colors = TextFieldDefaults.textFieldColors(
                         disabledTextColor = MaterialTheme.colorScheme.inversePrimary,
                         cursorColor = MaterialTheme.colorScheme.inversePrimary,
