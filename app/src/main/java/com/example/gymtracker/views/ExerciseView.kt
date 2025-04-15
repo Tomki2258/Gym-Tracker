@@ -42,6 +42,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -61,7 +62,9 @@ import com.example.gymtracker.R
 import com.example.gymtracker.other.ToastManager
 import com.example.gymtracker.roomdb.MeasurementDatabase
 import com.example.gymtracker.roomdb.MeasurementViewModel
+import com.example.gymtracker.ui.theme.BlackDark
 import com.example.gymtracker.ui.theme.GymTrackerTheme
+import com.example.gymtracker.ui.theme.Purple40
 import kotlinx.coroutines.launch
 
 var exercise = ExerciseClass("Default Name", Categories.CALVES, exericseEntity = null)
@@ -133,7 +136,9 @@ class ExerciseView : ComponentActivity() {
                 Card(
                     modifier = Modifier
                         .padding(8.dp)
-                        .fillMaxWidth(),
+                        .fillMaxWidth()
+                        .background(BlackDark)
+                    ,
                     border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline),
                 ) {
                     Column(
@@ -172,7 +177,8 @@ class ExerciseView : ComponentActivity() {
                     modifier = Modifier
                         .padding(8.dp)
                         .fillMaxWidth()
-                        .height(250.dp),
+                        .height(250.dp)
+                    ,
                     border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline),
 
                     ) {
@@ -180,38 +186,37 @@ class ExerciseView : ComponentActivity() {
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .padding(8.dp), contentAlignment = Alignment.Center
+                                .padding(8.dp)
+                            , contentAlignment = Alignment.Center
                         ) {
                             Text(text = "No measurements yet")
                         }
                     } else {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(8.dp,8.dp,8.dp,0.dp)
+                                .background(Color(0xFF49454f))
+                        ) {
+                            Text(
+                                text = "  Date",
+                                modifier = Modifier.weight(1f),
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                text = "Reps",
+                                modifier = Modifier.weight(1f),
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                text = "Weight (kg)",
+                                modifier = Modifier.weight(1f),
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
                         LazyColumn(
                             modifier = Modifier.padding(8.dp)
                         ) {
-                            stickyHeader {
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(8.dp, 0.dp, 8.dp, 8.dp)
-                                        .background(MaterialTheme.colorScheme.primaryContainer)
-                                ) {
-                                    Text(
-                                        text = "Date",
-                                        modifier = Modifier.weight(1f),
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                    Text(
-                                        text = "Reps",
-                                        modifier = Modifier.weight(1f),
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                    Text(
-                                        text = "Weight (kg)",
-                                        modifier = Modifier.weight(1f),
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                }
-                            }
                             items(sortedMeasurementsList) { measurement ->
                                 Row(
                                     modifier = Modifier
@@ -250,6 +255,33 @@ class ExerciseView : ComponentActivity() {
                     border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline),
 
                     ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp)
+                            .background(Color(0xFF49454f))
+                    ) {
+                        Text(
+                            text = "Week",
+                            modifier = Modifier.weight(exerciseViewModel.weekSize),
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = "Year",
+                            modifier = Modifier.weight(exerciseViewModel.yearSize),
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = "AVG",
+                            modifier = Modifier.weight(exerciseViewModel.avgWeightSize),
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = "Weight Diff",
+                            modifier = Modifier.weight(exerciseViewModel.weightDiffSize),
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                     LazyColumn {
                         if (weeklyProgressList.isEmpty()) {
                             item {
@@ -262,35 +294,6 @@ class ExerciseView : ComponentActivity() {
                                 }
                             }
                         } else {
-                            stickyHeader {
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(8.dp)
-                                        .background(MaterialTheme.colorScheme.primaryContainer)
-                                ) {
-                                    Text(
-                                        text = "Week",
-                                        modifier = Modifier.weight(exerciseViewModel.weekSize),
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                    Text(
-                                        text = "Year",
-                                        modifier = Modifier.weight(exerciseViewModel.yearSize),
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                    Text(
-                                        text = "AVG",
-                                        modifier = Modifier.weight(exerciseViewModel.avgWeightSize),
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                    Text(
-                                        text = "Weight Diff",
-                                        modifier = Modifier.weight(exerciseViewModel.weightDiffSize),
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                }
-                            }
                             items(weeklyProgressList) { weeklyProgress ->
                                 Row(
                                     modifier = Modifier

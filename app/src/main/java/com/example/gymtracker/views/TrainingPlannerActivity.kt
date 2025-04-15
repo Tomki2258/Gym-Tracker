@@ -3,6 +3,7 @@ package com.example.gymtracker.views
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color.red
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -12,11 +13,13 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -25,6 +28,7 @@ import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -43,7 +47,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -62,10 +68,14 @@ import com.example.gymtracker.data.ExerciseClass
 import com.example.gymtracker.managers.ExerciseManager
 import com.example.gymtracker.R
 import com.example.gymtracker.managers.TrainingManager
+import com.example.gymtracker.ui.theme.Black
+import com.example.gymtracker.ui.theme.BlackDark
 import com.example.gymtracker.ui.theme.GymTrackerTheme
+import com.example.gymtracker.ui.theme.Purple40
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.nio.file.WatchEvent
 import java.util.Calendar
 import java.util.Locale
 
@@ -210,13 +220,32 @@ fun MainView(name: String, modifier: Modifier = Modifier) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(0.dp, 24.dp, 0.dp, 0.dp),
+                .padding(0.dp, 5.dp, 0.dp, 120.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
-                text = TrainingManager.daysOfWeek[currentDayIndex.value].day,
-                modifier = Modifier.padding(8.dp)
-            )
+            Row() {
+                for (day in TrainingManager.daysOfWeek){
+                    val firstChar = day.day.subSequence(0,3).toString()
+                    var currentColor: Color = BlackDark
+
+                    if (TrainingManager.daysOfWeek.indexOf(day) == currentDayIndex.value){
+                        currentColor = Purple40
+                    }
+                    Text(
+                        modifier = Modifier.padding(15.dp)
+                            .drawBehind {
+                                drawCircle(
+                                    color = currentColor,
+                                    radius = 65f
+                                )
+                            }
+                            .clickable(){
+                                currentDayIndex.value = TrainingManager.daysOfWeek.indexOf(day)
+                            },
+                        text = firstChar
+                    )
+                }
+            }
             if (!exercisesView.value.isEmpty()) {
                 //WarmUpButton()
             } else {
@@ -226,8 +255,11 @@ fun MainView(name: String, modifier: Modifier = Modifier) {
                 items(exercisesView.value) { exercise ->
                     ExericeCard(exercise, currentDayIndex.value)
                 }
+                item {
+                    AddExercisePanelPanel()
+                }
             }
-
+            /*
             FloatingActionButton(
                 onClick = { showAddDialog.value = true },
                 modifier = Modifier
@@ -240,7 +272,7 @@ fun MainView(name: String, modifier: Modifier = Modifier) {
                     modifier = Modifier.fillMaxSize(0.6f)
                 )
             }
-
+            */
             if (showAddDialog.value) {
                 AddExericeToDay(
                     onDismissRequest = { showAddDialog.value = false },
@@ -358,7 +390,7 @@ fun AddExericeToDay(
                             Text(text = exercise.categoryString)
                         }
                         Spacer(modifier = Modifier.weight(1f))
-                        if(exercise.isCustom) {
+                        if (exercise.isCustom) {
                             Image(
                                 bitmap = exercise.getImage(),
                                 contentDescription = "${exercise.name} image",
@@ -370,13 +402,17 @@ fun AddExericeToDay(
                                     //.size(100.dp)
                                     .clip(RoundedCornerShape(percent = 10))
                             )
-                        }
-                        else{
+                        } else {
                             Icon(
-                                painter = painterResource(id = exercise.getPhotoResourceId(LocalContext.current)),
+                                painter = painterResource(
+                                    id = exercise.getPhotoResourceId(
+                                        LocalContext.current
+                                    )
+                                ),
                                 contentDescription = "Exercise photo",
                                 tint = colorResource(id = R.color.images),
-                                modifier = Modifier.padding(8.dp)
+                                modifier = Modifier
+                                    .padding(8.dp)
                                     .size(50.dp)
                             )
                         }
@@ -388,20 +424,29 @@ fun AddExericeToDay(
 }
 
 @Composable
-fun AddExercisePanel() {
+fun AddExercisePanelPanel() {
     Card(
         modifier = Modifier
             .padding(8.dp)
             .fillMaxWidth()
             .height(50.dp)
+            .clickable()
+            {
+                showAddDialog.value = true
+            }
     ) {
-        IconButton(
-            onClick = { showAddDialog.value = true }
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(5.dp)
         ) {
+
             Icon(
                 painter = painterResource(id = R.drawable.add),
                 contentDescription = "Add exercise"
             )
+
         }
     }
 }

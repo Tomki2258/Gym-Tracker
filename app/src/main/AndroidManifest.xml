@@ -28,27 +28,32 @@
             android:name=".views.AddCustomExerciseView"
             android:exported="false"
             android:label="@string/title_activity_add_custom_exercise_view"
-            android:theme="@style/Theme.GymTracker" />
+            android:theme="@style/Theme.GymTracker"
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".views.TrainingPlannerActivity"
             android:exported="false"
             android:label="@string/title_activity_training_planner"
-            android:theme="@style/Theme.GymTracker" />
+            android:theme="@style/Theme.GymTracker"
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".views.UserActivity"
             android:exported="false"
             android:label="@string/title_activity_user"
-            android:theme="@style/Theme.GymTracker" />
+            android:theme="@style/Theme.GymTracker"
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".views.ExerciseView"
             android:exported="false"
             android:label="@string/title_activity_exercise_view"
-            android:theme="@style/Theme.GymTracker" />
+            android:theme="@style/Theme.GymTracker"
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".views.MainActivity"
             android:exported="true"
             android:label="@string/app_name"
-            android:theme="@style/Theme.GymTracker">
+            android:theme="@style/Theme.GymTracker"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

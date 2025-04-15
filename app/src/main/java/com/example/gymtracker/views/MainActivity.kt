@@ -2,6 +2,7 @@
 package com.example.gymtracker.views
 
 
+import android.annotation.SuppressLint
 import com.example.gymtracker.services.AndroidAlarmScheduler
 import android.content.Context
 import android.content.Intent
@@ -45,6 +46,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TimeInput
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -78,6 +80,8 @@ import java.util.Calendar
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.tooling.preview.Preview
+import kotlin.math.log
 
 
 private lateinit var service: NotifycationsService
@@ -95,6 +99,7 @@ class MainActivity : ComponentActivity() {
 
     private val dao by lazy { db.measurementDao() }
 
+    @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         ExerciseManager.initialize(this)
@@ -109,11 +114,8 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier
                         .fillMaxSize()
                     //.padding(4.dp, 16.dp, 4.dp, 0.dp)
-                ) { innerPadding ->
-                    MainView(
-                        modifier = Modifier.padding(innerPadding),
-                        MeasurementViewModel(dao)
-                    )
+                ) {
+                    MainViewPreview()
                 }
             }
         }
@@ -146,13 +148,19 @@ fun LoadCategories(exercises: List<ExerciseClass>): List<String> {
     return categories
 }
 
+@Preview(showBackground = true)
 @Composable
-fun MainView(modifier: Modifier = Modifier, measurementViewModel: MeasurementViewModel) {
+fun MainViewPreview() {
+    MainView()
+}
+
+@Composable
+fun MainView() {
     //HideStatusBar()
     mainActivityViewModel = MainActivityViewModel()
     mainActivityViewModel.context = LocalContext.current
 
-    for (ex in ExerciseManager.exercises){
+    for (ex in ExerciseManager.exercises) {
         ex.loadImage(mainActivityViewModel.context)
     }
     val categories = LoadCategories(ExerciseManager.exercises)
@@ -227,7 +235,9 @@ fun MainView(modifier: Modifier = Modifier, measurementViewModel: MeasurementVie
                 }
                 var catIndex = categories.indexOf(currentCategory)
                 Text(
-                    text = "${currentCategory.lowercase().replaceFirstChar { it.uppercase() }}\n${catIndex + 1} / ${categories.size}",
+                    text = "${
+                        currentCategory.lowercase().replaceFirstChar { it.uppercase() }
+                    }\n${catIndex + 1} / ${categories.size}",
                     textAlign = TextAlign.Center
                 )
                 IconButton(onClick = {
@@ -304,9 +314,11 @@ fun MainView(modifier: Modifier = Modifier, measurementViewModel: MeasurementVie
                 )
             }
             IconButton(
-                onClick = { LaunchTrainingPlanIntent(
-                    mainActivityViewModel.context
-                ) },
+                onClick = {
+                    LaunchTrainingPlanIntent(
+                        mainActivityViewModel.context
+                    )
+                },
                 modifier = Modifier.weight(1f)
             ) {
                 Icon(
@@ -314,6 +326,7 @@ fun MainView(modifier: Modifier = Modifier, measurementViewModel: MeasurementVie
                     contentDescription = "User Icon"
                 )
             }
+            /*
             IconButton(
                 onClick = { showHourDialog.value = true },
                 modifier = Modifier.weight(1f)
@@ -323,6 +336,7 @@ fun MainView(modifier: Modifier = Modifier, measurementViewModel: MeasurementVie
                     contentDescription = "User Icon"
                 )
             }
+            */
         }
 
         if (showNickameDialog.value) {
@@ -367,8 +381,9 @@ fun WelcomeCard(userName: String) {
         }
     }
 }
+
 @Composable
-fun AddCustomExercisePanel(){
+fun AddCustomExercisePanel() {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -384,7 +399,7 @@ fun AddCustomExercisePanel(){
             modifier = Modifier
                 .width(350.dp),
             border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline),
-            ) {
+        ) {
             Column(
                 modifier = Modifier.padding(16.dp)
             ) {
@@ -396,9 +411,13 @@ fun AddCustomExercisePanel(){
         }
     }
 }
+
+@SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun ExerciseList(exercises: List<ExerciseClass>, currentCategory: String) {
+    //Log.d("state", mainActivityViewModel.searchNameState.value.isEmpty().toString())
     val userName = UserManager.getUserName()
+    val search by mainActivityViewModel.searchNameState.collectAsState()
     Box(
         modifier = Modifier.fillMaxSize(),
     ) {
@@ -408,16 +427,47 @@ fun ExerciseList(exercises: List<ExerciseClass>, currentCategory: String) {
             item {
                 WelcomeCard(userName)
             }
-            if(currentCategory == "All") {
+            item {
+                SearchCard()
+            }
+            if (currentCategory == "All") {
                 item {
                     AddCustomExercisePanel()
                 }
             }
-            items(exercises) { exercise ->
+            items(exercises.filter {
+                it.name.contains(search, ignoreCase = true)
+            }) { exercise ->
                 if (currentCategory == "All" || exercise.category.toString() == currentCategory) {
                     ExerciseCard(exercise, exercises.indexOf(exercise))
                 }
             }
+        }
+    }
+}
+
+
+@Composable
+fun SearchCard() {
+    val search by mainActivityViewModel.searchNameState.collectAsState()
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Card(
+            modifier = Modifier
+                .width(350.dp),
+            border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline),
+
+            ) {
+            TextField(
+                value = search,
+                onValueChange = { mainActivityViewModel.updateSearch(it) },
+                label = { Text("Search for exercise") }
+            )
         }
     }
 }
@@ -455,19 +505,18 @@ fun ExerciseCard(exercise: ExerciseClass, index: Int) {
                             text = "Category: ${exercise.categoryString}", fontSize = 16.sp
                         )
                     }
-                    if(exercise.isCustom) {
+                    if (exercise.isCustom) {
                         Image(
                             bitmap = exercise.getImage(),
                             contentDescription = "${exercise.name} image",
                             contentScale = ContentScale.Crop,
-                                    //colorFilter = ColorFilter.tint(colorResource(id = R.color.images)),
+                            //colorFilter = ColorFilter.tint(colorResource(id = R.color.images)),
                             modifier = Modifier
                                 .padding(8.dp)
                                 .size(100.dp)
                                 .clip(RoundedCornerShape(percent = 10))
                         )
-                    }
-                    else{
+                    } else {
                         Image(
                             painter = painterResource(id = photoId),
                             contentDescription = "${exercise.name} image",
@@ -548,10 +597,10 @@ fun HourPicker(
                     )
                     alarmScheduler.scheduleAlarm(newAlarmItem)
                     onConfirm()
-                }
-                , colors = ButtonDefaults.buttonColors(containerColor = Color.Green)) {
-                    Text("Confirm"
-                    , fontWeight = FontWeight.Bold)
+                }, colors = ButtonDefaults.buttonColors(containerColor = Color.Green)) {
+                    Text(
+                        "Confirm", fontWeight = FontWeight.Bold
+                    )
                 }
             }
         }
@@ -595,8 +644,7 @@ fun ChangeNickDialog(onDismissRequest: () -> Unit) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 8.dp),
-                    singleLine = true
-                    , colors = TextFieldDefaults.textFieldColors(
+                    singleLine = true, colors = TextFieldDefaults.textFieldColors(
                         disabledTextColor = MaterialTheme.colorScheme.inversePrimary,
                         cursorColor = MaterialTheme.colorScheme.inversePrimary,
                         errorCursorColor = MaterialTheme.colorScheme.inversePrimary,
@@ -612,7 +660,7 @@ fun ChangeNickDialog(onDismissRequest: () -> Unit) {
                         unfocusedLabelColor = MaterialTheme.colorScheme.inversePrimary,
                         disabledLabelColor = MaterialTheme.colorScheme.inversePrimary,
                         errorLabelColor = MaterialTheme.colorScheme.inversePrimary,
-                        disabledPlaceholderColor =MaterialTheme.colorScheme.inversePrimary
+                        disabledPlaceholderColor = MaterialTheme.colorScheme.inversePrimary
                     )
                 )
                 Row(
@@ -626,14 +674,19 @@ fun ChangeNickDialog(onDismissRequest: () -> Unit) {
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary),
                     ) {
-                        Text(text = "Save",
-                            fontWeight = FontWeight.Bold)
+                        Text(
+                            text = "Save",
+                            fontWeight = FontWeight.Bold
+                        )
                     }
-                    Button(onClick = { onDismissRequest() },
+                    Button(
+                        onClick = { onDismissRequest() },
                         colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
                     ) {
-                        Text(text = "Cancel",
-                            fontWeight = FontWeight.Bold)
+                        Text(
+                            text = "Cancel",
+                            fontWeight = FontWeight.Bold
+                        )
                     }
                 }
             }

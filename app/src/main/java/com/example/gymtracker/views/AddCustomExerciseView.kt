@@ -182,7 +182,7 @@ fun MainView(exerciseViewModel: AddCustomExerciseViewModel, activity: ComponentA
             ExposedDropdownMenu(
                 expanded = expanded,
                 onDismissRequest = { expanded = false }
-            ) {
+            )   {
                 Categories.entries.forEach { category ->
                     DropdownMenuItem(
                         text = { Text(category.name) },
