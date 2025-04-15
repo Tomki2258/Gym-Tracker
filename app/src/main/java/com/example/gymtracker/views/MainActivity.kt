@@ -29,6 +29,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -166,6 +167,7 @@ fun MainView() {
     val categories = LoadCategories(ExerciseManager.exercises)
     var currentCategory by remember { mutableStateOf(categories.first()) }
     val showNickameDialog = remember { mutableStateOf(false) }
+    val showSearchPanel = remember { mutableStateOf(false) }
     val showHourDialog = remember { mutableStateOf(false) }
     var totalDrag by remember { mutableStateOf(0f) }
     alarmScheduler = AndroidAlarmScheduler(
@@ -216,44 +218,7 @@ fun MainView() {
                     .padding(0.dp, 0.dp, 0.dp, 8.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                IconButton(onClick = {
-                    var catIndex = categories.indexOf(currentCategory)
-                    catIndex -= 1
-                    if (catIndex < 0) {
-                        catIndex = categories.size - 1
-                    }
-                    currentCategory = categories[catIndex]
-                    //Log.d(currentCategory, currentCategory)
-                }) {
-                    Icon(
-                        modifier = Modifier
-                            .size(25.dp)
-                            .scale(scaleX = -1f, scaleY = 1f),
-                        painter = painterResource(R.drawable.right_arrow),
-                        contentDescription = "Filter Icon"
-                    )
-                }
-                var catIndex = categories.indexOf(currentCategory)
-                Text(
-                    text = "${
-                        currentCategory.lowercase().replaceFirstChar { it.uppercase() }
-                    }\n${catIndex + 1} / ${categories.size}",
-                    textAlign = TextAlign.Center
-                )
-                IconButton(onClick = {
-                    catIndex += 1
-                    if (catIndex > categories.size - 1) {
-                        catIndex = 0
-                    }
-                    currentCategory = categories[catIndex]
-                    Log.d(currentCategory, currentCategory)
-                }) {
-                    Icon(
-                        modifier = Modifier.size(25.dp),
-                        painter = painterResource(R.drawable.right_arrow),
-                        contentDescription = "Filter Icon"
-                    )
-                }
+                TopBar()
             }
             Column(
                 modifier = Modifier
@@ -352,6 +317,37 @@ fun MainView() {
 }
 
 @Composable
+fun TopBar() {
+    LazyRow(
+        modifier = Modifier.padding(25.dp,0.dp,25.dp,0.dp)
+    ) {
+        item {
+            Text(
+                modifier = Modifier.padding(5.dp),
+                text = "Search".uppercase()
+            )
+        }
+        item {
+            Text(
+                modifier = Modifier.padding(5.dp)
+                    .clickable(){
+                        val intent =
+                            Intent(mainActivityViewModel.context, AddCustomExerciseView::class.java)
+                        mainActivityViewModel.context.startActivity(intent)
+                    },
+                text = "Add custom".uppercase()
+            )
+        }
+        items(mainActivityViewModel.getCat()) { category ->
+            Text(
+                modifier = Modifier.padding(5.dp),
+                text = category
+            )
+        }
+    }
+}
+
+@Composable
 fun WelcomeCard(userName: String) {
     val randomText = UserManager.wellcomeMessage
     Box(
@@ -382,6 +378,7 @@ fun WelcomeCard(userName: String) {
     }
 }
 
+//DEPRECATED
 @Composable
 fun AddCustomExercisePanel() {
     Box(
@@ -427,14 +424,14 @@ fun ExerciseList(exercises: List<ExerciseClass>, currentCategory: String) {
             item {
                 WelcomeCard(userName)
             }
-            item {
-                SearchCard()
-            }
-            if (currentCategory == "All") {
-                item {
-                    AddCustomExercisePanel()
-                }
-            }
+//            item {
+//                SearchCard()
+//            }
+//            if (currentCategory == "All") {
+//                item {
+//                    AddCustomExercisePanel()
+//                }
+//            }
             items(exercises.filter {
                 it.name.contains(search, ignoreCase = true)
             }) { exercise ->
@@ -445,7 +442,6 @@ fun ExerciseList(exercises: List<ExerciseClass>, currentCategory: String) {
         }
     }
 }
-
 
 @Composable
 fun SearchCard() {
@@ -538,7 +534,7 @@ fun LaunchExerciseIntent(exerciseIndex: Int, context: Context) {
     }
     context.startActivity(intent)
 }
-
+//DEPRECATED
 fun LaunchUserIntent(context: Context) {
     val intent = Intent(context, UserActivity::class.java)
     context.startActivity(intent)

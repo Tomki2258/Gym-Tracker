@@ -11,6 +11,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.*
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
+import com.example.gymtracker.data.ExerciseClass
+import com.example.gymtracker.managers.ExerciseManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
@@ -19,6 +21,10 @@ class MainActivityViewModel : ViewModel() {
 
     private val searchName = MutableStateFlow("")
     val searchNameState = searchName.asStateFlow()
+
+    val categories = LoadCategories(ExerciseManager.exercises)
+    private val currentCategory = MutableStateFlow(categories.first())
+    val currentCategoryState = currentCategory.asStateFlow()
 
     @Composable
     fun RequestNotificationPermission() {
@@ -51,5 +57,19 @@ class MainActivityViewModel : ViewModel() {
     fun updateSearch(search:String){
         searchName.value = search
         //Log.d("Search value ",searchName.value.toString())
+    }
+    fun LoadCategories(exercises: List<ExerciseClass>): List<String> {
+        val categories = mutableListOf<String>()
+        categories.add("All")
+        for (exercise in exercises) {
+            if (!categories.contains(exercise.category.toString())) {
+                categories.add(exercise.category.toString())
+            }
+        }
+
+        return categories
+    }
+    fun getCat(): List<String>{
+        return categories
     }
 }
