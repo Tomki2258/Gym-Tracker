@@ -122,7 +122,7 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
             }
             Button(
                 modifier = Modifier.fillMaxWidth(),
-                onClick = { LaunchTrainingPlanIntent(context) }) {
+                onClick = {  }) {
                 Text(text = "Training plan")
             }
             Button(

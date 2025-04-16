@@ -3,6 +3,7 @@ package com.example.gymtracker.views
 import android.Manifest
 import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.util.Log
@@ -21,7 +22,9 @@ class MainActivityViewModel : ViewModel() {
 
     private val searchName = MutableStateFlow("")
     val searchNameState = searchName.asStateFlow()
-    val searchEnabled = mutableStateOf(false)
+    var searchEnabled = mutableStateOf(false)
+        private set
+
     val categories = LoadCategories(ExerciseManager.exercises)
     private val currentCategory = MutableStateFlow(categories.first())
     val currentCategoryState = currentCategory.asStateFlow()
@@ -58,6 +61,10 @@ class MainActivityViewModel : ViewModel() {
         searchName.value = search
         //Log.d("Search value ",searchName.value.toString())
     }
+    fun updateCat(category : String){
+        currentCategory.value = category
+        Log.d("Category",currentCategory.value)
+    }
     fun LoadCategories(exercises: List<ExerciseClass>): List<String> {
         val categories = mutableListOf<String>()
         categories.add("All")
@@ -71,5 +78,12 @@ class MainActivityViewModel : ViewModel() {
     }
     fun getCat(): List<String>{
         return categories
+    }
+    fun LaunchTrainingPlanIntent() {
+        val intent = Intent(context, TrainingPlannerActivity::class.java)
+        context.startActivity(intent)
+    }
+    fun toggleSearch() {
+        searchEnabled.value = !searchEnabled.value
     }
 }

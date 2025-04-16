@@ -80,8 +80,11 @@ import java.time.LocalDateTime
 import java.util.Calendar
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Preview
+import com.example.gymtracker.ui.theme.Black
+import com.example.gymtracker.ui.theme.BlackDark
 import kotlin.math.log
 
 
@@ -164,10 +167,12 @@ fun MainView() {
     for (ex in ExerciseManager.exercises) {
         ex.loadImage(mainActivityViewModel.context)
     }
-    val categories = LoadCategories(ExerciseManager.exercises)
-    var currentCategory by remember { mutableStateOf(categories.first()) }
+    val categories = mainActivityViewModel.categories
+    var currentCategory by remember { mutableStateOf(
+        mainActivityViewModel.currentCategoryState.value
+    ) }
     val showNickameDialog = remember { mutableStateOf(false) }
-    val showSearchPanel = remember { mutableStateOf(false) }
+
     val showHourDialog = remember { mutableStateOf(false) }
     var totalDrag by remember { mutableStateOf(0f) }
     alarmScheduler = AndroidAlarmScheduler(
@@ -231,31 +236,28 @@ fun MainView() {
                             onHorizontalDrag = { change, dragAmount ->
                                 change.consume()
                                 totalDrag += dragAmount
-                                Log.d("PRZESUNIECIE: ", "amount: $dragAmount total: $totalDrag")
                             },
                             onDragEnd = {
+                                var catIndex = categories.indexOf(mainActivityViewModel.currentCategoryState.value)
                                 if (totalDrag < -25) {
-                                    var catIndex = categories.indexOf(currentCategory)
                                     catIndex += 1
                                     if (catIndex > categories.size - 1) {
                                         catIndex = 0
                                     }
-                                    currentCategory = categories[catIndex]
                                 } else if (totalDrag > 25) {
-                                    var catIndex = categories.indexOf(currentCategory)
                                     catIndex -= 1
                                     if (catIndex < 0) {
                                         catIndex = categories.size - 1
                                     }
-                                    currentCategory = categories[catIndex]
                                 }
+                                mainActivityViewModel.updateCat(categories[catIndex])
                                 totalDrag = 0f
                             }
                         )
                     },
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                ExerciseList(ExerciseManager.exercises, currentCategory)
+                ExerciseList(ExerciseManager.exercises)
             }
         }
 
@@ -265,7 +267,6 @@ fun MainView() {
                 .fillMaxWidth()
                 .background(MaterialTheme.colorScheme.background)
 
-                //.background(Color.LightGray)
                 .padding(0.dp, 2.dp, 0.dp, 16.dp),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
@@ -280,9 +281,7 @@ fun MainView() {
             }
             IconButton(
                 onClick = {
-                    LaunchTrainingPlanIntent(
-                        mainActivityViewModel.context
-                    )
+                    mainActivityViewModel.LaunchTrainingPlanIntent()
                 },
                 modifier = Modifier.weight(1f)
             ) {
@@ -291,17 +290,6 @@ fun MainView() {
                     contentDescription = "User Icon"
                 )
             }
-            /*
-            IconButton(
-                onClick = { showHourDialog.value = true },
-                modifier = Modifier.weight(1f)
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.meds),
-                    contentDescription = "User Icon"
-                )
-            }
-            */
         }
 
         if (showNickameDialog.value) {
@@ -316,6 +304,7 @@ fun MainView() {
     }
 }
 
+@SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun TopBar() {
     LazyRow(
@@ -326,12 +315,7 @@ fun TopBar() {
                 modifier = Modifier
                     .padding(5.dp)
                     .clickable() {
-                        if (mainActivityViewModel.searchEnabled.value) {
-                            mainActivityViewModel.searchEnabled.value = false
-                        }
-                        else{
-                            mainActivityViewModel.searchEnabled.value = true
-                        }
+                        mainActivityViewModel.toggleSearch()
                     },
                 text = "Search".uppercase()
             )
@@ -350,7 +334,16 @@ fun TopBar() {
         }
         items(mainActivityViewModel.getCat()) { category ->
             Text(
-                modifier = Modifier.padding(5.dp),
+                modifier = Modifier.padding(5.dp)
+                    .clickable{
+                        mainActivityViewModel.updateCat(category)
+                    }.drawBehind {
+                        val circleColor = Black
+                        drawCircle(
+                            color = circleColor,
+                            radius = 65f
+                        )
+                    },
                 text = category
             )
         }
@@ -388,43 +381,16 @@ fun WelcomeCard(userName: String) {
     }
 }
 
-//DEPRECATED
-@Composable
-fun AddCustomExercisePanel() {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp)
-            .clickable {
-                val intent =
-                    Intent(mainActivityViewModel.context, AddCustomExerciseView::class.java)
-                mainActivityViewModel.context.startActivity(intent)
-            },
-        contentAlignment = Alignment.Center
-    ) {
-        Card(
-            modifier = Modifier
-                .width(350.dp),
-            border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline),
-        ) {
-            Column(
-                modifier = Modifier.padding(16.dp)
-            ) {
-                Text(
-                    text = "Click to add exercise",
-                    fontSize = 24.sp
-                )
-            }
-        }
-    }
-}
 
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
-fun ExerciseList(exercises: List<ExerciseClass>, currentCategory: String) {
+fun ExerciseList(exercises: List<ExerciseClass>) {
     //Log.d("state", mainActivityViewModel.searchNameState.value.isEmpty().toString())
     val userName = UserManager.getUserName()
     val search by mainActivityViewModel.searchNameState.collectAsState()
+
+    val currentCategory by mainActivityViewModel.currentCategoryState.collectAsState()
+
     Box(
         modifier = Modifier.fillMaxSize(),
     ) {
@@ -438,6 +404,7 @@ fun ExerciseList(exercises: List<ExerciseClass>, currentCategory: String) {
                 else{
                     WelcomeCard("Tomek")
                 }
+                Log.d("Search",mainActivityViewModel.searchEnabled.value.toString())
             }
 //            item {
 //                SearchCard()
@@ -559,11 +526,7 @@ fun LaunchExerciseIntent(exerciseIndex: Int, context: Context) {
     }
     context.startActivity(intent)
 }
-//DEPRECATED
-fun LaunchUserIntent(context: Context) {
-    val intent = Intent(context, UserActivity::class.java)
-    context.startActivity(intent)
-}
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -626,11 +589,6 @@ fun HourPicker(
             }
         }
     }
-}
-
-fun LaunchTrainingPlanIntent(context: Context) {
-    val intent = Intent(context, TrainingPlannerActivity::class.java)
-    context.startActivity(intent)
 }
 
 @Composable
