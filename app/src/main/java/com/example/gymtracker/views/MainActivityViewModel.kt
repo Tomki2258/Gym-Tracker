@@ -21,7 +21,7 @@ class MainActivityViewModel : ViewModel() {
 
     private val searchName = MutableStateFlow("")
     val searchNameState = searchName.asStateFlow()
-
+    val searchEnabled = mutableStateOf(false)
     val categories = LoadCategories(ExerciseManager.exercises)
     private val currentCategory = MutableStateFlow(categories.first())
     val currentCategoryState = currentCategory.asStateFlow()

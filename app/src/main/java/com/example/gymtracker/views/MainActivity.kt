@@ -323,14 +323,24 @@ fun TopBar() {
     ) {
         item {
             Text(
-                modifier = Modifier.padding(5.dp),
+                modifier = Modifier
+                    .padding(5.dp)
+                    .clickable() {
+                        if (mainActivityViewModel.searchEnabled.value) {
+                            mainActivityViewModel.searchEnabled.value = false
+                        }
+                        else{
+                            mainActivityViewModel.searchEnabled.value = true
+                        }
+                    },
                 text = "Search".uppercase()
             )
         }
         item {
             Text(
-                modifier = Modifier.padding(5.dp)
-                    .clickable(){
+                modifier = Modifier
+                    .padding(5.dp)
+                    .clickable() {
                         val intent =
                             Intent(mainActivityViewModel.context, AddCustomExerciseView::class.java)
                         mainActivityViewModel.context.startActivity(intent)
@@ -422,7 +432,12 @@ fun ExerciseList(exercises: List<ExerciseClass>, currentCategory: String) {
             modifier = Modifier.fillMaxSize(),
         ) {
             item {
-                WelcomeCard(userName)
+                if(mainActivityViewModel.searchEnabled.value == true) {
+                    SearchCard()
+                }
+                else{
+                    WelcomeCard("Tomek")
+                }
             }
 //            item {
 //                SearchCard()
@@ -459,11 +474,21 @@ fun SearchCard() {
             border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline),
 
             ) {
-            TextField(
-                value = search,
-                onValueChange = { mainActivityViewModel.updateSearch(it) },
-                label = { Text("Search for exercise") }
-            )
+            Row() {
+                TextField(
+                    value = search,
+                    onValueChange = { mainActivityViewModel.updateSearch(it) },
+                    label = { Text("Search for exercise") }
+                )
+                IconButton(onClick = {
+                    mainActivityViewModel.searchEnabled.value = false
+                }) {
+                    Icon(
+                        painter = painterResource(R.drawable.icons8_male_user_100),
+                        contentDescription = "User Icon"
+                    )
+                }
+            }
         }
     }
 }
