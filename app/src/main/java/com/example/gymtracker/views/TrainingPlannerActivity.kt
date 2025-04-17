@@ -78,6 +78,7 @@ import kotlinx.coroutines.launch
 import java.nio.file.WatchEvent
 import java.util.Calendar
 import java.util.Locale
+private lateinit var trainingPlannerViewModel: TrainingPlannerViewModel
 
 class TrainingPlannerActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -85,9 +86,9 @@ class TrainingPlannerActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             GymTrackerTheme {
+                trainingPlannerViewModel = TrainingPlannerViewModel(LocalContext.current)
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     MainView(
-                        name = "Android",
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
@@ -95,7 +96,6 @@ class TrainingPlannerActivity : ComponentActivity() {
         }
     }
 }
-
 var showAddDialog = mutableStateOf(false)
 var showRemoveDialog = mutableStateOf(false)
 var selectedToRemove = mutableStateOf(ExerciseClass("", Categories.CHEST, exericseEntity = null))
@@ -103,64 +103,12 @@ var showWarmUpDialog = mutableStateOf(false)
 
 var warmUpList = mutableStateOf(mutableListOf<String>())
 
-
-fun loadWarmUp(context: Context) {
-    CoroutineScope(Dispatchers.Main).launch {
-        warmUpList.value.clear()
-        for (day in TrainingManager.daysOfWeek) {
-            val exercises = loadExercisesForDay(context, day.day)
-            val uniqueCategories = exercises.map { it.categoryString }.toSet()
-            val categories = uniqueCategories.joinToString("-").lowercase(Locale.getDefault())
-            val warmUp = ApiManager.getWarpUp(categories)
-            warmUpList.value.add(warmUp)
-        }
-    }
-}
-
-fun loadExercisesForDay(context: Context, day: String): MutableList<ExerciseClass> {
-    val exercises = mutableListOf<ExerciseClass>()
-    val planTrainings = TrainingManager.getTrainingPlan(context, day)
-    planTrainings.forEach { training ->
-        val exercise = ExerciseManager.exercises.find { it.name == training.exercise }
-        if (exercise != null) {
-            exercises.add(exercise)
-        }
-    }
-    return exercises
-}
-
 var exercisesView = mutableStateOf(mutableListOf<ExerciseClass>())
 var currentDayIndex = mutableStateOf(0)
 
-fun getStringDay(dayIndex: Int): String {
-    return when (dayIndex) {
-        0 -> "Monday"
-        1 -> "Tuesday"
-        2 -> "Wednesday"
-        3 -> "Thursday"
-        4 -> "Friday"
-        5 -> "Saturday"
-        6 -> "Sunday"
-        else -> "Monday"
-    }
-}
-
-fun IncreaseDayIndex() {
-    currentDayIndex.value++
-    if (currentDayIndex.value >= TrainingManager.daysOfWeek.size) {
-        currentDayIndex.value = 0
-    }
-}
-
-fun DecreateDayIndex() {
-    currentDayIndex.value--
-    if (currentDayIndex.value < 0) {
-        currentDayIndex.value = TrainingManager.daysOfWeek.size - 1
-    }
-}
 
 @Composable
-fun MainView(name: String, modifier: Modifier = Modifier) {
+fun MainView(modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val calendar: Calendar = Calendar.getInstance()
     var totalDrag by remember { mutableStateOf(0f) }
@@ -170,10 +118,9 @@ fun MainView(name: String, modifier: Modifier = Modifier) {
         mutableStateOf(adjustedDayIndex)
     }
 
-    loadWarmUp(context)
+    //trainingPlannerViewModel.loadWarmUp()
     showAddDialog = remember { mutableStateOf(false) }
-    exercisesView.value = loadExercisesForDay(
-        context,
+    exercisesView.value = trainingPlannerViewModel.loadExercisesForDay(
         TrainingManager.daysOfWeek[currentDayIndex.value].day
     )
     Box(
@@ -189,15 +136,13 @@ fun MainView(name: String, modifier: Modifier = Modifier) {
                     },
                     onDragEnd = {
                         if (totalDrag < -25) {
-                            IncreaseDayIndex()
-                            exercisesView.value = loadExercisesForDay(
-                                context,
+                            trainingPlannerViewModel.IncreaseDayIndex()
+                            exercisesView.value = trainingPlannerViewModel.loadExercisesForDay(
                                 TrainingManager.daysOfWeek[currentDayIndex.value].day
                             )
                         } else if (totalDrag > 25) {
-                            DecreateDayIndex()
-                            exercisesView.value = loadExercisesForDay(
-                                context,
+                            trainingPlannerViewModel.DecreateDayIndex()
+                            exercisesView.value = trainingPlannerViewModel.loadExercisesForDay(
                                 TrainingManager.daysOfWeek[currentDayIndex.value].day
                             )
                         }
@@ -253,26 +198,14 @@ fun MainView(name: String, modifier: Modifier = Modifier) {
             }
             LazyColumn {
                 items(exercisesView.value) { exercise ->
-                    ExericeCard(exercise, currentDayIndex.value)
+                    ExericeCard(exercise)
                 }
                 item {
                     AddExercisePanelPanel()
                 }
             }
-            /*
-            FloatingActionButton(
-                onClick = { showAddDialog.value = true },
-                modifier = Modifier
-                    .padding(16.dp)
-                    .requiredSize(56.dp)
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.add),
-                    contentDescription = "Add measurement",
-                    modifier = Modifier.fillMaxSize(0.6f)
-                )
-            }
-            */
+
+
             if (showAddDialog.value) {
                 AddExericeToDay(
                     onDismissRequest = { showAddDialog.value = false },
@@ -317,10 +250,9 @@ fun MainView(name: String, modifier: Modifier = Modifier) {
                     .size(25.dp)
                     .scale(scaleX = -1f, scaleY = 1f),
                 onClick = {
-                    DecreateDayIndex()
+                    trainingPlannerViewModel.DecreateDayIndex()
 
-                    exercisesView.value = loadExercisesForDay(
-                        context,
+                    exercisesView.value = trainingPlannerViewModel.loadExercisesForDay(
                         TrainingManager.daysOfWeek[currentDayIndex.value].day
                     )
                 }
@@ -336,10 +268,9 @@ fun MainView(name: String, modifier: Modifier = Modifier) {
                     .size(25.dp)
                     .scale(scaleX = 1f, scaleY = 1f),
                 onClick = {
-                    IncreaseDayIndex()
+                    trainingPlannerViewModel.IncreaseDayIndex()
 
-                    exercisesView.value = loadExercisesForDay(
-                        context,
+                    exercisesView.value = trainingPlannerViewModel.loadExercisesForDay(
                         TrainingManager.daysOfWeek[currentDayIndex.value].day
                     )
                 }
@@ -454,7 +385,6 @@ fun AddExercisePanelPanel() {
 @Composable
 fun ExericeCard(
     exercise: ExerciseClass,
-    dayIndex: Int,
 ) {
     val context = LocalContext.current
     Card(
@@ -553,7 +483,7 @@ fun RemoveExerciseCard(exercise: ExerciseClass) {
                             showRemoveDialog.value = false
                             TrainingManager.removeExerciseFromPlan(
                                 context,
-                                getStringDay(currentDayIndex.value),
+                                trainingPlannerViewModel.getStringDay(currentDayIndex.value),
                                 exercise.name
                             )
                         },
@@ -573,38 +503,8 @@ fun RemoveExerciseCard(exercise: ExerciseClass) {
             }
         }
     }
-    fun LaunchExerciseIntent(exerciseIndex: Int, context: Context) {
-        val intent = Intent(context, ExerciseView::class.java).apply {
-            putExtra("EXERCISE_INDEX", exerciseIndex)
-        }
-        context.startActivity(intent)
-    }
 }
 
-@Composable
-fun WarmUpButton() {
-    Card(
-        modifier = Modifier
-            .padding(8.dp)
-            .fillMaxWidth()
-            .height(50.dp)
-            .clickable {
-                showWarmUpDialog.value = true
-            },
-        border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline),
-    ) {
-        Column(
-            modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = "Warm Up !",
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(8.dp)
-            )
-        }
-    }
-}
 
 @Composable
 fun WarmUpCard(

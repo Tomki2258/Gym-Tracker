@@ -8,21 +8,41 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import com.example.gymtracker.data.Measurement
 import com.example.gymtracker.R
+import com.example.gymtracker.data.ExerciseClass
 import com.example.gymtracker.roomdb.MeasurementEvent
 import com.example.gymtracker.roomdb.MeasurementViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-class ExerciseViewModel(
-    measurementViewModel: MeasurementViewModel):ViewModel() {
+class ExerciseViewModel(measurementViewModel: MeasurementViewModel,exercise: ExerciseClass):ViewModel() {
     private val measurementViewModel = measurementViewModel
+    private val exercise = exercise
+
     //Cards UI sizes
     val weekSize = 1.5f
     val yearSize = 0.5f
     val avgWeightSize = 0.65f
     val weightDiffSize = 1f
     val imageUIsize = 225.dp
+    //---------
+
+    private val showDialog = MutableStateFlow(false)
+    val showDialogState = showDialog.asStateFlow()
+
+    private val showDescDialog = MutableStateFlow(false)
+    val showDescDialogState = showDescDialog.asStateFlow()
+
+    private val showDeleteDialog = MutableStateFlow(false)
+    val showDeleteDialogState = showDeleteDialog.asStateFlow()
+
+    private val measurementsList = this.exercise.measurementsList.toMutableList()
+
+    private val clickedMeasurement = MutableStateFlow(Measurement(0, 0, 0.0f, ""))
+    val clicledMeasurementState = clickedMeasurement.asStateFlow()
+
     lateinit var context: Context
     fun formatStringDate(date: Long): String {
         val sdf = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
@@ -95,5 +115,24 @@ class ExerciseViewModel(
     }
     fun roundTheNumber(numInDouble: Float): String {
         return "%.1f".format(numInDouble)
+    }
+
+    fun updateShowDialog(mode: Boolean){
+        showDialog.value = mode
+    }
+    fun updateDeleteDialog(mode:Boolean){
+        showDeleteDialog.value = mode
+    }
+    fun updateShowDescDialog(mode: Boolean){
+        showDescDialog.value = mode
+    }
+    fun getMeasurementsList() : MutableList<Measurement>{
+        return measurementsList
+    }
+    fun getExercise() : ExerciseClass{
+        return this.exercise
+    }
+    fun updateClickedMeasurement(measurement: Measurement){
+        clickedMeasurement.value = measurement
     }
 }

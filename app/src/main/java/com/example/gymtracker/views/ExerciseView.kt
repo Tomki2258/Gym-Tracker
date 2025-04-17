@@ -1,6 +1,7 @@
 // ExerciseView.kt
 package com.example.gymtracker.views
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -36,6 +37,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -67,10 +69,8 @@ import com.example.gymtracker.ui.theme.GymTrackerTheme
 import com.example.gymtracker.ui.theme.Purple40
 import kotlinx.coroutines.launch
 
-var exercise = ExerciseClass("Default Name", Categories.CALVES, exericseEntity = null)
 
 class ExerciseView : ComponentActivity() {
-    private lateinit var measurementViewModel: MeasurementViewModel
     private lateinit var exerciseViewModel: ExerciseViewModel
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -81,18 +81,18 @@ class ExerciseView : ComponentActivity() {
         ).build()
         val dao = db.measurementDao()
 
-        measurementViewModel = ViewModelProvider(
+        val measurementViewModel = ViewModelProvider(
             this,
             MeasurementViewModel.Factory(dao)
         ).get(MeasurementViewModel::class.java)
-        exerciseViewModel = ExerciseViewModel(measurementViewModel)
         setContent {
             GymTrackerTheme {
                 val index = intent.getIntExtra("EXERCISE_INDEX", 0)
                 val exerciseClass = ExerciseManager.exercises[index]
-                exercise = exerciseClass
+                exerciseViewModel = ExerciseViewModel(measurementViewModel,exerciseClass)
+
                 ExerciseIntent(
-                    exerciseClass = exerciseClass,
+                    exerciseClass,
                     exerciseView = this,
                     exerciseViewModel
                 )
@@ -100,6 +100,7 @@ class ExerciseView : ComponentActivity() {
         }
     }
 
+    @SuppressLint("StateFlowValueCalledInComposition")
     @OptIn(ExperimentalFoundationApi::class)
     @Composable
     fun ExerciseIntent(
@@ -114,12 +115,15 @@ class ExerciseView : ComponentActivity() {
     ) {
         //TODO move ExerciseView values to viewModel
         exerciseViewModel.context = LocalContext.current
-        val showDialog = remember { mutableStateOf(false) }
-        val showDescDialog = remember { mutableStateOf(false) }
-        val showDeleteDialog = remember { mutableStateOf(false) }
-        val clickedMeasurement = remember { mutableStateOf(Measurement(0, 0, 0.0f, "")) }
+        val showDialog = exerciseViewModel.showDialogState.collectAsState()
+        val showDescDialog = exerciseViewModel.showDescDialogState.collectAsState()
+        val showDeleteDialog = exerciseViewModel.showDeleteDialogState.collectAsState()
+
+        val clickedMeasurement = exerciseViewModel.clicledMeasurementState.collectAsState()
+
         val measurementsList =
-            remember { mutableStateOf(exercise.measurementsList.toMutableList()) }
+            remember { mutableStateOf(exerciseViewModel.getMeasurementsList()) }
+
         val sortedMeasurementsList = remember(measurementsList.value) {
             measurementsList.value.sortedByDescending { it.date.time }
         }
@@ -148,9 +152,9 @@ class ExerciseView : ComponentActivity() {
                             .padding(8.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        if(exercise.isCustom) {
+                        if(exerciseViewModel.getExercise().isCustom) {
                             Image(
-                                bitmap = exercise.getImage(),
+                                bitmap = exerciseViewModel.getExercise().getImage(),
                                 contentScale = ContentScale.Crop,
                                 //colorFilter = ColorFilter.tint(colorResource(id = R.color.images)),
                                 contentDescription = "Exercise Image",
@@ -161,7 +165,7 @@ class ExerciseView : ComponentActivity() {
                         }
                         else{
                             Image(
-                                painter = painterResource(id = exercise.getPhotoResourceId(LocalContext.current)),
+                                painter = painterResource(id = exerciseViewModel.getExercise().getPhotoResourceId(LocalContext.current)),
                                 colorFilter = ColorFilter.tint(colorResource(id = R.color.images)),
                                 contentDescription = "Exercise Image",
                                 modifier = Modifier.size(exerciseViewModel.imageUIsize),
@@ -224,8 +228,8 @@ class ExerciseView : ComponentActivity() {
                                         .fillMaxWidth()
                                         .clickable(
                                             onClick = {
-                                                showDeleteDialog.value = true
-                                                clickedMeasurement.value = measurement
+                                                exerciseViewModel.updateDeleteDialog(true)
+                                                exerciseViewModel.updateClickedMeasurement(measurement)
                                             }
                                         )
                                         .padding(8.dp)
@@ -340,7 +344,7 @@ class ExerciseView : ComponentActivity() {
                 }
             }
             FloatingActionButton(
-                onClick = { showDescDialog.value = true },
+                onClick = { exerciseViewModel.updateShowDescDialog(true) },
                 modifier = Modifier
                     .align(Alignment.BottomStart)
                     .padding(16.dp)
@@ -353,7 +357,7 @@ class ExerciseView : ComponentActivity() {
                 )
             }
             FloatingActionButton(
-                onClick = { showDialog.value = true },
+                onClick = { exerciseViewModel.updateShowDialog(true) },
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .padding(16.dp)
@@ -368,18 +372,18 @@ class ExerciseView : ComponentActivity() {
         }
         if (showDialog.value) {
             AddMeasurementDialog(
-                onDismissRequest = { showDialog.value = false },
+                onDismissRequest = { exerciseViewModel.updateShowDialog(false) },
                 measurementsList,
                 exerciseView
             )
         }
         if (showDescDialog.value) {
-            ShowExerciseInfo(onDismissRequest = { showDescDialog.value = false },exerciseViewModel)
+            ShowExerciseInfo(onDismissRequest = { exerciseViewModel.updateShowDescDialog(false) },exerciseViewModel)
         }
         if (showDeleteDialog.value) {
             ShowDeleteMeasurement(
                 clickedMeasurement.value,
-                onDismissRequest = { showDeleteDialog.value = false },
+                onDismissRequest = { exerciseViewModel.updateDeleteDialog(false) },
                 exerciseView,
                 measurementsList
             )
@@ -503,7 +507,7 @@ class ExerciseView : ComponentActivity() {
                                 exerciseView.exerciseViewModel.addMeasurementDatabase(
                                     reps.value.toInt(),
                                     weight.value.toFloat() * if (isDoubleWeight.value) 2 else 1,
-                                    exercise.name,
+                                    exerciseViewModel.getExercise().name,
                                     measurementsList
                                 )
                                 onDismissRequest()
@@ -533,14 +537,14 @@ class ExerciseView : ComponentActivity() {
                 ) {
                     Text(
                         modifier = Modifier.padding(16.dp),
-                        text = exercise.exerciseDecs
+                        text = exerciseViewModel.getExercise().exerciseDecs
                     )
-                    if (exercise.isCustom) {
+                    if (exerciseViewModel.getExercise().isCustom) {
                         Button(
                             onClick = {
                                 finish()
-                                exercise.removeImage(exerciseViewModel.context)
-                                exercise.exericseEntity?.let {
+                                exerciseViewModel.getExercise().removeImage(exerciseViewModel.context)
+                                exerciseViewModel.getExercise().exericseEntity?.let {
                                     ExerciseManager.DeleteExercise(it)
                                 }
                                 onDismissRequest()
