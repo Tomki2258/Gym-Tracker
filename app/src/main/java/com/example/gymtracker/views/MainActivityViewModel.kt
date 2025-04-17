@@ -29,6 +29,12 @@ class MainActivityViewModel : ViewModel() {
     private val currentCategory = MutableStateFlow(categories.first())
     val currentCategoryState = currentCategory.asStateFlow()
 
+    private val showNickameDialog = MutableStateFlow(false)
+    val showNicknameDialogState = showNickameDialog.asStateFlow()
+
+    private val showHourDialog = MutableStateFlow(false)
+    val showHourDialogState = showHourDialog.asStateFlow()
+
     @Composable
     fun RequestNotificationPermission() {
         var hasNotificationPermission by remember {
@@ -85,5 +91,16 @@ class MainActivityViewModel : ViewModel() {
     }
     fun toggleSearch() {
         searchEnabled.value = !searchEnabled.value
+    }
+    fun updateShowNickameDialog(mode: Boolean){
+        showNickameDialog.value = mode
+    }
+    fun updateShowHourDialog(mode: Boolean){
+        showHourDialog.value = mode
+    }
+    fun launchCustomExericseIntent(){
+        val intent =
+            Intent(context, AddCustomExerciseView::class.java)
+        context.startActivity(intent)
     }
 }

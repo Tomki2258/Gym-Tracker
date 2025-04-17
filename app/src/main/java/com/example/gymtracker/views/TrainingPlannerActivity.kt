@@ -226,17 +226,17 @@ fun MainView(name: String, modifier: Modifier = Modifier) {
             Row() {
                 for (day in TrainingManager.daysOfWeek){
                     val firstChar = day.day.subSequence(0,3).toString()
-                    var currentColor: Color = BlackDark
+                    var currentColor: Color = Black
 
                     if (TrainingManager.daysOfWeek.indexOf(day) == currentDayIndex.value){
-                        currentColor = Purple40
+                        currentColor = BlackDark
                     }
                     Text(
-                        modifier = Modifier.padding(15.dp)
+                        modifier = Modifier.padding(12.dp)
                             .drawBehind {
                                 drawCircle(
                                     color = currentColor,
-                                    radius = 65f
+                                    radius = 60f
                                 )
                             }
                             .clickable(){

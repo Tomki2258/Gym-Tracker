@@ -158,6 +158,7 @@ fun MainViewPreview() {
     MainView()
 }
 
+@SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun MainView() {
     //HideStatusBar()
@@ -167,13 +168,7 @@ fun MainView() {
     for (ex in ExerciseManager.exercises) {
         ex.loadImage(mainActivityViewModel.context)
     }
-    val categories = mainActivityViewModel.categories
-    var currentCategory by remember { mutableStateOf(
-        mainActivityViewModel.currentCategoryState.value
-    ) }
-    val showNickameDialog = remember { mutableStateOf(false) }
 
-    val showHourDialog = remember { mutableStateOf(false) }
     var totalDrag by remember { mutableStateOf(0f) }
     alarmScheduler = AndroidAlarmScheduler(
         mainActivityViewModel.context
@@ -238,19 +233,20 @@ fun MainView() {
                                 totalDrag += dragAmount
                             },
                             onDragEnd = {
-                                var catIndex = categories.indexOf(mainActivityViewModel.currentCategoryState.value)
+                                var catIndex =
+                                    mainActivityViewModel.categories.indexOf(mainActivityViewModel.currentCategoryState.value)
                                 if (totalDrag < -25) {
                                     catIndex += 1
-                                    if (catIndex > categories.size - 1) {
+                                    if (catIndex > mainActivityViewModel.categories.size - 1) {
                                         catIndex = 0
                                     }
                                 } else if (totalDrag > 25) {
                                     catIndex -= 1
                                     if (catIndex < 0) {
-                                        catIndex = categories.size - 1
+                                        catIndex = mainActivityViewModel.categories.size - 1
                                     }
                                 }
-                                mainActivityViewModel.updateCat(categories[catIndex])
+                                mainActivityViewModel.updateCat(mainActivityViewModel.categories[catIndex])
                                 totalDrag = 0f
                             }
                         )
@@ -271,7 +267,7 @@ fun MainView() {
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
             IconButton(
-                onClick = { showNickameDialog.value = true },
+                onClick = { mainActivityViewModel.updateShowNickameDialog(true) },
                 modifier = Modifier.weight(1f)
             ) {
                 Icon(
@@ -292,13 +288,13 @@ fun MainView() {
             }
         }
 
-        if (showNickameDialog.value) {
-            ChangeNickDialog { showNickameDialog.value = false }
+        if (mainActivityViewModel.showNicknameDialogState.value) {
+            ChangeNickDialog { mainActivityViewModel.updateShowNickameDialog(false) }
         }
-        if (showHourDialog.value) {
+        if (mainActivityViewModel.showHourDialogState.value) {
             HourPicker(
-                onConfirm = { showHourDialog.value = false },
-                onDismiss = { showHourDialog.value = false }
+                onConfirm = { mainActivityViewModel.updateShowHourDialog(false) },
+                onDismiss = { mainActivityViewModel.updateShowHourDialog(false) }
             )
         }
     }
@@ -308,7 +304,7 @@ fun MainView() {
 @Composable
 fun TopBar() {
     LazyRow(
-        modifier = Modifier.padding(25.dp,0.dp,25.dp,0.dp)
+        modifier = Modifier.padding(25.dp, 0.dp, 25.dp, 0.dp)
     ) {
         item {
             Text(
@@ -325,19 +321,19 @@ fun TopBar() {
                 modifier = Modifier
                     .padding(5.dp)
                     .clickable() {
-                        val intent =
-                            Intent(mainActivityViewModel.context, AddCustomExerciseView::class.java)
-                        mainActivityViewModel.context.startActivity(intent)
+                        mainActivityViewModel.launchCustomExericseIntent()
                     },
                 text = "Add custom".uppercase()
             )
         }
         items(mainActivityViewModel.getCat()) { category ->
             Text(
-                modifier = Modifier.padding(5.dp)
-                    .clickable{
+                modifier = Modifier
+                    .padding(5.dp)
+                    .clickable {
                         mainActivityViewModel.updateCat(category)
-                    }.drawBehind {
+                    }
+                    .drawBehind {
                         val circleColor = Black
                         drawCircle(
                             color = circleColor,
@@ -398,13 +394,12 @@ fun ExerciseList(exercises: List<ExerciseClass>) {
             modifier = Modifier.fillMaxSize(),
         ) {
             item {
-                if(mainActivityViewModel.searchEnabled.value == true) {
+                if (mainActivityViewModel.searchEnabled.value == true) {
                     SearchCard()
+                } else {
+                    WelcomeCard(UserManager.getUserName())
                 }
-                else{
-                    WelcomeCard("Tomek")
-                }
-                Log.d("Search",mainActivityViewModel.searchEnabled.value.toString())
+                Log.d("Search", mainActivityViewModel.searchEnabled.value.toString())
             }
 //            item {
 //                SearchCard()

@@ -112,6 +112,7 @@ class ExerciseView : ComponentActivity() {
         exerciseView: ExerciseView,
         exerciseViewModel: ExerciseViewModel
     ) {
+        //TODO move ExerciseView values to viewModel
         exerciseViewModel.context = LocalContext.current
         val showDialog = remember { mutableStateOf(false) }
         val showDescDialog = remember { mutableStateOf(false) }
