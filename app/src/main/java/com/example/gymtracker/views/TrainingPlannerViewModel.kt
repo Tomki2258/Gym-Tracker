@@ -1,7 +1,9 @@
 package com.example.gymtracker.views
 
 import android.content.Context
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import com.example.gymtracker.data.Categories
 import com.example.gymtracker.data.ExerciseClass
 import com.example.gymtracker.managers.ApiManager
 import com.example.gymtracker.managers.ExerciseManager
@@ -12,19 +14,13 @@ import kotlinx.coroutines.launch
 import java.util.Locale
 
 class TrainingPlannerViewModel(context: Context): ViewModel() {
-    private val context: Context = context
-    fun loadWarmUp() {
-        CoroutineScope(Dispatchers.Main).launch {
-            warmUpList.value.clear()
-            for (day in TrainingManager.daysOfWeek) {
-                val exercises = loadExercisesForDay(day.day)
-                val uniqueCategories = exercises.map { it.categoryString }.toSet()
-                val categories = uniqueCategories.joinToString("-").lowercase(Locale.getDefault())
-                val warmUp = ApiManager.getWarpUp(categories)
-                warmUpList.value.add(warmUp)
-            }
-        }
-    }
+    internal val context: Context = context
+    var showAddDialog = mutableStateOf(false)
+    var showRemoveDialog = mutableStateOf(false)
+    var currentDayIndex = mutableStateOf(0)
+    var showWarmUpDialog = mutableStateOf(false)
+    var exercisesView = mutableStateOf(mutableListOf<ExerciseClass>())
+    var selectedToRemove = mutableStateOf(ExerciseClass("", Categories.CHEST, exericseEntity = null))
 
     fun loadExercisesForDay(day: String): MutableList<ExerciseClass> {
         val exercises = mutableListOf<ExerciseClass>()

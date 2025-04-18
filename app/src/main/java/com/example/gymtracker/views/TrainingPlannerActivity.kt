@@ -1,11 +1,7 @@
 // app/src/main/java/com/example/gymtracker/TrainingPlannerActivity.kt
 package com.example.gymtracker.views
 
-import android.content.Context
-import android.content.Intent
-import android.graphics.Color.red
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -13,27 +9,22 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -62,7 +53,6 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import com.example.gymtracker.managers.ApiManager
 import com.example.gymtracker.data.Categories
 import com.example.gymtracker.data.ExerciseClass
 import com.example.gymtracker.managers.ExerciseManager
@@ -71,14 +61,9 @@ import com.example.gymtracker.managers.TrainingManager
 import com.example.gymtracker.ui.theme.Black
 import com.example.gymtracker.ui.theme.BlackDark
 import com.example.gymtracker.ui.theme.GymTrackerTheme
-import com.example.gymtracker.ui.theme.Purple40
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import java.nio.file.WatchEvent
 import java.util.Calendar
-import java.util.Locale
-private lateinit var trainingPlannerViewModel: TrainingPlannerViewModel
+
+private lateinit var viewModel: TrainingPlannerViewModel
 
 class TrainingPlannerActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -86,7 +71,7 @@ class TrainingPlannerActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             GymTrackerTheme {
-                trainingPlannerViewModel = TrainingPlannerViewModel(LocalContext.current)
+                viewModel = TrainingPlannerViewModel(LocalContext.current)
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     MainView(
                         modifier = Modifier.padding(innerPadding)
@@ -96,32 +81,21 @@ class TrainingPlannerActivity : ComponentActivity() {
         }
     }
 }
-var showAddDialog = mutableStateOf(false)
-var showRemoveDialog = mutableStateOf(false)
-var selectedToRemove = mutableStateOf(ExerciseClass("", Categories.CHEST, exericseEntity = null))
-var showWarmUpDialog = mutableStateOf(false)
-
-var warmUpList = mutableStateOf(mutableListOf<String>())
-
-var exercisesView = mutableStateOf(mutableListOf<ExerciseClass>())
-var currentDayIndex = mutableStateOf(0)
-
 
 @Composable
 fun MainView(modifier: Modifier = Modifier) {
-    val context = LocalContext.current
     val calendar: Calendar = Calendar.getInstance()
     var totalDrag by remember { mutableStateOf(0f) }
-    currentDayIndex = remember {
+    viewModel.currentDayIndex = remember {
         val dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK)
         val adjustedDayIndex = (dayOfWeek - 1) % 7
         mutableStateOf(adjustedDayIndex)
     }
 
     //trainingPlannerViewModel.loadWarmUp()
-    showAddDialog = remember { mutableStateOf(false) }
-    exercisesView.value = trainingPlannerViewModel.loadExercisesForDay(
-        TrainingManager.daysOfWeek[currentDayIndex.value].day
+    viewModel.showAddDialog = remember { mutableStateOf(false) }
+    viewModel.exercisesView.value = viewModel.loadExercisesForDay(
+        TrainingManager.daysOfWeek[viewModel.currentDayIndex.value].day
     )
     Box(
         modifier = Modifier
@@ -136,14 +110,14 @@ fun MainView(modifier: Modifier = Modifier) {
                     },
                     onDragEnd = {
                         if (totalDrag < -25) {
-                            trainingPlannerViewModel.IncreaseDayIndex()
-                            exercisesView.value = trainingPlannerViewModel.loadExercisesForDay(
-                                TrainingManager.daysOfWeek[currentDayIndex.value].day
+                            viewModel.IncreaseDayIndex()
+                            viewModel.exercisesView.value = viewModel.loadExercisesForDay(
+                                TrainingManager.daysOfWeek[viewModel.currentDayIndex.value].day
                             )
                         } else if (totalDrag > 25) {
-                            trainingPlannerViewModel.DecreateDayIndex()
-                            exercisesView.value = trainingPlannerViewModel.loadExercisesForDay(
-                                TrainingManager.daysOfWeek[currentDayIndex.value].day
+                            viewModel.DecreateDayIndex()
+                            viewModel.exercisesView.value = viewModel.loadExercisesForDay(
+                                TrainingManager.daysOfWeek[viewModel.currentDayIndex.value].day
                             )
                         }
 //                        if (totalDrag < -15) {
@@ -173,7 +147,7 @@ fun MainView(modifier: Modifier = Modifier) {
                     val firstChar = day.day.subSequence(0,3).toString()
                     var currentColor: Color = Black
 
-                    if (TrainingManager.daysOfWeek.indexOf(day) == currentDayIndex.value){
+                    if (TrainingManager.daysOfWeek.indexOf(day) == viewModel.currentDayIndex.value){
                         currentColor = BlackDark
                     }
                     Text(
@@ -185,19 +159,19 @@ fun MainView(modifier: Modifier = Modifier) {
                                 )
                             }
                             .clickable(){
-                                currentDayIndex.value = TrainingManager.daysOfWeek.indexOf(day)
+                                viewModel.currentDayIndex.value = TrainingManager.daysOfWeek.indexOf(day)
                             },
                         text = firstChar
                     )
                 }
             }
-            if (!exercisesView.value.isEmpty()) {
+            if (!viewModel.exercisesView.value.isEmpty()) {
                 //WarmUpButton()
             } else {
                 EmptyCard()
             }
             LazyColumn {
-                items(exercisesView.value) { exercise ->
+                items(viewModel.exercisesView.value) { exercise ->
                     ExericeCard(exercise)
                 }
                 item {
@@ -206,15 +180,15 @@ fun MainView(modifier: Modifier = Modifier) {
             }
 
 
-            if (showAddDialog.value) {
+            if (viewModel.showAddDialog.value) {
                 AddExericeToDay(
-                    onDismissRequest = { showAddDialog.value = false },
+                    onDismissRequest = { viewModel.showAddDialog.value = false },
                     onAddExercise = { exercise ->
-                        val currentDay = TrainingManager.daysOfWeek[currentDayIndex.value]
+                        val currentDay = TrainingManager.daysOfWeek[viewModel.currentDayIndex.value]
                         currentDay.exercises.add(exercise)
-                        exercisesView.value = currentDay.exercises.toMutableList()
+                        viewModel.exercisesView.value = currentDay.exercises.toMutableList()
                         TrainingManager.saveTrainingPlan(
-                            context,
+                            viewModel.context,
                             currentDay.day,
                             exercise.name
                         )
@@ -222,14 +196,8 @@ fun MainView(modifier: Modifier = Modifier) {
                 )
             }
 
-            if (showRemoveDialog.value) {
-                RemoveExerciseCard(selectedToRemove.value)
-            }
-            if (showWarmUpDialog.value) {
-                WarmUpCard(
-                    onDismissRequest = { showWarmUpDialog.value = false },
-                    warmUpString = warmUpList.value[currentDayIndex.value]
-                )
+            if (viewModel.showRemoveDialog.value) {
+                RemoveExerciseCard(viewModel.selectedToRemove.value)
             }
         }
 
@@ -250,10 +218,10 @@ fun MainView(modifier: Modifier = Modifier) {
                     .size(25.dp)
                     .scale(scaleX = -1f, scaleY = 1f),
                 onClick = {
-                    trainingPlannerViewModel.DecreateDayIndex()
+                    viewModel.DecreateDayIndex()
 
-                    exercisesView.value = trainingPlannerViewModel.loadExercisesForDay(
-                        TrainingManager.daysOfWeek[currentDayIndex.value].day
+                    viewModel.exercisesView.value = viewModel.loadExercisesForDay(
+                        TrainingManager.daysOfWeek[viewModel.currentDayIndex.value].day
                     )
                 }
             ) {
@@ -268,10 +236,10 @@ fun MainView(modifier: Modifier = Modifier) {
                     .size(25.dp)
                     .scale(scaleX = 1f, scaleY = 1f),
                 onClick = {
-                    trainingPlannerViewModel.IncreaseDayIndex()
+                    viewModel.IncreaseDayIndex()
 
-                    exercisesView.value = trainingPlannerViewModel.loadExercisesForDay(
-                        TrainingManager.daysOfWeek[currentDayIndex.value].day
+                    viewModel.exercisesView.value = viewModel.loadExercisesForDay(
+                        TrainingManager.daysOfWeek[viewModel.currentDayIndex.value].day
                     )
                 }
             ) {
@@ -302,7 +270,7 @@ fun AddExericeToDay(
                     Row(
                         modifier = Modifier
                             .clickable {
-                                if (exercisesView.value.contains(exercise)) {
+                                if (viewModel.exercisesView.value.contains(exercise)) {
                                     onDismissRequest()
                                     return@clickable
                                 }
@@ -363,7 +331,7 @@ fun AddExercisePanelPanel() {
             .height(50.dp)
             .clickable()
             {
-                showAddDialog.value = true
+                viewModel.showAddDialog.value = true
             }
     ) {
         Box(
@@ -386,7 +354,6 @@ fun AddExercisePanelPanel() {
 fun ExericeCard(
     exercise: ExerciseClass,
 ) {
-    val context = LocalContext.current
     Card(
         modifier = Modifier
             .padding(8.dp)
@@ -394,7 +361,7 @@ fun ExericeCard(
             .height(100.dp)
             .clickable {
                 val exerciseIndex = ExerciseManager.exercises.indexOf(exercise)
-                LaunchExerciseIntent(exerciseIndex, context)
+                LaunchExerciseIntent(exerciseIndex, viewModel.context)
             },
         border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline),
     ) {
@@ -416,7 +383,7 @@ fun ExericeCard(
                 )
             } else {
                 Icon(
-                    painter = painterResource(id = exercise.getPhotoResourceId(context)),
+                    painter = painterResource(id = exercise.getPhotoResourceId(viewModel.context)),
                     contentDescription = "Exercise photo",
                     tint = colorResource(id = R.color.images),
                     modifier = Modifier.padding(8.dp)
@@ -434,8 +401,8 @@ fun ExericeCard(
             Spacer(modifier = Modifier.weight(1f))
             IconButton(
                 onClick = {
-                    showRemoveDialog.value = true
-                    selectedToRemove.value = exercise
+                    viewModel.showRemoveDialog.value = true
+                    viewModel.selectedToRemove.value = exercise
                 }
             ) {
                 Icon(
@@ -452,7 +419,7 @@ fun RemoveExerciseCard(exercise: ExerciseClass) {
     val context = LocalContext.current
     Dialog(
         onDismissRequest = {
-            showRemoveDialog.value = false
+            viewModel.showRemoveDialog.value = false
         }
     ) {
         Card(
@@ -480,10 +447,10 @@ fun RemoveExerciseCard(exercise: ExerciseClass) {
                 ) {
                     Button(
                         onClick = {
-                            showRemoveDialog.value = false
+                            viewModel.showRemoveDialog.value = false
                             TrainingManager.removeExerciseFromPlan(
                                 context,
-                                trainingPlannerViewModel.getStringDay(currentDayIndex.value),
+                                viewModel.getStringDay(viewModel.currentDayIndex.value),
                                 exercise.name
                             )
                         },
@@ -493,7 +460,7 @@ fun RemoveExerciseCard(exercise: ExerciseClass) {
                     }
                     Button(
                         onClick = {
-                            showRemoveDialog.value = false
+                            viewModel.showRemoveDialog.value = false
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
                     ) {
@@ -501,27 +468,6 @@ fun RemoveExerciseCard(exercise: ExerciseClass) {
                     }
                 }
             }
-        }
-    }
-}
-
-
-@Composable
-fun WarmUpCard(
-    onDismissRequest: () -> Unit, warmUpString: String
-) {
-    Dialog(
-        onDismissRequest = { onDismissRequest() }
-    ) {
-        Card(
-            modifier = Modifier
-                .fillMaxWidth(),
-            border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline),
-        ) {
-            Text(
-                modifier = Modifier.padding(8.dp),
-                text = warmUpString
-            )
         }
     }
 }
