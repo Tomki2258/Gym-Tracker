@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -136,13 +137,15 @@ class ExerciseView : ComponentActivity() {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(0.dp, 12.dp, 0.dp, 0.dp)
+                .background(MaterialTheme.colorScheme.background)
+                .systemBarsPadding()
+
         ) {
             Column {
                 Card(
                     modifier = Modifier
                         .padding(8.dp)
                         .fillMaxWidth()
-                        .background(BlackDark)
                     ,
                     border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline),
                 ) {

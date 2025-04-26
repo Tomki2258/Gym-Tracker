@@ -7,6 +7,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -139,27 +140,29 @@ fun MainView(modifier: Modifier = Modifier) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(0.dp, 5.dp, 0.dp, 120.dp),
+                .padding(0.dp, 5.dp, 0.dp, 50.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Row() {
-                for (day in TrainingManager.daysOfWeek){
-                    val firstChar = day.day.subSequence(0,3).toString()
+                for (day in TrainingManager.daysOfWeek) {
+                    val firstChar = day.day.subSequence(0, 3).toString()
                     var currentColor: Color = Black
 
-                    if (TrainingManager.daysOfWeek.indexOf(day) == viewModel.currentDayIndex.value){
+                    if (TrainingManager.daysOfWeek.indexOf(day) == viewModel.currentDayIndex.value) {
                         currentColor = BlackDark
                     }
                     Text(
-                        modifier = Modifier.padding(12.dp)
+                        modifier = Modifier
+                            .padding(12.dp)
                             .drawBehind {
                                 drawCircle(
                                     color = currentColor,
                                     radius = 60f
                                 )
                             }
-                            .clickable(){
-                                viewModel.currentDayIndex.value = TrainingManager.daysOfWeek.indexOf(day)
+                            .clickable() {
+                                viewModel.currentDayIndex.value =
+                                    TrainingManager.daysOfWeek.indexOf(day)
                             },
                         text = firstChar
                     )
@@ -203,14 +206,10 @@ fun MainView(modifier: Modifier = Modifier) {
 
         Row(
             modifier = Modifier
+                .align(Alignment.BottomStart)
                 .fillMaxWidth()
-                .padding(
-                    bottom = 36.dp,
-                    start = 8.dp,
-                    top = 8.dp,
-                    end = 8.dp
-                )
-                .align(Alignment.BottomCenter),
+                .background(MaterialTheme.colorScheme.background)
+                .padding(16.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             IconButton(
@@ -237,7 +236,6 @@ fun MainView(modifier: Modifier = Modifier) {
                     .scale(scaleX = 1f, scaleY = 1f),
                 onClick = {
                     viewModel.IncreaseDayIndex()
-
                     viewModel.exercisesView.value = viewModel.loadExercisesForDay(
                         TrainingManager.daysOfWeek[viewModel.currentDayIndex.value].day
                     )

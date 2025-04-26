@@ -381,8 +381,6 @@ fun WelcomeCard(userName: String) {
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun ExerciseList(exercises: List<ExerciseClass>) {
-    //Log.d("state", mainActivityViewModel.searchNameState.value.isEmpty().toString())
-    val userName = UserManager.getUserName()
     val search by mainActivityViewModel.searchNameState.collectAsState()
 
     val currentCategory by mainActivityViewModel.currentCategoryState.collectAsState()
@@ -409,11 +407,23 @@ fun ExerciseList(exercises: List<ExerciseClass>) {
 //                    AddCustomExercisePanel()
 //                }
 //            }
-            items(exercises.filter {
+            val filtered = exercises.filter {
                 it.name.contains(search, ignoreCase = true)
-            }) { exercise ->
-                if (currentCategory == "All" || exercise.category.toString() == currentCategory) {
-                    ExerciseCard(exercise, exercises.indexOf(exercise))
+            }
+            if (filtered.isEmpty()) {
+                item {
+                    Box(
+                        modifier = Modifier
+                            .padding(25.dp)
+                    ) {
+                        Text(text = "Nothing is here :(")
+                    }
+                }
+            } else {
+                items(filtered) { exercise ->
+                    if (currentCategory == "All" || exercise.category.toString() == currentCategory) {
+                        ExerciseCard(exercise, exercises.indexOf(exercise))
+                    }
                 }
             }
         }
@@ -436,7 +446,9 @@ fun SearchCard() {
             border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline),
 
             ) {
-            Row() {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 TextField(
                     value = search,
                     onValueChange = { mainActivityViewModel.updateSearch(it) },
@@ -446,14 +458,16 @@ fun SearchCard() {
                     mainActivityViewModel.searchEnabled.value = false
                 }) {
                     Icon(
-                        painter = painterResource(R.drawable.icons8_male_user_100),
-                        contentDescription = "User Icon"
+                        painter = painterResource(R.drawable.close),
+                        contentDescription = "User Icon",
+                        Modifier.size(20.dp)
                     )
                 }
             }
         }
     }
 }
+
 
 @Composable
 fun ExerciseCard(exercise: ExerciseClass, index: Int) {
