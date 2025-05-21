@@ -25,7 +25,7 @@ class MainActivityViewModel : ViewModel() {
     var searchEnabled = mutableStateOf(false)
         private set
 
-    val categories = LoadCategories(ExerciseManager.exercises)
+    val categories = ExerciseManager.categories
     private val currentCategory = MutableStateFlow(categories.first())
     val currentCategoryState = currentCategory.asStateFlow()
 
@@ -70,17 +70,6 @@ class MainActivityViewModel : ViewModel() {
     fun updateCat(category : String){
         currentCategory.value = category
         Log.d("Category",currentCategory.value)
-    }
-    fun LoadCategories(exercises: List<ExerciseClass>): List<String> {
-        val categories = mutableListOf<String>()
-        categories.add("All")
-        for (exercise in exercises) {
-            if (!categories.contains(exercise.category.toString())) {
-                categories.add(exercise.category.toString())
-            }
-        }
-
-        return categories
     }
     fun getCat(): List<String>{
         return categories

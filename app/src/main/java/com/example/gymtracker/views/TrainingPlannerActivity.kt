@@ -54,11 +54,11 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import com.example.gymtracker.data.Categories
 import com.example.gymtracker.data.ExerciseClass
 import com.example.gymtracker.managers.ExerciseManager
 import com.example.gymtracker.R
 import com.example.gymtracker.managers.TrainingManager
+import com.example.gymtracker.services.TrainingManagerService
 import com.example.gymtracker.ui.theme.Black
 import com.example.gymtracker.ui.theme.BlackDark
 import com.example.gymtracker.ui.theme.GymTrackerTheme
@@ -75,7 +75,8 @@ class TrainingPlannerActivity : ComponentActivity() {
                 viewModel = TrainingPlannerViewModel(LocalContext.current)
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     MainView(
-                        modifier = Modifier.padding(innerPadding)
+                        modifier = Modifier.padding(innerPadding),
+                        trainingManagerService = viewModel.trainingManagerService
                     )
                 }
             }
@@ -84,7 +85,7 @@ class TrainingPlannerActivity : ComponentActivity() {
 }
 
 @Composable
-fun MainView(modifier: Modifier = Modifier) {
+fun MainView(modifier: Modifier = Modifier, trainingManagerService: TrainingManagerService) {
     val calendar: Calendar = Calendar.getInstance()
     var totalDrag by remember { mutableStateOf(0f) }
     viewModel.currentDayIndex = remember {
@@ -95,7 +96,7 @@ fun MainView(modifier: Modifier = Modifier) {
 
     //trainingPlannerViewModel.loadWarmUp()
     viewModel.showAddDialog = remember { mutableStateOf(false) }
-    viewModel.exercisesView.value = viewModel.loadExercisesForDay(
+    viewModel.exercisesView.value = viewModel.trainingManagerService.loadExercisesForDay(
         TrainingManager.daysOfWeek[viewModel.currentDayIndex.value].day
     )
     Box(
@@ -111,13 +112,13 @@ fun MainView(modifier: Modifier = Modifier) {
                     },
                     onDragEnd = {
                         if (totalDrag < -25) {
-                            viewModel.IncreaseDayIndex()
-                            viewModel.exercisesView.value = viewModel.loadExercisesForDay(
+                            viewModel.increaseDayIndex()
+                            viewModel.exercisesView.value = trainingManagerService.loadExercisesForDay(
                                 TrainingManager.daysOfWeek[viewModel.currentDayIndex.value].day
                             )
                         } else if (totalDrag > 25) {
-                            viewModel.DecreateDayIndex()
-                            viewModel.exercisesView.value = viewModel.loadExercisesForDay(
+                            viewModel.decreateDayIndex()
+                            viewModel.exercisesView.value = trainingManagerService.loadExercisesForDay(
                                 TrainingManager.daysOfWeek[viewModel.currentDayIndex.value].day
                             )
                         }
@@ -217,9 +218,9 @@ fun MainView(modifier: Modifier = Modifier) {
                     .size(25.dp)
                     .scale(scaleX = -1f, scaleY = 1f),
                 onClick = {
-                    viewModel.DecreateDayIndex()
+                    viewModel.decreateDayIndex()
 
-                    viewModel.exercisesView.value = viewModel.loadExercisesForDay(
+                    viewModel.exercisesView.value = trainingManagerService.loadExercisesForDay(
                         TrainingManager.daysOfWeek[viewModel.currentDayIndex.value].day
                     )
                 }
@@ -235,8 +236,8 @@ fun MainView(modifier: Modifier = Modifier) {
                     .size(25.dp)
                     .scale(scaleX = 1f, scaleY = 1f),
                 onClick = {
-                    viewModel.IncreaseDayIndex()
-                    viewModel.exercisesView.value = viewModel.loadExercisesForDay(
+                    viewModel.increaseDayIndex()
+                    viewModel.exercisesView.value = trainingManagerService.loadExercisesForDay(
                         TrainingManager.daysOfWeek[viewModel.currentDayIndex.value].day
                     )
                 }

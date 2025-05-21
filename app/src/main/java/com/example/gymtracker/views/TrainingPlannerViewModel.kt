@@ -5,13 +5,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import com.example.gymtracker.data.Categories
 import com.example.gymtracker.data.ExerciseClass
-import com.example.gymtracker.managers.ApiManager
-import com.example.gymtracker.managers.ExerciseManager
 import com.example.gymtracker.managers.TrainingManager
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import java.util.Locale
+import com.example.gymtracker.services.TrainingManagerService
 
 class TrainingPlannerViewModel(context: Context): ViewModel() {
     internal val context: Context = context
@@ -21,18 +16,8 @@ class TrainingPlannerViewModel(context: Context): ViewModel() {
     var showWarmUpDialog = mutableStateOf(false)
     var exercisesView = mutableStateOf(mutableListOf<ExerciseClass>())
     var selectedToRemove = mutableStateOf(ExerciseClass("", Categories.CHEST, exericseEntity = null))
+    var trainingManagerService = TrainingManagerService(context)
 
-    fun loadExercisesForDay(day: String): MutableList<ExerciseClass> {
-        val exercises = mutableListOf<ExerciseClass>()
-        val planTrainings = TrainingManager.getTrainingPlan(context, day)
-        planTrainings.forEach { training ->
-            val exercise = ExerciseManager.exercises.find { it.name == training.exercise }
-            if (exercise != null) {
-                exercises.add(exercise)
-            }
-        }
-        return exercises
-    }
     fun getStringDay(dayIndex: Int): String {
         return when (dayIndex) {
             0 -> "Monday"
@@ -46,14 +31,14 @@ class TrainingPlannerViewModel(context: Context): ViewModel() {
         }
     }
 
-    fun IncreaseDayIndex() {
+    fun increaseDayIndex() {
         currentDayIndex.value++
         if (currentDayIndex.value >= TrainingManager.daysOfWeek.size) {
             currentDayIndex.value = 0
         }
     }
 
-    fun DecreateDayIndex() {
+    fun decreateDayIndex() {
         currentDayIndex.value--
         if (currentDayIndex.value < 0) {
             currentDayIndex.value = TrainingManager.daysOfWeek.size - 1

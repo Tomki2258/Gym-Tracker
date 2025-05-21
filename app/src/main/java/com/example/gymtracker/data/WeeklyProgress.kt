@@ -12,6 +12,7 @@ class WeeklyProgress(
 ) {
     val year: Int
     val avgWeight: Float = setAvgWeight()
+    val sumWeight: Double = setWeightSum()
     val avgWeightDifference: Float = calculateAvgWeightDifference()
     val firstDate: Long = measurements[0].date.time
     val weekRange: String = calculateWeekRange()
@@ -19,7 +20,9 @@ class WeeklyProgress(
     init {
         this.year = measurements[0].date.year + 1900
     }
-
+    private fun setWeightSum(): Double{
+        return  measurements.sumOf { it.weight.toDouble() }
+    }
     private fun setAvgWeight(): Float {
         var totalWeight = 0.0f
         var totalReps = 0

@@ -11,6 +11,8 @@ import com.example.gymtracker.data.Categories
 import com.example.gymtracker.data.ExerciseClass
 import com.example.gymtracker.data.ExericseEntity
 import com.example.gymtracker.data.Measurement
+import com.example.gymtracker.factories.ExercisesFactory
+import com.example.gymtracker.managers.ExerciseManager.exerciseFactory
 import com.example.gymtracker.roomdb.ExercisesDatabase
 import com.example.gymtracker.roomdb.MeasurementDatabase
 import kotlinx.coroutines.CoroutineScope
@@ -22,22 +24,12 @@ object ExerciseManager {
     private const val PREFS_NAME = "exercise_prefs"
     private const val KEY_EXERCISES = "exercises"
     var exercises by mutableStateOf(listOf<ExerciseClass>())
-    private var exerciseDatabase: ExercisesDatabase? = null
-
+    var categories by mutableStateOf(listOf<String>())
+    private lateinit var exerciseDatabase: ExercisesDatabase;
+    private lateinit var exerciseFactory: ExercisesFactory;
     fun initialize(context: Context) {
         exerciseDatabase = getDatabase(context)
-        CoroutineScope(Dispatchers.IO).launch {
-            val customExercises = loadCustomExercises()
-            val defaultExercises = LoadExercises()
-            exercises = customExercises + defaultExercises
-            //exercises = defaultExercises
-
-            val db = MeasurementDatabase.getInstance(context)
-            loadMeasurementsFromDatabase(db)
-            Thread {
-                //LoadDescriptions()
-            }.start()
-        }
+        exerciseFactory = ExercisesFactory(context);
     }
 
     fun getDatabase(context: Context): ExercisesDatabase {
@@ -49,27 +41,6 @@ object ExerciseManager {
             .build()
     }
 
-    private fun loadMeasurementsFromDatabase(db: MeasurementDatabase) {
-        CoroutineScope(Dispatchers.IO).launch {
-            val measurements = db.measurementDao().getAllMeasurements().first()
-            exercises.forEach { exercise ->
-                exercise.measurementsList = measurements.filter { measurement ->
-                    measurement.exerciseName == exercise.name
-                }.toMutableList()
-            }
-        }
-    }
-    suspend fun loadCustomExercises(): List<ExerciseClass> {
-        val loadedExercises = mutableListOf<ExerciseClass>()
-        val customExercises = exerciseDatabase?.exerciseDao()?.getAllExercises()?.first()
-        customExercises?.forEach { ex ->
-            loadedExercises.add(
-                ExerciseClass(ex.name, ex.category, ex.description, isCustom = true, exericseEntity = ex)
-            )
-            Log.d(ex.name, ex.description)
-        }
-        return loadedExercises
-    }
     fun LoadDescriptions() {
         exercises.forEach { exercise ->
             Thread {
@@ -81,7 +52,7 @@ object ExerciseManager {
     }
     fun DeleteExercise(exericseEntity: ExericseEntity){
         CoroutineScope(Dispatchers.IO).launch {
-            exerciseDatabase?.exerciseDao()?.deleteExercise(exericseEntity)
+            exerciseDatabase.exerciseDao().deleteExercise(exericseEntity)
 
             val value = exercises.indexOf(exercises.find { it.name.equals(exericseEntity.name) })
             if (value != -1) {
@@ -90,23 +61,6 @@ object ExerciseManager {
                 }
             }
         }
-    }
-    fun LoadExercises(): List<ExerciseClass> {
-        return listOf(
-            ExerciseClass("Chest fly", Categories.CHEST, exericseEntity = null),
-            ExerciseClass("Bench press", Categories.CHEST, exericseEntity = null),
-            ExerciseClass("Dumbbell Chest Press", Categories.CHEST, exericseEntity = null),
-            ExerciseClass("Pec Deck", Categories.CHEST, exericseEntity = null),
-            ExerciseClass("Reverse Machine Fly", Categories.SHOULDERS, exericseEntity = null),
-            ExerciseClass("Shoulder Press", Categories.SHOULDERS, exericseEntity = null),
-            ExerciseClass("Barbell Curl", Categories.BICEPS, exericseEntity = null),
-            ExerciseClass("Tricep Pushdown", Categories.TRICEPS, exericseEntity = null),
-            ExerciseClass("Cable Grip", Categories.BACK, exericseEntity = null),
-            ExerciseClass("Lat Pulldown", Categories.BACK, exericseEntity = null),
-            ExerciseClass("Machine Crunch", Categories.ABS, exericseEntity = null),
-            ExerciseClass("Leg Press", Categories.LEGS, exericseEntity = null),
-            ExerciseClass("Leg Curl", Categories.LEGS, exericseEntity = null)
-        )
     }
 
     fun GetExerciseMeasurements(exercise: ExerciseClass): List<Measurement> {

@@ -85,6 +85,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.gymtracker.ui.theme.Black
 import com.example.gymtracker.ui.theme.BlackDark
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlin.math.log
 
 
@@ -164,6 +165,8 @@ fun MainView() {
     //HideStatusBar()
     mainActivityViewModel = MainActivityViewModel()
     mainActivityViewModel.context = LocalContext.current
+
+    val userDialog by mainActivityViewModel.showNicknameDialogState.collectAsState()
 
     for (ex in ExerciseManager.exercises) {
         ex.loadImage(mainActivityViewModel.context)
@@ -288,8 +291,9 @@ fun MainView() {
             }
         }
 
-        if (mainActivityViewModel.showNicknameDialogState.value) {
+        if (userDialog) {
             ChangeNickDialog { mainActivityViewModel.updateShowNickameDialog(false) }
+
         }
         if (mainActivityViewModel.showHourDialogState.value) {
             HourPicker(

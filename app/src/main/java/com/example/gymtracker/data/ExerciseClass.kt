@@ -9,7 +9,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.core.graphics.scale
 import java.io.Serializable
 
-class ExerciseClass(
+data class ExerciseClass(
     val name: String,
     val category: Categories,
     val photoString: String = name.replace(" ", "_").lowercase(),
@@ -22,8 +22,9 @@ class ExerciseClass(
     var exerciseDecs = ""
     private lateinit var exerciseBitMap:ImageBitmap
     init {
-        categoryString = category.toString().lowercase()
-        categoryString = categoryString.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+        categoryString = category.toString().lowercase().replaceFirstChar {
+            if (it.isLowerCase()) it.titlecase() else it.toString()
+        }
         setBestMeasurement()
 
         if(isCustom){
