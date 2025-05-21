@@ -17,8 +17,7 @@ import com.example.gymtracker.managers.ExerciseManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-class MainActivityViewModel : ViewModel() {
-    lateinit var context: Context
+class MainActivityViewModel(val context: Context) : ViewModel() {
 
     private val searchName = MutableStateFlow("")
     val searchNameState = searchName.asStateFlow()

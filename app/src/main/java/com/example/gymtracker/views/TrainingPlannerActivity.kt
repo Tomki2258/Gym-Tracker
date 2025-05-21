@@ -117,7 +117,7 @@ fun MainView(modifier: Modifier = Modifier, trainingManagerService: TrainingMana
                                 TrainingManager.daysOfWeek[viewModel.currentDayIndex.value].day
                             )
                         } else if (totalDrag > 25) {
-                            viewModel.decreateDayIndex()
+                            viewModel.decreaseDayIndex()
                             viewModel.exercisesView.value = trainingManagerService.loadExercisesForDay(
                                 TrainingManager.daysOfWeek[viewModel.currentDayIndex.value].day
                             )
@@ -218,7 +218,7 @@ fun MainView(modifier: Modifier = Modifier, trainingManagerService: TrainingMana
                     .size(25.dp)
                     .scale(scaleX = -1f, scaleY = 1f),
                 onClick = {
-                    viewModel.decreateDayIndex()
+                    viewModel.decreaseDayIndex()
 
                     viewModel.exercisesView.value = trainingManagerService.loadExercisesForDay(
                         TrainingManager.daysOfWeek[viewModel.currentDayIndex.value].day

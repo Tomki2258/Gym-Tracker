@@ -52,18 +52,18 @@ class AddCustomExerciseViewModel(contextArg: Context) : ViewModel() {
 
     fun checkForAdd(): Boolean {
         val startTime = System.currentTimeMillis()
-
-        if (exerciseName.value == "") return false
+        val entity = ExericseEntity(
+            0,
+            exerciseName.value,
+            exerciseCattegory.value,
+            description.value
+        )
+        if (entity.check()) return false
         try {
             saveImage()
             viewModelScope.launch {
                 ExerciseManager.getDatabase(context).exerciseDao().insertExercise(
-                    ExericseEntity(
-                        0,
-                        exerciseName.value,
-                        exerciseCattegory.value,
-                        description.value
-                    )
+                    entity
                 )
                 ExerciseManager.initialize(context)
             }

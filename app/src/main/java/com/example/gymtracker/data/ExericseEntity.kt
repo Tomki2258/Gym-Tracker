@@ -9,4 +9,11 @@ data class ExericseEntity(
     val name: String,
     val category: Categories,
     val description: String,
-)
+){
+    fun check(): Boolean {
+        if(name.isEmpty() || name.equals("") || category == null){
+            return false;
+        }
+        return true;
+    }
+}

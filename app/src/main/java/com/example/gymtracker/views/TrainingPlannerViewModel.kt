@@ -9,7 +9,7 @@ import com.example.gymtracker.managers.TrainingManager
 import com.example.gymtracker.services.TrainingManagerService
 
 class TrainingPlannerViewModel(context: Context): ViewModel() {
-    internal val context: Context = context
+    val context: Context = context
     var showAddDialog = mutableStateOf(false)
     var showRemoveDialog = mutableStateOf(false)
     var currentDayIndex = mutableStateOf(0)
@@ -27,7 +27,7 @@ class TrainingPlannerViewModel(context: Context): ViewModel() {
             4 -> "Friday"
             5 -> "Saturday"
             6 -> "Sunday"
-            else -> "Monday"
+            else -> "UNDEFINED"
         }
     }
 
@@ -38,7 +38,7 @@ class TrainingPlannerViewModel(context: Context): ViewModel() {
         }
     }
 
-    fun decreateDayIndex() {
+    fun decreaseDayIndex() {
         currentDayIndex.value--
         if (currentDayIndex.value < 0) {
             currentDayIndex.value = TrainingManager.daysOfWeek.size - 1

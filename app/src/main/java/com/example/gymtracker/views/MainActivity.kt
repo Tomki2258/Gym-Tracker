@@ -163,8 +163,7 @@ fun MainViewPreview() {
 @Composable
 fun MainView() {
     //HideStatusBar()
-    mainActivityViewModel = MainActivityViewModel()
-    mainActivityViewModel.context = LocalContext.current
+    mainActivityViewModel = MainActivityViewModel(LocalContext.current)
 
     val userDialog by mainActivityViewModel.showNicknameDialogState.collectAsState()
 
