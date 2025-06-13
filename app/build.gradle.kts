@@ -6,11 +6,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.gymtracker"
+    namespace = "com.tamusdev.gymtracker"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.gymtracker"
+        applicationId = "com.tamusdev.gymtracker"
         minSdk = 26
         targetSdk = 34
         versionCode = 1
